@@ -19,7 +19,7 @@ datasets:
     type: RealESRGANPairedDataset
     dataroot_gt: /datasets/RealESRGAN_data/dataset/train
     dataroot_lq: /datasets/RealESRGAN_data/dataset/train
-    meta_info: datasets/RealESRGAN_data/meta_info/meta_info_light_sub_pair.txt
+    meta_info: /datasets/RealESRGAN_data/meta_info/meta_info_light_sub_pair.txt
     io_backend:
       type: disk
 
