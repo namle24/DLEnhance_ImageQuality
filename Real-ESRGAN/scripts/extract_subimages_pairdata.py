@@ -27,7 +27,7 @@ def main():
     extract_subimages(opt)
 
     # LRx2 images
-    opt['input_folder'] = '/datasets/RealESRGAN_data/dataset/train'
+    opt['input_folder'] = '/datasets/RealESRGAN_data/dataset/train/LR_light'
     opt['save_folder'] = '/datasets/RealESRGAN_data/dataset/train/LR_x2_sub'
     opt['crop_size'] = 120
     opt['step'] = 60
@@ -35,7 +35,7 @@ def main():
     extract_subimages(opt)
 
     # LRx4 images
-    opt['input_folder'] = '/datasets/RealESRGAN_data/dataset/train'
+    opt['input_folder'] = '/datasets/RealESRGAN_data/dataset/train/LR_moderate'
     opt['save_folder'] = '/datasets/RealESRGAN_data/dataset/train/LR_x4_sub'
     opt['crop_size'] = 120
     opt['step'] = 60
