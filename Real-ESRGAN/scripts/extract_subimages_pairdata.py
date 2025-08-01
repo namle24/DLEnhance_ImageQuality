@@ -28,7 +28,7 @@ def main():
 
     # LRx2 images
     opt['input_folder'] = '/datasets/RealESRGAN_data/dataset/train/LR_light'
-    opt['save_folder'] = '/datasets/RealESRGAN_data/dataset/train/LR_x2_sub'
+    opt['save_folder'] = '/datasets/RealESRGAN_data/dataset/train/LR_light_sub'
     opt['crop_size'] = 120
     opt['step'] = 60
     opt['thresh_size'] = 0
@@ -36,7 +36,7 @@ def main():
 
     # LRx4 images
     opt['input_folder'] = '/datasets/RealESRGAN_data/dataset/train/LR_moderate'
-    opt['save_folder'] = '/datasets/RealESRGAN_data/dataset/train/LR_x4_sub'
+    opt['save_folder'] = '/datasets/RealESRGAN_data/dataset/train/LR_moderate_sub'
     opt['crop_size'] = 120
     opt['step'] = 60
     opt['thresh_size'] = 0
