@@ -27,13 +27,13 @@ if __name__ == '__main__':
     parser.add_argument(
         '--input',
         nargs='+',
-        default=['/storage/student12/Real-ESRGAN/data/Set5/Set5/GTmod12', '/storage/student12/Real-ESRGAN/data/Set5/Set5/LRbicx4/'],
+        default=['/datasets/RealESRGAN_data/dataset/train/HR_sub', '/datasets/RealESRGAN_data/dataset/train/LR_light_sub'],
         help='Input folder, should be [gt_folder, lq_folder]')
     parser.add_argument('--root', nargs='+', default=[None, None], help='Folder root, will use the ')
     parser.add_argument(
         '--meta_info',
         type=str,
-        default='/storage/student12/Real-ESRGAN/Real-ESRGAN/dataset/meta_info/meta_info_Set5_pair.txt',
+        default='datasets/RealESRGAN_data/meta_info/meta_info_light_sub_pair.txt',
         help='txt path for meta info')
     args = parser.parse_args()
 
