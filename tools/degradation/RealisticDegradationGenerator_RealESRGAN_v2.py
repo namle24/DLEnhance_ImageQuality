@@ -11,31 +11,30 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class RealisticDegradationGenerator:
-    def __init__(self,
-                 resize_prob=1.0,
-                 noise_prob=0.9,
-                 blur_prob=0.8,
-                 jpeg_prob=0.9,
-                 camera_noise_prob=0.7,
-                 film_grain_prob=0.0,  # 0.5 for old photos
-                 scratches_prob=0.0,   # 0.3 for old photos
-                 local_artifacts_prob=0.0,  # 0.2 for old photos
-                 blur_kernel_size=21,
-                 noise_sigma_range=[1, 25],
-                 jpeg_quality_range=[30, 95],
-                 is_old_photo=False):
-        self.resize_prob = resize_prob
-        self.noise_prob = noise_prob
-        self.blur_prob = blur_prob
-        self.jpeg_prob = jpeg_prob
-        self.camera_noise_prob = camera_noise_prob
-        self.film_grain_prob = 0.5 if is_old_photo else film_grain_prob
-        self.scratches_prob = 0.3 if is_old_photo else scratches_prob
-        self.local_artifacts_prob = 0.2 if is_old_photo else local_artifacts_prob
-        self.blur_kernel_size = blur_kernel_size
-        self.noise_sigma_range = noise_sigma_range
-        self.jpeg_quality_range = jpeg_quality_range
-        self.is_old_photo = is_old_photo
+    def __init__(self, config='light'):
+        if config == 'light':
+            # Configuration for very slight degradation (9-9.5/10 quality)
+            self.resize_prob = 0.7  # Lower probability for resizing
+            self.noise_prob = 0.4   # Minimal noise
+            self.blur_prob = 0.3    # Minimal blur
+            self.jpeg_prob = 0.6    # Light JPEG compression
+            self.camera_noise_prob = 0.3  # Very minimal camera noise
+            self.blur_kernel_size = 11    # Smaller blur kernel
+            self.noise_sigma_range = [1, 5]  # Very light noise
+            self.jpeg_quality_range = [85, 95]  # High JPEG quality
+        elif config == 'moderate':
+            # Configuration for moderate degradation (7-8.5/10 quality)
+            self.resize_prob = 0.9  # High probability for resizing
+            self.noise_prob = 0.8   # Moderate noise
+            self.blur_prob = 0.7    # Moderate blur
+            self.jpeg_prob = 0.8    # Moderate JPEG compression
+            self.camera_noise_prob = 0.6  # Moderate camera noise
+            self.blur_kernel_size = 17    # Larger blur kernel
+            self.noise_sigma_range = [3, 20]  # Moderate noise
+            self.jpeg_quality_range = [60, 85]  # Moderate JPEG quality
+        else:
+            raise ValueError("Config must be 'light' or 'moderate'")
+
         self.blur_types = ['gaussian', 'aniso', 'generalized', 'motion', 'defocus', 'sinc']
         self.blur_probs = [0.3, 0.15, 0.1, 0.2, 0.15, 0.2]
 
@@ -50,7 +49,7 @@ class RealisticDegradationGenerator:
 
     def _add_noise(self, img, is_second=False):
         noise_type = random.choice(['gaussian', 'sp', 'poisson', 'mixed'])
-        sigma_range = [1, 20] if is_second else self.noise_sigma_range
+        sigma_range = [1, 15] if is_second else self.noise_sigma_range
         if noise_type == 'gaussian':
             mean = 0
             sigma = random.uniform(*sigma_range)
@@ -58,7 +57,7 @@ class RealisticDegradationGenerator:
             noisy = np.clip(img.astype(np.float32) + gauss, 0, 255).astype(np.uint8)
             return noisy
         elif noise_type == 'sp':
-            prob = random.uniform(0.001, 0.01)
+            prob = random.uniform(0.001, 0.005)
             output = np.copy(img)
             salt_mask = np.random.random(img.shape[:2]) < prob / 2
             output[salt_mask] = 255
@@ -77,18 +76,18 @@ class RealisticDegradationGenerator:
     def _add_blur(self, img):
         blur_type = random.choices(self.blur_types, self.blur_probs, k=1)[0]
         if blur_type == 'gaussian':
-            sigma = random.uniform(0.2, 3.0)
+            sigma = random.uniform(0.1, 2.0)
             return cv2.GaussianBlur(img, (self.blur_kernel_size, self.blur_kernel_size), sigma)
         elif blur_type == 'aniso':
-            sigma_x = random.uniform(0.2, 3.0)
-            sigma_y = random.uniform(0.2, 3.0)
+            sigma_x = random.uniform(0.1, 2.0)
+            sigma_y = random.uniform(0.1, 2.0)
             angle = random.uniform(0, 180)
             kernel = self._create_aniso_kernel(sigma_x, sigma_y, angle, self.blur_kernel_size)
             blurred = cv2.filter2D(img, -1, kernel)
             return np.clip(blurred, 0, 255).astype(np.uint8)
         elif blur_type == 'generalized':
-            sigma = random.uniform(0.2, 3.0)
-            beta = random.uniform(0.5, 4.0)
+            sigma = random.uniform(0.1, 2.0)
+            beta = random.uniform(0.5, 3.0)
             x = np.arange(-self.blur_kernel_size // 2 + 1, self.blur_kernel_size // 2 + 1)
             kernel = np.exp(-np.abs(x / sigma) ** beta)
             kernel /= kernel.sum()
@@ -96,21 +95,21 @@ class RealisticDegradationGenerator:
             blurred = cv2.filter2D(img, -1, kernel_2d)
             return np.clip(blurred, 0, 255).astype(np.uint8)
         elif blur_type == 'motion':
-            degree = random.randint(5, 30)
+            degree = random.randint(3, 20)
             angle = random.uniform(0, 360)
             M = cv2.getRotationMatrix2D((degree / 2, degree / 2), angle, 1)
             motion_blur_kernel = np.diag(np.hamming(degree))
             motion_blur_kernel = cv2.warpAffine(motion_blur_kernel, M, (degree, degree))
             motion_blur_kernel = motion_blur_kernel / motion_blur_kernel.sum()
             blurred = cv2.filter2D(img, -1, motion_blur_kernel)
-            if random.random() < 0.2:
+            if random.random() < 0.1:
                 blurred = self._add_blur(blurred)
             return np.clip(blurred, 0, 255).astype(np.uint8)
         elif blur_type == 'defocus':
-            radius = random.randint(1, 10)
+            radius = random.randint(1, 5)
             return cv2.GaussianBlur(img, (radius * 2 + 1, radius * 2 + 1), 0)
         else:  # sinc
-            kernel_size = random.randint(7, self.blur_kernel_size)
+            kernel_size = random.randint(5, self.blur_kernel_size)
             kernel = np.sinc(np.linspace(-3, 3, kernel_size)).astype(np.float32)
             kernel /= kernel.sum()
             kernel_2d = np.outer(kernel, kernel)
@@ -133,25 +132,11 @@ class RealisticDegradationGenerator:
         decimg = cv2.imdecode(encimg, 1)
         return decimg
 
-    def _add_iso_noise(self, img):
-        iso = random.randint(400, 1600)
-        sigma = iso / 100
-        noise = np.random.normal(0, sigma, img.shape).astype(np.float32)
-        return np.clip(img.astype(np.float32) + noise, 0, 255).astype(np.uint8)
-
-    def _add_demosaic_artifacts(self, img):
-        bayer = img.copy()
-        bayer[::2, ::2, 1:] = 0  # Red
-        bayer[1::2, ::2, [0, 2]] = 0  # Green
-        bayer[::2, 1::2, [0, 2]] = 0  # Green
-        bayer[1::2, 1::2, :-1] = 0  # Blue
-        return cv2.demosaicing(bayer, cv2.COLOR_BayerBG2BGR)
-
     def _add_camera_noise(self, img):
-        degraded = img.copy()
-        if random.random() < 0.4:
-            b, g, r = cv2.split(degraded)
-            shift = random.randint(1, 3)
+        h, w = img.shape[:2]
+        if random.random() < 0.3:
+            b, g, r = cv2.split(img)
+            shift = random.randint(1, 2)
             if random.random() < 0.5:
                 r = np.pad(r, ((0, 0), (shift, 0)), mode='edge')[:, :-shift]
                 b = np.pad(b, ((0, 0), (0, shift)), mode='edge')[:, shift:]
@@ -166,59 +151,11 @@ class RealisticDegradationGenerator:
                     r = cv2.resize(r, (g.shape[1], g.shape[0]), interpolation=cv2.INTER_NEAREST)
                 if b.shape != g.shape:
                     b = cv2.resize(b, (g.shape[1], g.shape[0]), interpolation=cv2.INTER_NEAREST)
-            degraded = cv2.merge([b, g, r])
-        if random.random() < 0.3:
-            degraded = self._add_iso_noise(degraded)
+            img = cv2.merge([b, g, r])
         if random.random() < 0.2:
-            degraded = self._add_demosaic_artifacts(degraded)
-        return degraded
-
-    def _sinc_shuffle(self, img, scale_factor):
-        h, w = img.shape[:2]
-        img = cv2.resize(img, (int(w*2), int(h*2)), interpolation=cv2.INTER_CUBIC)
-        kernel_size = random.randint(7, self.blur_kernel_size)
-        kernel = np.sinc(np.linspace(-3, 3, kernel_size)).astype(np.float32)
-        kernel /= kernel.sum()
-        kernel_2d = np.outer(kernel, kernel)
-        img = cv2.filter2D(img, -1, kernel_2d)
-        return cv2.resize(img, (int(w*scale_factor), int(h*scale_factor)), interpolation=cv2.INTER_CUBIC)
-
-    def _resize_artifacts(self, img, scale_factor):
-        h, w = img.shape[:2]
-        img = cv2.resize(img, (int(w*1.5), int(h*1.5)), interpolation=cv2.INTER_CUBIC)
-        return cv2.resize(img, (int(w*scale_factor), int(h*scale_factor)), interpolation=cv2.INTER_AREA)
-
-    def _add_film_grain(self, img):
-        intensity = random.uniform(0.02, 0.05) if self.is_old_photo else random.uniform(0.01, 0.03)
-        grain = np.random.normal(0, intensity * 255, img.shape).astype(np.float32)
-        return np.clip(img.astype(np.float32) + grain, 0, 255).astype(np.uint8)
-
-    def _add_scratches(self, img):
-        output = img.copy()
-        h, w = img.shape[:2]
-        num_scratches = random.randint(5, 10) if self.is_old_photo else random.randint(3, 8)
-        for _ in range(num_scratches):
-            x1, y1 = random.randint(0, w), random.randint(0, h)
-            x2, y2 = random.randint(0, w), random.randint(0, h)
-            cv2.line(output, (x1, y1), (x2, y2), (0, 0, 0), 1)
-        return output
-
-    def _add_local_artifacts(self, img):
-        output = img.copy()
-        h, w = img.shape[:2]
-        num_spots = random.randint(2, 5)
-        for _ in range(num_spots):
-            x, y = random.randint(0, w), random.randint(0, h)
-            radius = random.randint(10, 50)
-            intensity = random.randint(50, 150)
-            cv2.circle(output, (x, y), radius, (intensity, intensity, intensity), -1)
-        return output
-
-    def _add_fading(self, img):
-        if not self.is_old_photo:
-            return img
-        alpha = random.uniform(0.3, 0.7)  # Giảm độ tương phản
-        return np.clip(img.astype(np.float32) * alpha + 128 * (1 - alpha), 0, 255).astype(np.uint8)
+            pattern = np.random.normal(0, random.uniform(0.5, 2), img.shape).astype(np.float32)
+            img = np.clip(img.astype(np.float32) + pattern, 0, 255).astype(np.uint8)
+        return img
 
     def apply_degradation(self, img, scale_factor):
         degraded = img.copy()
@@ -226,10 +163,12 @@ class RealisticDegradationGenerator:
         if 'resize' not in steps:
             steps.insert(0, 'resize')
         degraded = self._apply_steps(degraded, steps, scale_factor)
-        steps = self._get_random_steps()
-        if 'resize' in steps:
-            steps.remove('resize')
-        degraded = self._apply_steps(degraded, steps, None)
+        # Apply second degradation only for 'moderate' config
+        if self.jpeg_quality_range[0] <= 85:  # Indicator for 'moderate' config
+            steps = self._get_random_steps()
+            if 'resize' in steps:
+                steps.remove('resize')
+            degraded = self._apply_steps(degraded, steps, None)
         h, w = img.shape[:2]
         target_h, target_w = int(h * scale_factor), int(w * scale_factor)
         current_h, current_w = degraded.shape[:2]
@@ -253,18 +192,6 @@ class RealisticDegradationGenerator:
             steps.append('camera_noise')
         if random.random() < self.jpeg_prob:
             steps.append('jpeg')
-        if random.random() < 0.4:
-            steps.append('sinc_shuffle')
-        if random.random() < 0.3:
-            steps.append('resize_artifacts')
-        if random.random() < self.film_grain_prob:
-            steps.append('film_grain')
-        if random.random() < self.scratches_prob:
-            steps.append('scratches')
-        if random.random() < self.local_artifacts_prob:
-            steps.append('local_artifacts')
-        if self.is_old_photo and random.random() < 0.6:
-            steps.append('fading')
         random.shuffle(steps[1:] if 'resize' in steps else steps)
         if 'resize' in steps:
             steps = ['resize'] + steps[1:]
@@ -283,26 +210,14 @@ class RealisticDegradationGenerator:
                 degraded = self._jpeg_compression(degraded)
             elif step == 'camera_noise':
                 degraded = self._add_camera_noise(degraded)
-            elif step == 'sinc_shuffle':
-                degraded = self._sinc_shuffle(degraded, scale_factor or 0.25)
-            elif step == 'resize_artifacts':
-                degraded = self._resize_artifacts(degraded, scale_factor or 0.25)
-            elif step == 'film_grain':
-                degraded = self._add_film_grain(degraded)
-            elif step == 'scratches':
-                degraded = self._add_scratches(degraded)
-            elif step == 'local_artifacts':
-                degraded = self._add_local_artifacts(degraded)
-            elif step == 'fading':
-                degraded = self._add_fading(degraded)
         return degraded
 
 # Instance chung cho multiprocessing
 generator_instance = None
 
-def init_worker(scale_factor, is_old_photo):
+def init_worker(scale_factor, config):
     global generator_instance
-    generator_instance = RealisticDegradationGenerator(is_old_photo=is_old_photo)
+    generator_instance = RealisticDegradationGenerator(config=config)
     global global_scale_factor
     global_scale_factor = scale_factor
 
@@ -331,26 +246,31 @@ def process_image(args):
     except Exception as e:
         logging.error(f"Lỗi khi xử lý {img_path}: {e}")
 
-def process_dataset(input_dir, output_dir, scale_factor=0.25, n_workers=None, is_old_photo=False):
+def process_dataset(input_dir, output_dir, scale_factor=0.25, n_workers=None, config='light'):
     if n_workers is None:
         n_workers = max(1, cpu_count() - 1)
-    logging.info(f"Processing with scale factor {scale_factor}, is_old_photo={is_old_photo}")
+    logging.info(f"Processing with scale factor {scale_factor} and config {config}")
     for mode in ['train', 'test']:
         mode_dir = os.path.join(input_dir, mode)
         if not os.path.exists(mode_dir):
             logging.warning(f"Thư mục {mode_dir} không tồn tại, bỏ qua")
             continue
         datasets = [d for d in os.listdir(mode_dir) if os.path.isdir(os.path.join(mode_dir, d))]
+        if not datasets:  # Handle case where HR is directly under train/test
+            hr_dir = os.path.join(mode_dir, 'HR')
+            if os.path.exists(hr_dir):
+                datasets = ['DF2K']  # Assume dataset name is DF2K if HR is found
+            else:
+                logging.warning(f"Thư mục HR {hr_dir} không tồn tại, bỏ qua")
+                continue
         for dataset in datasets:
             dataset_path = os.path.join(mode_dir, dataset)
-            hr_dir = os.path.join(dataset_path, f"{dataset}_HR")
-            if not os.path.exists(hr_dir):
-                hr_dir = os.path.join(dataset_path, 'HR')
+            hr_dir = os.path.join(dataset_path, f"{dataset}_HR") if dataset != 'HR' else os.path.join(dataset_path)
             if not os.path.exists(hr_dir):
                 logging.warning(f"Thư mục HR {hr_dir} không tồn tại, bỏ qua")
                 continue
-            lr_dir = os.path.join(output_dir, mode, dataset, f"{dataset}_LR")
-            new_hr_dir = os.path.join(output_dir, mode, dataset, os.path.basename(hr_dir))
+            lr_dir = os.path.join(output_dir, mode, dataset, f"{dataset}_LR_{config}")
+            new_hr_dir = os.path.join(output_dir, mode, dataset, f"{dataset}_HR") if dataset != 'HR' else os.path.join(output_dir, mode, dataset, 'HR')
             if hr_dir != new_hr_dir:
                 os.makedirs(new_hr_dir, exist_ok=True)
                 logging.info(f"Tạo liên kết ảnh HR từ {hr_dir} tới {new_hr_dir}")
@@ -368,11 +288,11 @@ def process_dataset(input_dir, output_dir, scale_factor=0.25, n_workers=None, is
                     os.makedirs(os.path.dirname(hr_output_path), exist_ok=True)
                     if not os.path.exists(hr_output_path):
                         import shutil
-                        shutil.move(img_path, hr_output_path)
+                        shutil.copy(img_path, hr_output_path)
                 lr_output_path = os.path.join(lr_dir, rel_path)
                 args_list.append((img_path, lr_output_path))
             logging.info(f"Đang xử lý {len(args_list)} ảnh từ {hr_dir} vào {lr_dir}...")
-            with Pool(n_workers, initializer=init_worker, initargs=(scale_factor, is_old_photo)) as pool:
+            with Pool(n_workers, initializer=init_worker, initargs=(scale_factor, config)) as pool:
                 list(tqdm(pool.imap(process_image, args_list), total=len(args_list)))
 
 if __name__ == '__main__':
@@ -381,6 +301,6 @@ if __name__ == '__main__':
     parser.add_argument('--output', type=str, required=True, help='Output directory for degraded LR images')
     parser.add_argument('--scale', type=float, default=0.25, help='Scale factor for degradation (e.g., 0.25 for x4, 0.5 for x2)')
     parser.add_argument('--workers', type=int, default=None, help='Number of worker processes')
-    parser.add_argument('--old-photo', action='store_true', help='Use degradation for old photos (film grain, scratches, fading)')
+    parser.add_argument('--config', type=str, default='light', choices=['light', 'moderate'], help='Degradation config: light (9-9.5/10) or moderate (7-8.5/10)')
     args = parser.parse_args()
-    process_dataset(args.input, args.output, args.scale, args.workers, is_old_photo=args.old_photo)
+    process_dataset(args.input, args.output, args.scale, args.workers, args.config)
