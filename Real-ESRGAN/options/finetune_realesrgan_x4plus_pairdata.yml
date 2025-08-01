@@ -61,13 +61,13 @@ network_d:
 # path
 path:
   # use the pre-trained Real-ESRNet model
-  pretrain_network_g: /storage/student12/Real-ESRGAN/Real-ESRGAN/experiments/pretrained_models/RealESRNet_x4plus.pth
+  pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRNet_x4plus.pth
   param_key_g: params_ema
   strict_load_g: true
-  pretrain_network_d: /storage/student12/Real-ESRGAN/Real-ESRGAN/experiments/pretrained_models/RealESRGAN_x4plus_netD.pth
+  pretrain_network_d: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRGAN_x4plus_netD.pth
   param_key_d: params
   strict_load_d: true
-  resume_state: /storage/student12/Real-ESRGAN/Real-ESRGAN/experiments/finetune_RealESRGANx4plus_400k_pairdata/training_states/575000.state
+  resume_state: ~
 
 # training settings
 train:
