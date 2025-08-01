@@ -27,7 +27,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--input',
         nargs='+',
-        default=['/datasets/RealESRGAN_data/dataset/train/HR_sub', '/datasets/RealESRGAN_data/dataset/train/LR_light_sub'],
+        default=['/datasets/RealESRGAN_data/dataset/train/HR_sub', '/datasets/RealESRGAN_data/dataset/train/LR_moderate_sub'],
         help='Input folder, should be [gt_folder, lq_folder]')
     parser.add_argument('--root', nargs='+', default=[None, None], help='Folder root, will use the ')
     parser.add_argument(
