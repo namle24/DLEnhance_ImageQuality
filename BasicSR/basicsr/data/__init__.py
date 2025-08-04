@@ -6,7 +6,7 @@ import torch.utils.data
 from copy import deepcopy
 from functools import partial
 from os import path as osp
-
+from .paired_image_siamese_dataset import PairedImageDatasetSiamese
 from basicsr.data.prefetch_dataloader import PrefetchDataLoader
 from basicsr.utils import get_root_logger, scandir
 from basicsr.utils.dist_util import get_dist_info

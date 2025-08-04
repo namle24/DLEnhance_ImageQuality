@@ -1,6 +1,6 @@
 # general settings
-name: finetune_RealESRGANx4plus_400k_pairdata
-model_type: RealESRGANModel
+name: finetune_RealESRGANx4plus_400k_pairdata_21000state
+model_type: RealESRGANModel_Siamese
 scale: 4
 num_gpu: auto
 manual_seed: 0
@@ -17,9 +17,9 @@ datasets:
   train:
     name: DIV2K
     type: RealESRGANPairedDataset
-    dataroot_gt: /storage/student12/Real-ESRGAN/data/DIV2K+_dataset/train
-    dataroot_lq: /storage/student12/Real-ESRGAN/data/DIV2K+_dataset/train
-    meta_info: /storage/student12/Real-ESRGAN/Real-ESRGAN/dataset/meta_info/meta_info_DIV2K_sub_pair.txt
+    dataroot_gt: /datasets/RealESRGAN_data/dataset/train
+    dataroot_lq: /datasets/RealESRGAN_data/dataset/train
+    meta_info: /home/namlh/DLEnhance_ImageQuality/datasets/RealESRGAN_data/meta_info/meta_info_light_sub_pair.txt
     io_backend:
       type: disk
 
@@ -29,28 +29,39 @@ datasets:
 
     # data loader
     use_shuffle: true
-    num_worker_per_gpu: 2
-    batch_size_per_gpu: 4
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 8
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
 
   #Uncomment these for validation
   val:
     name: validation
-    type: PairedImageDataset
-    dataroot_gt: /storage/student12/Real-ESRGAN/data/DIV2K+_dataset/val/HR
-    dataroot_lq: /storage/student12/Real-ESRGAN/data/DIV2K+_dataset/val/LR
+    type: PairedImageDatasetSiamese
+    dataroot_gt: /datasets/RealESRGAN_data/dataset/test/HR
+    dataroot_lq: /datasets/RealESRGAN_data/dataset/test/LR_light
     io_backend:
       type: disk
 
 # network structures
-network_g:
+network_g_a:
   type: RRDBNet
   num_in_ch: 3
   num_out_ch: 3
   num_feat: 64
   num_block: 23
   num_grow_ch: 32
+  scale: 4
+
+network_g_b:
+  type: RRDBNet
+  num_in_ch: 3
+  num_out_ch: 3
+  num_feat: 64
+  num_block: 23
+  num_grow_ch: 32
+  scale: 4
+
 
 network_d:
   type: UNetDiscriminatorSN
@@ -58,16 +69,26 @@ network_d:
   num_feat: 64
   skip_connection: True
 
+loss_weights:
+  l1_a: 1.0
+  l1_b: 1.0
+  distill: 0.1
+  gan: 0.1
+  percep: 0.01
+
 # path
 path:
   # use the pre-trained Real-ESRNet model
-  pretrain_network_g: /storage/student12/Real-ESRGAN/Real-ESRGAN/experiments/pretrained_models/RealESRNet_x4plus.pth
+  path:
+  pretrain_network_g_a: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRNet_x4plus.pth
+  pretrain_network_g_b: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRNet_x4plus.pth
   param_key_g: params_ema
   strict_load_g: true
-  pretrain_network_d: /storage/student12/Real-ESRGAN/Real-ESRGAN/experiments/pretrained_models/RealESRGAN_x4plus_netD.pth
+
+  pretrain_network_d: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRGAN_x4plus_netD.pth
   param_key_d: params
   strict_load_d: true
-  resume_state: /storage/student12/Real-ESRGAN/Real-ESRGAN/experiments/finetune_RealESRGANx4plus_400k_pairdata/training_states/500000.state
+  resume_state: ~
 
 # training settings
 train:
@@ -85,10 +106,10 @@ train:
 
   scheduler:
     type: MultiStepLR
-    milestones: [500000]
+    milestones: [400000]
     gamma: 0.5
 
-  total_iter: 500000
+  total_iter: 400000
   warmup_iter: -1  # no warm up
 
   # losses
@@ -108,7 +129,7 @@ train:
       'conv5_4': 1
     vgg_type: vgg19
     use_input_norm: true
-    perceptual_weight: !!float 1.0
+    perceptual_weight: !!float 1.2
     style_weight: 0
     range_norm: false
     criterion: l1
@@ -133,7 +154,11 @@ val:
     psnr: # metric name
       type: calculate_psnr
       crop_border: 4
-      test_y_channel: false
+      test_y_channel: true
+    ssim: # metric name
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: true
 
 # logging settings
 logger:
