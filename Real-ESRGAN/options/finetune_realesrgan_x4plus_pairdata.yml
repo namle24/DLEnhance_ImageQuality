@@ -67,7 +67,7 @@ path:
   pretrain_network_d: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRGAN_x4plus_netD.pth
   param_key_d: params
   strict_load_d: true
-  resume_state: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/finetune_RealESRGANx4plus_400k_pairdata_21000state/training_states/210000.state
+  resume_state: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/finetune_RealESRGANx4plus_400k_pairdata_21000state/training_states/200000.state
 
 # training settings
 train:
