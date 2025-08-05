@@ -11,7 +11,7 @@ datasets:
     type: PairedImageDataset
     dataroot_gt: /datasets/RealESRGAN_data/dataset/train/HR_sub
     dataroot_lq: /datasets/RealESRGAN_data/dataset/train/LR_light_sub
-    filename_tmpl: {}
+    filename_tmpl: "{}"
     io_backend:
       type: disk
     phase: train
@@ -23,7 +23,7 @@ datasets:
     type: PairedImageDataset
     dataroot_gt: /datasets/RealESRGAN_data/dataset/train/HR_sub
     dataroot_lq: /datasets/RealESRGAN_data/dataset/train/LR_moderate_sub
-    filename_tmpl: {}
+    filename_tmpl: "{}"
     io_backend:
       type: disk
     phase: train
