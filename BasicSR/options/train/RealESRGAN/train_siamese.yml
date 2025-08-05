@@ -16,8 +16,9 @@ datasets:
       type: disk
     phase: train
     scale: 4
-    batch_size_per_gpu: 8  
+    batch_size_per_gpu: 8
     prefetch_mode: cuda
+    pin_memory: true
   student:
     name: LQ_heavy_GT
     type: PairedImageDataset
@@ -28,8 +29,9 @@ datasets:
       type: disk
     phase: train
     scale: 4
-    atch_size_per_gpu: 8  
-    prefetch_mode: cuda   
+    batch_size_per_gpu: 8  # Sửa lỗi chính tả
+    prefetch_mode: cuda
+    pin_memory: true        # Thêm pin_memory
 network_g:
   type: RRDBNet
   num_in_ch: 3
@@ -68,7 +70,7 @@ train:
     type: GANLoss
     gan_type: vanilla
     loss_weight: !!float 1e-1
-  siamese_opt:  # Thêm loss Siamese
+  siamese_opt:
     type: MSELoss
     loss_weight: 0.1
     reduction: mean
