@@ -4,12 +4,8 @@ from os import path as osp
 
 from basicsr.utils import get_root_logger, scandir
 from basicsr.utils.registry import MODEL_REGISTRY
-try:
-    from .student_teacher_model import StudentTeacherModel
-    __all__.append('StudentTeacherModel')
-except ImportError:
-    pass
-__all__ = ['build_model','StudentTeacherModel']
+
+__all__ = ['build_model']
 
 # automatically scan and import model modules for registry
 # scan all the files under the 'models' folder and collect files ending with '_model.py'
