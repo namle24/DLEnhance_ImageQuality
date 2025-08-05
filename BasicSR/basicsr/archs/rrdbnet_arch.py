@@ -9,7 +9,7 @@ from .arch_util import default_init_weights, make_layer, pixel_unshuffle
 class ResidualDenseBlock(nn.Module):
     """Residual Dense Block.
 
-    Used in RRDBNet in ESRGAN.
+    Used in RRDB block in ESRGAN.
 
     Args:
         num_feat (int): Channel number of intermediate features.
@@ -35,13 +35,14 @@ class ResidualDenseBlock(nn.Module):
         x3 = self.lrelu(self.conv3(torch.cat((x, x1, x2), 1)))
         x4 = self.lrelu(self.conv4(torch.cat((x, x1, x2, x3), 1)))
         x5 = self.conv5(torch.cat((x, x1, x2, x3, x4), 1))
+        # Empirically, we use 0.2 to scale the residual for better performance
         return x5 * 0.2 + x
 
 
 class RRDB(nn.Module):
     """Residual in Residual Dense Block.
 
-    Used in RRDBNet in ESRGAN.
+    Used in RRDB-Net in ESRGAN.
 
     Args:
         num_feat (int): Channel number of intermediate features.
@@ -58,6 +59,7 @@ class RRDB(nn.Module):
         out = self.rdb1(x)
         out = self.rdb2(out)
         out = self.rdb3(out)
+        # Empirically, we use 0.2 to scale the residual for better performance
         return out * 0.2 + x
 
 
@@ -115,20 +117,3 @@ class RRDBNet(nn.Module):
         feat = self.lrelu(self.conv_up2(F.interpolate(feat, scale_factor=2, mode='nearest')))
         out = self.conv_last(self.lrelu(self.conv_hr(feat)))
         return out
-
-    def get_intermediate_features(self, x):
-        """Extract intermediate features from specified blocks for feature-based distillation."""
-        features = {}
-        if self.scale == 2:
-            feat = pixel_unshuffle(x, scale=2)
-        elif self.scale == 1:
-            feat = pixel_unshuffle(x, scale=4)
-        else:
-            feat = x
-        feat = self.conv_first(feat)
-        # Extract features from specific RRDB blocks
-        for i, block in enumerate(self.body):
-            feat = block(feat)
-            if i in [2, 4, 6]:  # Select blocks 2, 4, 6 for feature extraction
-                features[f'block_{i}'] = feat
-        return features
