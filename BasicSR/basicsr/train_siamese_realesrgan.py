@@ -4,12 +4,12 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from basicsr.data import build_dataloader
 from basicsr.models import build_model
-from basicsr.utils.options import parse
+from basicsr.train import parse_options  # Updated import for BasicSR 1.4.2
 from basicsr.utils import create_logger, logging
 
 def main():
     # Parse configuration
-    opt = parse('options/train_realesrgan.yml', is_train=True)
+    opt = parse_options(is_train=True)  # Use parse_options; opt_path passed via command line
     logger, tb_logger = create_logger(opt, True)
     
     # Initialize teacher and student models
@@ -60,7 +60,7 @@ def main():
         teacher_model.feed_data(data_a)
         teacher_model.optimize_parameters(current_iter)
         teacher_loss = teacher_model.log_dict
-        teacher_output = teacher_model.output.detach()  # Detach to avoid backprop through teacher
+        teacher_output = teacher_model.output.detach()
         
         # Train student on dataset B
         student_model.feed_data(data_b)
@@ -68,18 +68,18 @@ def main():
         student_loss = student_model.log_dict
         student_output = student_model.output
         
-        # Distillation loss: L1 between teacher and student outputs
+        # Distillation loss
         if opt['train'].get('distillation_loss', False):
             distillation_loss = distillation_loss_fn(student_output, teacher_output) * distillation_weight
             student_model.optimizer_g.zero_grad()
             distillation_loss.backward()
             student_model.optimizer_g.step()
         
-        # Optional: Siamese feature alignment loss
+        # Siamese feature alignment loss
         if opt['train'].get('siamese_loss', False):
             teacher_features = teacher_model.net_g.module.get_intermediate_features(data_a['lq'])
             student_features = student_model.net_g.module.get_intermediate_features(data_b['lq'])
-            siamese_loss = nn.MSELoss()(teacher_features[-1], student_features[-1])  # Use last feature layer
+            siamese_loss = nn.MSELoss()(teacher_features[-1], student_features[-1])
             student_model.optimizer_g.zero_grad()
             siamese_loss.backward()
             student_model.optimizer_g.step()

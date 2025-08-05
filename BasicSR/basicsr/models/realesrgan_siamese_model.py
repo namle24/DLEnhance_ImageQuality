@@ -13,6 +13,6 @@ class RealESRGANSiameseModel(SRGANModel):
         features = []
         for block_idx, block in enumerate(self.net_g.body):
             x = block(x)
-            if block_idx in [5, 11, 17]:  # Example layers to extract features
+            if block_idx in [5, 11, 17]:
                 features.append(x)
         return features
