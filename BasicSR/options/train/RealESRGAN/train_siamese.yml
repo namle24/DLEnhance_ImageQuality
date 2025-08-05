@@ -2,8 +2,9 @@ name: RealESRGAN_x4plus_siamese
 model:
   type: RealESRGAN
   scale: 4
-  num_gpu: 1
-  manual_seed: 0
+num_gpu: 1
+manual_seed: 0
+dist: false
 datasets:
   teacher:
     name: LQ_light_GT
