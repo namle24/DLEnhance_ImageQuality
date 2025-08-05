@@ -9,7 +9,7 @@ datasets:
   teacher:
     name: LQ_light_GT
     type: PairedImageDataset
-    dataroot_gt: /datasets/RealESRGAN_data/dataset/train/HR
+    dataroot_gt: /datasets/RealESRGAN_data/dataset/train/HR_sub
     dataroot_lq: /datasets/RealESRGAN_data/dataset/train/LR_light_sub
     filename_tmpl: {}
     io_backend:
@@ -21,7 +21,7 @@ datasets:
   student:
     name: LQ_heavy_GT
     type: PairedImageDataset
-    dataroot_gt: /datasets/RealESRGAN_data/dataset/train/HR
+    dataroot_gt: /datasets/RealESRGAN_data/dataset/train/HR_sub
     dataroot_lq: /datasets/RealESRGAN_data/dataset/train/LR_moderate_sub
     filename_tmpl: {}
     io_backend:
