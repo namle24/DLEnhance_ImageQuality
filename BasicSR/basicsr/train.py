@@ -3,7 +3,6 @@ import logging
 import math
 import time
 import torch
-import torch.nn as nn
 from os import path as osp
 
 from basicsr.data import build_dataloader, build_dataset
@@ -14,7 +13,9 @@ from basicsr.utils import (AvgTimer, MessageLogger, check_resume, get_env_info, 
                            init_tb_logger, init_wandb_logger, make_exp_dirs, mkdir_and_rename, scandir)
 from basicsr.utils.options import copy_opt_file, dict2str, parse_options
 
+
 def init_tb_loggers(opt):
+    # initialize wandb logger before tensorboard logger to allow proper sync
     if (opt['logger'].get('wandb') is not None) and (opt['logger']['wandb'].get('project')
                                                      is not None) and ('debug' not in opt['name']):
         assert opt['logger'].get('use_tb_logger') is True, ('should turn on tensorboard when using wandb')
@@ -24,10 +25,12 @@ def init_tb_loggers(opt):
         tb_logger = init_tb_logger(log_dir=osp.join(opt['root_path'], 'tb_logger', opt['name']))
     return tb_logger
 
+
 def create_train_val_dataloader(opt, logger):
-    train_loaders, val_loaders = {}, []
+    # create train and val dataloaders
+    train_loader, val_loaders = None, []
     for phase, dataset_opt in opt['datasets'].items():
-        if phase in ['teacher', 'student']:
+        if phase == 'train':
             dataset_enlarge_ratio = dataset_opt.get('dataset_enlarge_ratio', 1)
             train_set = build_dataset(dataset_opt)
             train_sampler = EnlargedSampler(train_set, opt['world_size'], opt['rank'], dataset_enlarge_ratio)
@@ -38,14 +41,12 @@ def create_train_val_dataloader(opt, logger):
                 dist=opt['dist'],
                 sampler=train_sampler,
                 seed=opt['manual_seed'])
-            train_loaders[phase] = train_loader
-            train_loaders[f'{phase}_sampler'] = train_sampler
 
             num_iter_per_epoch = math.ceil(
                 len(train_set) * dataset_enlarge_ratio / (dataset_opt['batch_size_per_gpu'] * opt['world_size']))
             total_iters = int(opt['train']['total_iter'])
-            total_epochs = math.ceil(total_iters / num_iter_per_epoch)
-            logger.info(f'{phase.capitalize()} Training statistics:'
+            total_epochs = math.ceil(total_iters / (num_iter_per_epoch))
+            logger.info('Training statistics:'
                         f'\n\tNumber of train images: {len(train_set)}'
                         f'\n\tDataset enlarge ratio: {dataset_enlarge_ratio}'
                         f'\n\tBatch size per gpu: {dataset_opt["batch_size_per_gpu"]}'
@@ -61,7 +62,8 @@ def create_train_val_dataloader(opt, logger):
         else:
             raise ValueError(f'Dataset phase {phase} is not recognized.')
 
-    return train_loaders, val_loaders, total_epochs, total_iters
+    return train_loader, train_sampler, val_loaders, total_epochs, total_iters
+
 
 def load_resume_state(opt):
     resume_state_path = None
@@ -85,38 +87,43 @@ def load_resume_state(opt):
         check_resume(opt, resume_state['iter'])
     return resume_state
 
+
 def train_pipeline(root_path):
+    # parse options, set distributed setting, set random seed
     opt, args = parse_options(root_path, is_train=True)
     opt['root_path'] = root_path
 
     torch.backends.cudnn.benchmark = True
+    # torch.backends.cudnn.deterministic = True
 
+    # load resume states if necessary
     resume_state = load_resume_state(opt)
+    # mkdir for experiments and logger
     if resume_state is None:
         make_exp_dirs(opt)
         if opt['logger'].get('use_tb_logger') and 'debug' not in opt['name'] and opt['rank'] == 0:
             mkdir_and_rename(osp.join(opt['root_path'], 'tb_logger', opt['name']))
 
+    # copy the yml file to the experiment root
     copy_opt_file(args.opt, opt['path']['experiments_root'])
 
+    # WARNING: should not use get_root_logger in the above codes, including the called functions
+    # Otherwise the logger will not be properly initialized
     log_file = osp.join(opt['path']['log'], f"train_{opt['name']}_{get_time_str()}.log")
     logger = get_root_logger(logger_name='basicsr', log_level=logging.INFO, log_file=log_file)
     logger.info(get_env_info())
     logger.info(dict2str(opt))
+    # initialize wandb and tb loggers
     tb_logger = init_tb_loggers(opt)
 
+    # create train and validation dataloaders
     result = create_train_val_dataloader(opt, logger)
-    train_loaders, val_loaders, total_epochs, total_iters = result
+    train_loader, train_sampler, val_loaders, total_epochs, total_iters = result
 
-    # Create Teacher and Student models
-    teacher_model = build_model(opt)
-    student_model = build_model(opt)  # Same architecture
-    teacher_model.net_g.cuda()
-    student_model.net_g.cuda()
-
-    if resume_state:
-        teacher_model.resume_training(resume_state)
-        student_model.resume_training(resume_state)
+    # create model
+    model = build_model(opt)
+    if resume_state:  # resume training
+        model.resume_training(resume_state)  # handle optimizers and schedulers
         logger.info(f"Resuming training from epoch: {resume_state['epoch']}, iter: {resume_state['iter']}.")
         start_epoch = resume_state['epoch']
         current_iter = resume_state['iter']
@@ -124,115 +131,84 @@ def train_pipeline(root_path):
         start_epoch = 0
         current_iter = 0
 
+    # create message logger (formatted outputs)
     msg_logger = MessageLogger(opt, current_iter, tb_logger)
 
-    # Initialize Siamese loss
-    siamese_criterion = nn.MSELoss().cuda()
-
-    # Optimizer for both models
-    optim_params = list(teacher_model.net_g.parameters()) + list(student_model.net_g.parameters())
-    optimizer_g = torch.optim.Adam(optim_params, lr=opt['train']['optim_g']['lr'])
-
-    # Dataloader prefetcher
-    prefetch_mode = opt['datasets']['teacher'].get('prefetch_mode')
+    # dataloader prefetcher
+    prefetch_mode = opt['datasets']['train'].get('prefetch_mode')
     if prefetch_mode is None or prefetch_mode == 'cpu':
-        teacher_prefetcher = CPUPrefetcher(train_loaders['teacher'])
-        student_prefetcher = CPUPrefetcher(train_loaders['student'])
+        prefetcher = CPUPrefetcher(train_loader)
     elif prefetch_mode == 'cuda':
-        teacher_prefetcher = CUDAPrefetcher(train_loaders['teacher'], opt)
-        student_prefetcher = CUDAPrefetcher(train_loaders['student'], opt)
+        prefetcher = CUDAPrefetcher(train_loader, opt)
         logger.info(f'Use {prefetch_mode} prefetch dataloader')
-        if opt['datasets']['teacher'].get('pin_memory') is not True:
+        if opt['datasets']['train'].get('pin_memory') is not True:
             raise ValueError('Please set pin_memory=True for CUDAPrefetcher.')
     else:
         raise ValueError(f"Wrong prefetch_mode {prefetch_mode}. Supported ones are: None, 'cuda', 'cpu'.")
 
+    # training
     logger.info(f'Start training from epoch: {start_epoch}, iter: {current_iter}')
     data_timer, iter_timer = AvgTimer(), AvgTimer()
     start_time = time.time()
 
     for epoch in range(start_epoch, total_epochs + 1):
-        train_loaders['teacher_sampler'].set_epoch(epoch)
-        train_loaders['student_sampler'].set_epoch(epoch)
-        teacher_prefetcher.reset()
-        student_prefetcher.reset()
-        teacher_data = teacher_prefetcher.next()
-        student_data = student_prefetcher.next()
+        train_sampler.set_epoch(epoch)
+        prefetcher.reset()
+        train_data = prefetcher.next()
 
-        while teacher_data is not None and student_data is not None:
+        while train_data is not None:
             data_timer.record()
 
             current_iter += 1
             if current_iter > total_iters:
                 break
-
-            # Update learning rate
-            teacher_model.update_learning_rate(current_iter, warmup_iter=opt['train'].get('warmup_iter', -1))
-            student_model.update_learning_rate(current_iter, warmup_iter=opt['train'].get('warmup_iter', -1))
-
-            # Feed data
-            teacher_model.feed_data(teacher_data)
-            student_model.feed_data(student_data)
-
-            # Optimize parameters
-            teacher_model.optimize_parameters(current_iter)
-            student_model.optimize_parameters(current_iter)
-
-            # Siamese loss
-            teacher_output = teacher_model.net_g(teacher_data['lq'].cuda())
-            student_output = student_model.net_g(student_data['lq'].cuda())
-            siamese_loss = siamese_criterion(student_output, teacher_output.detach())
-
-            # Combine losses
-            teacher_loss = teacher_model.get_current_log().get('l_g_total', 0)
-            student_loss = student_model.get_current_log().get('l_g_total', 0)
-            total_loss = teacher_loss + student_loss + opt['train']['siamese_opt']['loss_weight'] * siamese_loss
-
-            # Backward and optimize
-            optimizer_g.zero_grad()
-            total_loss.backward()
-            optimizer_g.step()
-
+            # update learning rate
+            model.update_learning_rate(current_iter, warmup_iter=opt['train'].get('warmup_iter', -1))
+            # training
+            model.feed_data(train_data)
+            model.optimize_parameters(current_iter)
             iter_timer.record()
             if current_iter == 1:
+                # reset start time in msg_logger for more accurate eta_time
+                # not work in resume mode
                 msg_logger.reset_start_time()
-
-            # Log
+            # log
             if current_iter % opt['logger']['print_freq'] == 0:
                 log_vars = {'epoch': epoch, 'iter': current_iter}
-                log_vars.update({'lrs': teacher_model.get_current_learning_rate()})
+                log_vars.update({'lrs': model.get_current_learning_rate()})
                 log_vars.update({'time': iter_timer.get_avg_time(), 'data_time': data_timer.get_avg_time()})
-                log_vars.update({'teacher_loss': teacher_loss, 'student_loss': student_loss, 'siamese_loss': siamese_loss.item()})
+                log_vars.update(model.get_current_log())
                 msg_logger(log_vars)
 
-            # Save models
+            # save models and training states
             if current_iter % opt['logger']['save_checkpoint_freq'] == 0:
                 logger.info('Saving models and training states.')
-                teacher_model.save(epoch, current_iter, save_path=osp.join(opt['path']['models'], 'teacher_net_g'))
-                student_model.save(epoch, current_iter, save_path=osp.join(opt['path']['models'], 'student_net_g'))
+                model.save(epoch, current_iter)
 
-            # Validation
+            # validation
             if opt.get('val') is not None and (current_iter % opt['val']['val_freq'] == 0):
+                if len(val_loaders) > 1:
+                    logger.warning('Multiple validation datasets are *only* supported by SRModel.')
                 for val_loader in val_loaders:
-                    teacher_model.validation(val_loader, current_iter, tb_logger, opt['val']['save_img'])
-                    student_model.validation(val_loader, current_iter, tb_logger, opt['val']['save_img'])
+                    model.validation(val_loader, current_iter, tb_logger, opt['val']['save_img'])
 
             data_timer.start()
             iter_timer.start()
-            teacher_data = teacher_prefetcher.next()
-            student_data = student_prefetcher.next()
+            train_data = prefetcher.next()
+        # end of iter
+
+    # end of epoch
 
     consumed_time = str(datetime.timedelta(seconds=int(time.time() - start_time)))
     logger.info(f'End of training. Time consumed: {consumed_time}')
     logger.info('Save the latest model.')
-    teacher_model.save(epoch=-1, current_iter=-1, save_path=osp.join(opt['path']['models'], 'teacher_net_g'))
-    student_model.save(epoch=-1, current_iter=-1, save_path=osp.join(opt['path']['models'], 'student_net_g'))
+    model.save(epoch=-1, current_iter=-1)  # -1 stands for the latest
     if opt.get('val') is not None:
         for val_loader in val_loaders:
-            teacher_model.validation(val_loader, current_iter, tb_logger, opt['val']['save_img'])
-            student_model.validation(val_loader, current_iter, tb_logger, opt['val']['save_img'])
+            model.validation(val_loader, current_iter, tb_logger, opt['val']['save_img'])
     if tb_logger:
         tb_logger.close()
+
 
 if __name__ == '__main__':
     root_path = osp.abspath(osp.join(__file__, osp.pardir, osp.pardir))
