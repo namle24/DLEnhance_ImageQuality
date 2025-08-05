@@ -6,13 +6,86 @@ import random
 import time
 import torch
 from os import path as osp
+import sys
+import os
 
-from basicsr.data import create_dataloader, create_dataset
-from basicsr.models import create_model
-from basicsr.utils import (MessageLogger, check_resume, get_env_info, get_root_logger, 
-                          init_tb_logger, init_wandb_logger, make_exp_dirs, mkdir_and_rename,
-                          set_random_seed)
-from basicsr.utils.options import dict2str, parse
+# Add current directory to path
+sys.path.insert(0, os.getcwd())
+
+try:
+    # Try importing from local BasicSR first
+    from basicsr.data import create_dataloader, create_dataset
+    from basicsr.models import create_model
+    from basicsr.utils import (MessageLogger, check_resume, get_env_info, get_root_logger, 
+                              init_tb_logger, init_wandb_logger, make_exp_dirs, mkdir_and_rename,
+                              set_random_seed, get_time_str)
+    from basicsr.utils.options import dict2str, parse_options
+    from basicsr.utils.dist_util import get_dist_info, init_dist
+    from basicsr.data.prefetch_dataloader import CPUPrefetcher, CUDAPrefetcher
+    from basicsr.utils import AvgTimer
+    print("Using local BasicSR")
+except ImportError:
+    try:
+        # Fallback to pip-installed BasicSR
+        from basicsr.data import build_dataloader, build_dataset
+        from basicsr.models import build_model
+        from basicsr.utils import (MessageLogger, check_resume, get_env_info, get_root_logger, 
+                                  init_tb_logger, init_wandb_logger, make_exp_dirs, mkdir_and_rename,
+                                  set_random_seed, get_time_str)
+        from basicsr.utils.options import dict2str, parse
+        from basicsr.utils.dist_util import get_dist_info, init_dist
+        
+        # Aliases for compatibility
+        create_dataloader = build_dataloader
+        create_dataset = build_dataset
+        create_model = build_model
+        parse_options = parse
+        
+        print("Using pip-installed BasicSR")
+        
+        # Fallback implementations for missing classes
+        class CPUPrefetcher:
+            def __init__(self, loader):
+                self.ori_loader = loader
+                self.loader = iter(loader)
+
+            def next(self):
+                try:
+                    return next(self.loader)
+                except StopIteration:
+                    return None
+
+            def reset(self):
+                self.loader = iter(self.ori_loader)
+
+        class CUDAPrefetcher(CPUPrefetcher):
+            def __init__(self, loader, opt):
+                super().__init__(loader)
+
+        class AvgTimer:
+            def __init__(self):
+                self.val = 0
+                self.avg = 0
+                self.sum = 0
+                self.count = 0
+                self.start_time = time.time()
+
+            def record(self):
+                self.val = time.time() - self.start_time
+                self.sum += self.val
+                self.count += 1
+                self.avg = self.sum / self.count
+
+            def start(self):
+                self.start_time = time.time()
+
+            def get_avgtime(self):
+                return self.avg
+                
+    except ImportError as e:
+        print(f"Failed to import BasicSR: {e}")
+        print("Please install BasicSR or check your installation")
+        sys.exit(1)
 
 
 def init_loggers(opt):
@@ -67,10 +140,6 @@ def create_train_val_dataloader(opt, logger):
     return train_loader, val_loaders, total_epochs, total_iters
 
 
-def get_time_str():
-    return time.strftime('%Y%m%d_%H%M%S', time.localtime())
-
-
 def main():
     # parse options, set distributed setting, set ramdom seed
     parser = argparse.ArgumentParser()
@@ -80,7 +149,7 @@ def main():
     parser.add_argument('--local_rank', type=int, default=0)
     args = parser.parse_args()
     
-    opt = parse(args.opt, is_train=True)
+    opt = parse_options(args.opt, is_train=True)
 
     # distributed settings
     if args.launcher == 'none':
@@ -94,11 +163,19 @@ def main():
             init_dist(args.launcher)
 
     rank = get_dist_info()[0]
+    
+    # set random seed
+    seed = opt['manual_seed']
+    if seed is None:
+        seed = random.randint(1, 10000)
+        opt['manual_seed'] = seed
+    set_random_seed(seed + rank)
 
     # load resume states if necessary
     if opt['path'].get('resume_state'):
         device_id = torch.cuda.current_device()
-        resume_state = torch.load(opt['path']['resume_state'], map_location=lambda storage, loc: storage.cuda(device_id))
+        resume_state = torch.load(opt['path']['resume_state'], 
+                                map_location=lambda storage, loc: storage.cuda(device_id))
     else:
         resume_state = None
 
@@ -165,10 +242,11 @@ def main():
             model.feed_data(train_data)
             model.optimize_parameters(current_iter)
             iter_timer.record()
+            
             if current_iter == 1:
                 # reset start time in msg_logger for more accurate eta_time
-                # not work in resume mode
                 msg_logger.reset_start_time()
+                
             # log
             if current_iter % opt['logger']['print_freq'] == 0:
                 log_vars = {'epoch': epoch, 'iter': current_iter}
