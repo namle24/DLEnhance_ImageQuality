@@ -17,6 +17,7 @@ datasets:
   train:
     name: DIV2K
     type: PairedImageDatasetSiamese
+    phase: train
     dataroot_gt: /datasets/RealESRGAN_data/dataset/train/GT
     dataroot_lq_a: /datasets/RealESRGAN_data/dataset/train/LR_light
     dataroot_lq_b: /datasets/RealESRGAN_data/dataset/train/LR_moderate
@@ -39,8 +40,10 @@ datasets:
   val:
     name: validation
     type: PairedImageDatasetSiamese
+    phase: val
     dataroot_gt: /datasets/RealESRGAN_data/dataset/test/HR
-    dataroot_lq: /datasets/RealESRGAN_data/dataset/test/LR_light
+    dataroot_lq_a: /datasets/RealESRGAN_data/dataset/test/LR_light
+    dataroot_lq_b: /datasets/RealESRGAN_data/dataset/test/LR_moderate
     io_backend:
       type: disk
 
