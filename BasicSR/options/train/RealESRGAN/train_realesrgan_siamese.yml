@@ -16,6 +16,8 @@ dataset:
       type: disk
     phase: train
     scale: 4
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 6
   train_b:
     name: DatasetB
     type: PairedImageDataset
@@ -25,6 +27,9 @@ dataset:
       type: disk
     phase: train
     scale: 4
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 6
+
 
 # Network settings
 network_g:
