@@ -16,7 +16,7 @@ high_order_degradation: False # do not use the high-order degradation generation
 datasets:
   train:
     name: DIV2K
-    type: PairedImageDataset
+    type: PairedImageDatasetSiamese
     phase: train
     dataroot_gt: /datasets/RealESRGAN_data/dataset/train/GT
     dataroot_lq_a: /datasets/RealESRGAN_data/dataset/train/LR_light

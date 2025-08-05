@@ -10,8 +10,9 @@ import cv2
 from torch.utils.data import Dataset
 from basicsr.utils.registry import DATASET_REGISTRY
 
-@DATASET_REGISTRY.register()
-class PairedImageDatasetSiamese(Dataset):
+@DATASET_REGISTRY.register('PairedImageDatasetSiamese')
+class PairedImageDatasetSiamese(data.Dataset):
+
     def __init__(self, opt):
         super().__init__()
         self.opt = opt
