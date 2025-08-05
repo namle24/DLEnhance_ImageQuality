@@ -1,0 +1,94 @@
+# General
+name: siamese_realesrgan_x4plus
+model_type: SiameseESRGANModel
+scale: 4
+num_gpu: auto
+manual_seed: 0
+
+# Dataset
+datasets:
+  train:
+    name: DIV2K_Siamese
+    type: SiamesePairedDataset
+    dataroot_gt: /datasets/RealESRGAN_data/dataset/train/HR_sub
+    dataroot_low: /datasets/RealESRGAN_data/dataset/train/LR_light_sub
+    dataroot_very_low: /datasets/RealESRGAN_data/dataset/train/LR_moderate_sub
+    gt_size: 256
+    batch_size_per_gpu: 8
+    num_worker_per_gpu: 4
+
+  val:
+    name: validation
+    type: PairedImageDataset
+    dataroot_gt: /datasets/RealESRGAN_data/dataset/test/HR
+    dataroot_lq: /datasets/RealESRGAN_data/dataset/test/LR_light
+    gt_size: 256
+
+# Networks
+network_g_teacher:
+  type: RRDBNet
+  num_in_ch: 3
+  num_out_ch: 3
+  num_feat: 64
+  num_block: 23
+  pretrained_path: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRNet_x4plus.pth
+
+network_g_student:
+  type: RRDBNet
+  num_in_ch: 3
+  num_out_ch: 3
+  num_feat: 64
+  num_block: 23
+
+network_d:
+  type: UNetDiscriminatorSN
+  num_in_ch: 3
+  num_feat: 64
+  pretrained_path: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRGAN_x4plus_netD.pth
+
+# Paths
+path:
+  pretrain_teacher: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRNet_x4plus.pth
+  pretrain_student: null
+  resume_state: null
+  save_checkpoint_freq: 5000
+  save_dir: "./experiments"
+  log_dir: "./logs"
+
+# Training
+train:
+  ema_decay: 0.999
+  optim_g:
+    type: Adam
+    lr: 1e-4
+    weight_decay: 0
+    betas: [0.9, 0.99]
+  optim_d:
+    type: Adam
+    lr: 1e-4
+    weight_decay: 0
+    betas: [0.9, 0.99]
+
+  # Loss weights
+  pixel_weight: 1.0
+  perceptual_weight: 0.1
+  gan_weight: 0.05
+  distillation_weight: 0.5
+
+  total_iter: 400000
+  net_d_iters: 1
+  net_d_init_iters: 0
+
+# Validation
+val:
+  val_freq: 5000
+  save_img: true
+  metrics:
+    psnr:
+      type: calculate_psnr
+      crop_border: 4
+      test_y_channel: true
+    ssim:
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: true
