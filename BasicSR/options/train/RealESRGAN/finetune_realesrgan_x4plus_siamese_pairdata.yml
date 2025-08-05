@@ -16,7 +16,7 @@ high_order_degradation: False # do not use the high-order degradation generation
 datasets:
   train:
     name: DIV2K
-    type: RealESRGANPairedDataset
+    type: PairedImageDatasetSiamese
     dataroot_gt: /datasets/RealESRGAN_data/dataset/train
     dataroot_lq: /datasets/RealESRGAN_data/dataset/train
     meta_info: /home/namlh/DLEnhance_ImageQuality/datasets/RealESRGAN_data/meta_info/meta_info_light_sub_pair.txt
@@ -80,10 +80,10 @@ loss_weights:
 path:
   # use the pre-trained Real-ESRNet model
   experiments_root: /home/namlh/DLEnhance_ImageQuality/BasicSR/experiments/finetune_realesrgan_x4plus_siamese
-  models: ~
-  training_states: ~
-  log: ~
-  visual: ~
+  models: /home/namlh/DLEnhance_ImageQuality/BasicSR/experiments/finetune_realesrgan_x4plus_siamese/models
+  training_states: /home/namlh/DLEnhance_ImageQuality/BasicSR/experiments/finetune_realesrgan_x4plus_siamese/training_states
+  log: /home/namlh/DLEnhance_ImageQuality/BasicSR/experiments/finetune_realesrgan_x4plus_siamese/log
+  visual: /home/namlh/DLEnhance_ImageQuality/BasicSR/experiments/finetune_realesrgan_x4plus_siamese/visual
   pretrain_network_g_a: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRNet_x4plus.pth
   pretrain_network_g_b: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRNet_x4plus.pth
   param_key_g: params_ema
