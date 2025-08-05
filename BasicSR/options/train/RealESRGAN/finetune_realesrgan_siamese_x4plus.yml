@@ -6,7 +6,7 @@ num_gpu: 1
 datasets:
   train:
     name: RealESRGAN_SiameseTrain
-    type: PairedImageDatasetSiamese_basicsr
+    type: PairedImageDatasetSiamese
     dataroot_gt: /datasets/RealESRGAN_data/dataset/train/HR
     dataroot_lq_a: /datasets/RealESRGAN_data/dataset/train/LR_light # ảnh xấu nhẹ -> Teacher
     dataroot_lq_b: /datasets/RealESRGAN_data/dataset/train/LR_moderate  # ảnh xấu nặng -> Student

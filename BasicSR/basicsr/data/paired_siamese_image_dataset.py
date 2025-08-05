@@ -9,7 +9,7 @@ import torch
 from torchvision.transforms.functional import normalize
 
 @DATASET_REGISTRY.register()
-class PairedImageDatasetSiamese(PairedImageDataset):
+class PairedImageDatasetSiamese(BaseDataset):
     def __init__(self, opt):
         super().__init__(opt)
         self.paths_lq_a = paths_from_folder(self.opt['dataroot_lq_a'])

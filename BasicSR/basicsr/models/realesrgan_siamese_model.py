@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from basicsr.models.real_esrgan_model import RealESRGANModel
+from basicsr.models.realesrgan_model import RealESRGANModel
 from basicsr.utils.registry import MODEL_REGISTRY
 import copy
 
