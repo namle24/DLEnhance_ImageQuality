@@ -16,7 +16,7 @@ datasets:
       type: disk
     phase: train
     scale: 4
-    batch_size_per_gpu: 8  # Thêm batch size, điều chỉnh theo VRAM
+    batch_size_per_gpu: 8  
     prefetch_mode: cuda
   student:
     name: LQ_heavy_GT
@@ -28,8 +28,8 @@ datasets:
       type: disk
     phase: train
     scale: 4
-    atch_size_per_gpu: 8  # Thêm batch size, điều chỉnh theo VRAM
-    prefetch_mode: cuda    # Khuyến nghị dùng cuda để tăng tốc
+    atch_size_per_gpu: 8  
+    prefetch_mode: cuda   
 network_g:
   type: RRDBNet
   num_in_ch: 3
