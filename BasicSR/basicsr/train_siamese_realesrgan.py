@@ -2,14 +2,18 @@ import os
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 from basicsr.data import build_dataloader
 from basicsr.models import build_model
 from basicsr.train import parse_options
-from basicsr.utils.logger import create_logger  # Updated import for BasicSR 1.4.2
+from basicsr.utils.logger import get_root_logger  # Updated for BasicSR 1.4.2
 
 def main():
     opt = parse_options(is_train=True)
-    logger, tb_logger = create_logger(opt, True)
+    # Initialize logger
+    logger = get_root_logger(log_file=os.path.join(opt['path']['log'], 'train.log'))
+    # Initialize TensorBoard writer if enabled
+    tb_writer = SummaryWriter(log_dir=opt['path']['log']) if opt['logger'].get('use_tb_logger') else None
     
     opt_teacher = opt.copy()
     opt_student = opt.copy()
@@ -79,21 +83,21 @@ def main():
             if opt['train'].get('siamese_loss', False):
                 log_message += f", Siamese Loss: {siamese_loss.item():.4f}"
             logger.info(log_message)
-            if tb_logger:
-                tb_logger.add_scalar('loss/teacher_total', teacher_loss['l_total'], current_iter)
-                tb_logger.add_scalar('loss/student_total', student_loss['l_total'], current_iter)
+            if tb_writer:
+                tb_writer.add_scalar('loss/teacher_total', teacher_loss['l_total'], current_iter)
+                tb_writer.add_scalar('loss/student_total', student_loss['l_total'], current_iter)
                 if opt['train'].get('distillation_loss', False):
-                    tb_logger.add_scalar('loss/distillation', distillation_loss.item(), current_iter)
+                    tb_writer.add_scalar('loss/distillation', distillation_loss.item(), current_iter)
                 if opt['train'].get('siamese_loss', False):
-                    tb_logger.add_scalar('loss/siamese', siamese_loss.item(), current_iter)
+                    tb_writer.add_scalar('loss/siamese', siamese_loss.item(), current_iter)
         
         if current_iter % opt['logger']['save_checkpoint_freq'] == 0:
             teacher_model.save(current_iter, 'teacher')
             student_model.save(current_iter, 'student')
     
     logger.info("Training completed.")
-    if tb_logger:
-        tb_logger.close()
+    if tb_writer:
+        tb_writer.close()
 
 if __name__ == '__main__':
     main()
