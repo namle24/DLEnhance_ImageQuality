@@ -1,5 +1,5 @@
 # general settings
-name: finetune_RealESRGANx4plus_400k_pairdata_21000state
+name: finetune_RealESRGANx4plus_siamese_400k_pairdata
 model_type: RealESRGANModel_Siamese
 scale: 4
 num_gpu: auto
