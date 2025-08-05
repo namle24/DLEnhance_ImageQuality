@@ -17,11 +17,12 @@ datasets:
   train:
     name: DIV2K
     type: PairedImageDatasetSiamese
-    dataroot_gt: /datasets/RealESRGAN_data/dataset/train
-    dataroot_lq: /datasets/RealESRGAN_data/dataset/train
-    meta_info: /home/namlh/DLEnhance_ImageQuality/datasets/RealESRGAN_data/meta_info/meta_info_light_sub_pair.txt
+    dataroot_gt: /datasets/RealESRGAN_data/dataset/train/GT
+    dataroot_lq_a: /datasets/RealESRGAN_data/dataset/train/LR_light
+    dataroot_lq_b: /datasets/RealESRGAN_data/dataset/train/LR_moderate
     io_backend:
       type: disk
+
 
     gt_size: 256
     use_hflip: True
