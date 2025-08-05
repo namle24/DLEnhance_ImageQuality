@@ -10,6 +10,7 @@ import os
 import cv2
 from torch.utils.data import Dataset
 
+@DATASET_REGISTRY.register()
 class PairedImageDatasetSiamese(Dataset):
     def __init__(self, opt):
         super().__init__()
