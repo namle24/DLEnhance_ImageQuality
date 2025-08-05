@@ -79,7 +79,11 @@ loss_weights:
 # path
 path:
   # use the pre-trained Real-ESRNet model
-  path:
+  experiments_root: /home/namlh/DLEnhance_ImageQuality/BasicSR/experiments/finetune_realesrgan_x4plus_siamese
+  models: ~
+  training_states: ~
+  log: ~
+  visual: ~
   pretrain_network_g_a: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRNet_x4plus.pth
   pretrain_network_g_b: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRNet_x4plus.pth
   param_key_g: params_ema
