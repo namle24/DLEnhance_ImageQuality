@@ -11,7 +11,7 @@ from basicsr.data.prefetch_dataloader import PrefetchDataLoader
 from basicsr.utils import get_root_logger, scandir
 from basicsr.utils.dist_util import get_dist_info
 from basicsr.utils.registry import DATASET_REGISTRY
-from basicsr.data import paired_image_siamese_dataset
+from basicsr.data.paired_image_siamese_dataset import PairedImageDatasetSiamese
 from .paired_image_siamese_dataset import PairedImageDatasetSiamese
 
 __all__ = ['build_dataset', 'build_dataloader']
@@ -32,6 +32,7 @@ def build_dataset(dataset_opt):
             name (str): Dataset name.
             type (str): Dataset type.
     """
+    print('>> DEBUG: dataset type =', dataset_opt['type'])
     dataset_opt = deepcopy(dataset_opt)
     dataset = DATASET_REGISTRY.get(dataset_opt['type'])(dataset_opt)
     logger = get_root_logger()
