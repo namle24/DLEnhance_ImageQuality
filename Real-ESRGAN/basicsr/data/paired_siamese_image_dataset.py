@@ -52,6 +52,16 @@ class PairedSiameseImageDataset(Dataset):
         img_lq_a = imfrombytes(lq_a_bytes, float32=True)
         img_lq_b = imfrombytes(lq_b_bytes, float32=True)
 
+        # Kiểm tra lỗi ảnh ngay sau khi decode
+        for img_type, img, path in [
+            ("GT", img_gt, gt_path),
+            ("LQ_A", img_lq_a, lq_a_path),
+            ("LQ_B", img_lq_b, lq_b_path),
+        ]:
+            if img is None:
+                print(f"[ERROR] Không đọc được ảnh {img_type} từ path: {path}")
+                raise ValueError(f"Ảnh {img_type} bị lỗi: {path}")
+
         # Kiểm tra ảnh có bị None không
         if img_gt is None:
             raise IOError(f"Cannot decode GT image from: {gt_path}")
@@ -74,18 +84,16 @@ class PairedSiameseImageDataset(Dataset):
             img_lq_a = img_lq_a[rnd_h:rnd_h + gt_size, rnd_w:rnd_w + gt_size, :]
             img_lq_b = img_lq_b[rnd_h:rnd_h + gt_size, rnd_w:rnd_w + gt_size, :]
 
-            # flip, rotate
-            img_gt, img_lq_a, img_lq_b = augment(
-                [img_gt, img_lq_a, img_lq_b], self.use_flip, self.use_rot)
-        
-        for img_type, img, path in [
-            ("GT", img_gt, self.paths_gt[index]),
-            ("LQ_A", img_lq_a, self.paths_lq_a[index]),
-            ("LQ_B", img_lq_b, self.paths_lq_b[index]),
-        ]:
-            if img is None:
-                print(f"[ERROR] Không đọc được ảnh {img_type} từ path: {path}")
-                raise ValueError(f"Ảnh {img_type} bị lỗi: {path}")
+            # Kiểm tra lại ảnh sau crop
+            for img_type, img, path in [
+                ("GT_cropped", img_gt, gt_path),
+                ("LQ_A_cropped", img_lq_a, lq_a_path),
+                ("LQ_B_cropped", img_lq_b, lq_b_path),
+            ]:
+                if img is None or img.size == 0:
+                    print(f"[ERROR] Ảnh {img_type} sau crop bị rỗng: {path}")
+                    raise ValueError(f"Crop ra ảnh rỗng: {path}")
+
         
         # Chuyển sang tensor
         img_gt = img2tensor(img_gt, bgr2rgb=True, float32=True)
