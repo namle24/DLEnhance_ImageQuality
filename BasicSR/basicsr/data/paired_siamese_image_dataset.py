@@ -10,16 +10,16 @@ from basicsr.utils import img2tensor, scandir
 from basicsr.data.util import imfrombytes, FileClient
 
 @DATASET_REGISTRY.register()
-class PairedSiameseImageDataset(data.Dataset):
+class PairedSiameseImageDataset(PairedImageDataset):
     def __init__(self, opt):
         print(">>> Loading PAIRED SIAMESE IMAGE DATASET")
-        self.opt = opt
-        self.gt_folder = opt['dataroot_gt']
-        self.lq_folder_a = opt['dataroot_lq_a']
-        self.lq_folder_b = opt['dataroot_lq_b']
+        # Gọi init của PairedImageDataset để setup self.paths_gt, self.paths_lq
+        super().__init__(opt)
+        self.paths_lq_a = self.get_image_paths(opt['io_backend'], opt['dataroot_lq_a'])
+        self.paths_lq_b = self.get_image_paths(opt['io_backend'], opt['dataroot_lq_b'])
 
         assert len(self.paths_gt) == len(self.paths_lq_a) == len(self.paths_lq_b), \
-            'Mismatch in number of GT, LQ_A, LQ_B images.'
+            f"Mismatch: GT={len(self.paths_gt)}, LQ_A={len(self.paths_lq_a)}, LQ_B={len(self.paths_lq_b)}"
 
     def __getitem__(self, index):
         gt_path = self.paths_gt[index]
