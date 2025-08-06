@@ -43,3 +43,4 @@ class PairedImageDatasetSiamese(PairedImageDataset):
             'lq_b': img_lq_b,
             'gt_path': gt_path
         }
+print(">>> Loading PAIRED SIAMESE IMAGE DATASET")

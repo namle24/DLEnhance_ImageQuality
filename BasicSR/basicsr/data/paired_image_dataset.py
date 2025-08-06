@@ -104,3 +104,4 @@ class PairedImageDataset(data.Dataset):
 
     def __len__(self):
         return len(self.paths)
+print(">>> Loading PAIRED IMAGE DATASET")

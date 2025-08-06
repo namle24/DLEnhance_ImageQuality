@@ -11,8 +11,9 @@ from basicsr.data.prefetch_dataloader import PrefetchDataLoader
 from basicsr.utils import get_root_logger, scandir
 from basicsr.utils.dist_util import get_dist_info
 from basicsr.utils.registry import DATASET_REGISTRY
+from .paired_siamese_image_dataset import PairedSiameseImageDataset
 
-__all__ = ['build_dataset', 'build_dataloader']
+__all__ = ['build_dataset', 'build_dataloader','PairedSiameseImageDataset']
 
 # automatically scan and import dataset modules for registry
 # scan all the files under the data folder with '_dataset' in file names
