@@ -2,6 +2,7 @@ import random
 import cv2
 import numpy as np
 import torch
+import torch.utils.data as data
 from basicsr.data.paired_image_dataset import PairedImageDataset
 from basicsr.utils.registry import DATASET_REGISTRY
 from basicsr.data.transforms import augment, paired_random_crop
