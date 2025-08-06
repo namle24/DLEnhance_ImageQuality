@@ -1,6 +1,6 @@
 # general settings
 name: finetune_RealESRGANx4plus_teacher_student_degradation
-model_type: RealESRGANModelStudent
+model_type: RealESRGANModel
 scale: 4
 num_gpu: auto
 manual_seed: 0
@@ -27,8 +27,8 @@ datasets:
     use_hflip: True
     use_rot: False
     use_shuffle: true
-    num_worker_per_gpu: 2
-    batch_size_per_gpu: 4
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 8
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
   val:
