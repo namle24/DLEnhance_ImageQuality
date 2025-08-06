@@ -33,7 +33,7 @@ class PairedSiameseImageDataset(BaseDataset):
         self.std = opt.get('std', [1.0, 1.0, 1.0])
         self.use_flip = opt.get('use_flip', True)
         self.use_rot = opt.get('use_rot', True)
-
+        self.file_client = None
         print(f"[INFO] Tổng số ảnh: {len(self.paths_gt)}")
 
     def __getitem__(self, index):
