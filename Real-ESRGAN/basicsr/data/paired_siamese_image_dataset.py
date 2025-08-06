@@ -2,7 +2,6 @@ import os
 import random
 import cv2
 import numpy as np
-import gc
 
 from basicsr.data.base_dataset import BaseDataset
 from basicsr.utils import FileClient, imfrombytes, img2tensor
@@ -28,7 +27,6 @@ class PairedSiameseImageDataset(BaseDataset):
         self.use_flip = opt.get('use_hflip', True)
         self.use_rot = opt.get('use_rot', True)
         self.phase = opt.get('phase', 'train')
-        self.max_retries = opt.get('max_retries', 5)  # Limit retries to prevent infinite loops
 
         self.paths_gt = []
         self.paths_lq_a = []
@@ -62,10 +60,7 @@ class PairedSiameseImageDataset(BaseDataset):
         self.file_client = None
         print(f'[INFO] PairedSiameseImageDataset: {len(self.paths_gt)} samples loaded.')
 
-    def __getitem__(self, index, retries=0):
-        if retries >= self.max_retries:
-            raise ValueError(f"[ERROR] Max retries ({self.max_retries}) reached for index {index}")
-
+    def __getitem__(self, index):
         try:
             if self.file_client is None:
                 self.file_client = FileClient(self.io_backend_opt.pop('type'), **self.io_backend_opt)
@@ -105,7 +100,8 @@ class PairedSiameseImageDataset(BaseDataset):
             expected_h_lq, expected_w_lq = h_gt // self.scale, w_gt // self.scale
             if (h_lq_a != expected_h_lq or w_lq_a != expected_w_lq or
                 h_lq_b != expected_h_lq or w_lq_b != expected_w_lq):
-                print(f"[DEBUG] Resizing LQ images to match GT dimensions: GT({h_gt}, {w_gt})")
+                print(f"[WARNING] Image shape mismatch: GT({img_gt.shape}), LQ_A({img_lq_a.shape}), LQ_B({img_lq_b.shape})")
+                # Ensure exact dimensions to avoid rounding errors
                 img_lq_a = cv2.resize(img_lq_a, (w_gt, h_gt), interpolation=cv2.INTER_CUBIC)
                 img_lq_b = cv2.resize(img_lq_b, (w_gt, h_gt), interpolation=cv2.INTER_CUBIC)
                 print(f"[DEBUG] Resized LQ_A to {img_lq_a.shape}, LQ_B to {img_lq_b.shape}")
@@ -151,10 +147,6 @@ class PairedSiameseImageDataset(BaseDataset):
                     t[c, :, :] = (t[c, :, :] - self.mean[c]) / self.std[c]
                 print(f"[DEBUG] Normalized {name} tensor: min={t.min().item()}, max={t.max().item()}")
 
-            # Clean up memory
-            del gt_bytes, lq_a_bytes, lq_b_bytes
-            gc.collect()
-
             return {
                 'gt': img_gt,
                 'lq_a': img_lq_a,
@@ -166,9 +158,7 @@ class PairedSiameseImageDataset(BaseDataset):
 
         except Exception as e:
             print(f"[WARNING] Error loading index {index}: {e}")
-            # Clean up memory before retry
-            gc.collect()
-            return self.__getitem__((index + 1) % self.__len__(), retries + 1)
+            return self.__getitem__((index + 1) % self.__len__())
 
     def __len__(self):
         return len(self.paths_gt)
