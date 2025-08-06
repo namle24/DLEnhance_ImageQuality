@@ -2,8 +2,8 @@ import os
 import cv2
 import numpy as np
 
-input_dir = r"D:\EnhanceVideo_ImageDLM\data\dataset\train\HR"
-output_dir = r"D:\EnhanceVideo_ImageDLM\data\dataset\train\LR_moderate"  
+input_dir = r"D:\Download\archive\BSDS100\BSD100"
+output_dir = r"D:\Download\archive\BSDS100\BSD100_LQ"
 
 os.makedirs(output_dir, exist_ok=True)
 
