@@ -11,9 +11,10 @@ from basicsr.data.util import imfrombytes, FileClient
 @DATASET_REGISTRY.register()
 class PairedImageDatasetSiamese(PairedImageDataset):
     def __init__(self, opt):
-        super().__init__(opt)
-        self.paths_lq_a = self.scan_folder(opt['dataroot_lq_a'])
-        self.paths_lq_b = self.scan_folder(opt['dataroot_lq_b'])
+        self.opt = opt
+        self.gt_folder = opt['dataroot_gt']
+        self.lq_folder_a = opt['dataroot_lq_a']
+        self.lq_folder_b = opt['dataroot_lq_b']
 
         assert len(self.paths_gt) == len(self.paths_lq_a) == len(self.paths_lq_b), \
             'Mismatch in number of GT, LQ_A, LQ_B images.'
