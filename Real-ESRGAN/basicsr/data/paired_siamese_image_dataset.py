@@ -76,6 +76,8 @@ class PairedSiameseImageDataset(BaseDataset):
             if img_gt is None or img_lq_a is None or img_lq_b is None:
                 raise ValueError(f"Image None: GT({gt_path}), LQ_A({lq_a_path}), LQ_B({lq_b_path})")
 
+            if not (img_lq_a.shape[0] * 4 == img_gt.shape[0] and img_lq_a.shape[1] * 4 == img_gt.shape[1]):
+                raise ValueError(f"Image shape mismatch: GT({img_gt.shape}), LQ_A({img_lq_a.shape}), LQ_B({img_lq_b.shape})")
 
             # Crop và augment nếu training
             if self.phase == 'train' and self.gt_size is not None:
@@ -110,7 +112,6 @@ class PairedSiameseImageDataset(BaseDataset):
 
         except Exception as e:
             print(f"[WARNING] Error loading index {index}: {e}")
-            # Nếu lỗi thì đệ quy lấy ảnh kế tiếp (vòng lại nếu cuối)
             return self.__getitem__((index + 1) % self.__len__())
 
 
