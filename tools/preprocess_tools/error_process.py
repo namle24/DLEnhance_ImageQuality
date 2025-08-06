@@ -6,7 +6,7 @@ lq_b_root = "/datasets/RealESRGAN_data/dataset/train/LR_moderate_sub"
 gt_root   = "/datasets/RealESRGAN_data/dataset/train/HR_sub"
 
 # Đọc các dòng từ log lỗi
-with open("error_log.txt", "r") as f:
+with open("tools/preprocess_tools/error_log.txt", "r") as f:
     lines = f.readlines()
 
 deleted_count = 0
