@@ -1,42 +1,38 @@
 import os
 import cv2
 
-# Cấu hình thư mục
-gt_dir = '/datasets/RealESRGAN_data/dataset/train/HR'
-lq_a_dir = '/datasets/RealESRGAN_data/dataset/train/LR_light'
-lq_b_dir = '/datasets/RealESRGAN_data/dataset/train/LR_moderate'
-gt_size = 128  # thay đổi theo cấu hình của bạn
+# Danh sách folder cần kiểm tra
+folders = {
+    "HR_sub": "/datasets/RealESRGAN_data/dataset/train/HR_sub",
+    "LR_light_sub": "/datasets/RealESRGAN_data/dataset/train/LR_light_sub",
+    "LR_moderate_sub": "/datasets/RealESRGAN_data/dataset/train/LR_moderate_sub"
+}
 
-img_names = sorted(os.listdir(gt_dir))
+# Định dạng ảnh hợp lệ
+valid_ext = ('.png', '.jpg', '.jpeg', '.bmp')
 
-num_removed = 0
+print("=== BẮT ĐẦU KIỂM TRA DATASET ===")
+for name, folder in folders.items():
+    print(f"\n--- Kiểm tra thư mục: {name} ({folder}) ---")
+    error_count = 0
+    total_count = 0
 
-for name in img_names:
-    gt_path = os.path.join(gt_dir, name)
-    lq_a_path = os.path.join(lq_a_dir, name)
-    lq_b_path = os.path.join(lq_b_dir, name)
+    for fname in os.listdir(folder):
+        total_count += 1
+        fpath = os.path.join(folder, fname)
 
-    if not os.path.exists(gt_path) or not os.path.exists(lq_a_path) or not os.path.exists(lq_b_path):
-        print(f"Bỏ qua {name}: thiếu ảnh.")
-        continue
+        # Bỏ qua file không phải ảnh
+        if not fname.lower().endswith(valid_ext):
+            print(f"Không phải file ảnh: {fpath}")
+            error_count += 1
+            continue
 
-    gt = cv2.imread(gt_path)
-    lq_a = cv2.imread(lq_a_path)
-    lq_b = cv2.imread(lq_b_path)
+        # Thử đọc ảnh
+        img = cv2.imread(fpath)
+        if img is None:
+            print(f"Không đọc được ảnh: {fpath}")
+            error_count += 1
 
-    if gt is None or lq_a is None or lq_b is None:
-        print(f"Ảnh lỗi: {name}")
-        continue
+    print(f"Tổng số ảnh: {total_count}, Lỗi: {error_count}")
 
-    h1, w1 = gt.shape[:2]
-    h2, w2 = lq_a.shape[:2]
-    h3, w3 = lq_b.shape[:2]
-
-    if min(h1, h2, h3) < gt_size or min(w1, w2, w3) < gt_size:
-        print(f"Xóa {name} do kích thước nhỏ hơn {gt_size}")
-        os.remove(gt_path)
-        os.remove(lq_a_path)
-        os.remove(lq_b_path)
-        num_removed += 1
-
-print(f"Đã xóa {num_removed} ảnh không đạt yêu cầu.")
+print("\n=== KIỂM TRA HOÀN TẤT ===")
