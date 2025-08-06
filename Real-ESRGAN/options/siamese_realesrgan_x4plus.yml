@@ -15,6 +15,7 @@ datasets:
       type: disk
     use_hflip: true
     use_rot: true
+    batch_size_per_gpu: 6
 
 network_g:
   type: RRDBNetFeatOut
