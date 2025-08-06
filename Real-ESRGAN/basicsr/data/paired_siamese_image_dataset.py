@@ -6,7 +6,7 @@ import numpy as np
 from basicsr.data.base_dataset import BaseDataset
 from basicsr.utils import FileClient, imfrombytes, img2tensor
 from basicsr.utils.registry import DATASET_REGISTRY
-from basicsr.data import augment
+from basicsr.data.transforms import augment
 
 @DATASET_REGISTRY.register()
 class PairedSiameseImageDataset(BaseDataset):
