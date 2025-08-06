@@ -3,9 +3,6 @@ model_type: RealESRGANSiameseModel
 num_gpu: 1
 scale: 4
 
-dataloader:
-  num_workers: 0
-
 datasets:
   train:
     name: TrainSiamese
@@ -17,13 +14,15 @@ datasets:
     meta_info_file: /datasets/RealESRGAN_data/meta_info/meta_info_triplet_nosub.txt
     io_backend:
       type: disk
-
+  
+    
     gt_size: 256
     use_hflip: true
     use_rot: false
-    
+
+  dataloader:
+    num_workers: 0
     use_shuffle: true
-    num_worker_per_gpu: 4
     batch_size_per_gpu: 6
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
