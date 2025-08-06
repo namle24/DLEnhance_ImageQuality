@@ -1,13 +1,10 @@
-from .models.siamese_model import SiameseESRGAN
+from models.siamese_model import SiameseESRGAN
 from losses import L1Loss, PerceptualLoss, GANLoss, DistillationLoss
-from datasets.siamese_paired_dataset import SiamesePairedDataset
 from torch.optim import Adam
-from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.tensorboard import SummaryWriter
-from utils.ema import ExponentialMovingAverage  # Cần tạo file utils/ema.py
+from utils.ema import ExponentialMovingAverage
 import os
 import torch
-
 
 class SiameseTrainer:
     def __init__(self, model, opt_g_teacher, opt_g_student, opt_d, config):
