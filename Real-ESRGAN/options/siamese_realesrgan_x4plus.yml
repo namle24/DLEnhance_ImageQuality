@@ -6,7 +6,7 @@ gt_size: 128
 
 dataloader:
   num_workers: 0
-  
+
 datasets:
   train:
     name: TrainSiamese
