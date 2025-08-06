@@ -4,6 +4,7 @@ from os import path as osp
 
 from basicsr.utils import get_root_logger, scandir
 from basicsr.utils.registry import ARCH_REGISTRY
+from .rrdbnet_featout_arch import RRDBNetFeatOut
 
 __all__ = ['build_network']
 
