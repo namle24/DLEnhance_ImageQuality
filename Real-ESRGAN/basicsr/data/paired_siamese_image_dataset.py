@@ -77,6 +77,13 @@ class PairedSiameseImageDataset(Dataset):
             # flip, rotate
             img_gt, img_lq_a, img_lq_b = augment(
                 [img_gt, img_lq_a, img_lq_b], self.use_flip, self.use_rot)
+            
+        # ngay trước dòng gây lỗi
+        print(f'>>> Đang đọc ảnh: {path_lq_a}')  # hoặc tên biến bạn đang đọc
+        img_lq_a = cv2.imread(path_lq_a, cv2.IMREAD_COLOR)
+
+        if img_lq_a is None:
+            raise ValueError(f'Không đọc được ảnh: {path_lq_a}')
 
         # Chuyển sang tensor
         img_gt = img2tensor(img_gt, bgr2rgb=True, float32=True)
