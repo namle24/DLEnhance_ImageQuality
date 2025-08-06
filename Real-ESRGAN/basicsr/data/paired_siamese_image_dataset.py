@@ -71,7 +71,8 @@ class PairedSiameseImageDataset(BaseDataset):
                 img_gt = img_gt[rnd_h:rnd_h + self.gt_size, rnd_w:rnd_w + self.gt_size, :]
                 img_lq_a = img_lq_a[rnd_h:rnd_h + self.gt_size, rnd_w:rnd_w + self.gt_size, :]
                 img_lq_b = img_lq_b[rnd_h:rnd_h + self.gt_size, rnd_w:rnd_w + self.gt_size, :]
-                img_gt, img_lq_a, img_lq_b = augment([img_gt, img_lq_a, img_lq_b], self.use_flip, self.use_rot)
+                img_gt, img_lq_a, img_lq_b = augment(
+                    [img_gt, img_lq_a, img_lq_b], use_flip=self.use_flip, use_rot=False)
 
             # Convert sang tensor
             img_gt = img2tensor(img_gt, bgr2rgb=True, float32=True)
