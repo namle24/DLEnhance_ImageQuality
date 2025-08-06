@@ -27,7 +27,8 @@ class PairedSiameseImageDataset(Dataset):
         self.std = opt.get('std', [1.0, 1.0, 1.0])
         self.use_flip = opt.get('use_flip', True)
         self.use_rot = opt.get('use_rot', True)
-        self.gt_size = self.opt.get('gt_size', None)
+        self.gt_size = opt.get('gt_size', None) or opt.get('gt_size', None) or opt.get('patch_size', None)
+
 
     def __len__(self):
         return len(self.paths_gt)
