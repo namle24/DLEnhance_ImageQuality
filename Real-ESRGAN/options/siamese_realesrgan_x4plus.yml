@@ -14,7 +14,7 @@ datasets:
     meta_info_file: /datasets/RealESRGAN_data/meta_info/meta_info_triplet_nosub.txt
     io_backend:
       type: disk
-    gt_size: 256
+    gt_size: null
     use_hflip: true
     use_rot: false
     scale: 4
