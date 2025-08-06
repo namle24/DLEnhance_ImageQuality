@@ -18,13 +18,13 @@ class PairedSiameseImageDataset(BaseDataset):
         self.mean = opt.get('mean', [0.0, 0.0, 0.0])
         self.std = opt.get('std', [1.0, 1.0, 1.0])
         self.gt_size = opt.get('gt_size', None)
-        self.scale = opt.get('scale', 4)  # Add scale factor for 4x super-resolution
+        self.scale = opt.get('scale', 4)
         if isinstance(self.gt_size, str):
             if self.gt_size.lower() == 'none':
                 self.gt_size = None
             else:
                 self.gt_size = int(self.gt_size)
-        self.use_flip = opt.get('use_flip', True)
+        self.use_flip = opt.get('use_hflip', True)
         self.use_rot = opt.get('use_rot', True)
         self.phase = opt.get('phase', 'train')
 
@@ -93,7 +93,7 @@ class PairedSiameseImageDataset(BaseDataset):
                 if len(img.shape) != 3 or img.shape[2] != 3:
                     raise ValueError(f"[ERROR] Image {name} is not RGB (shape: {img.shape}): {path}")
 
-            # Check resolution scaling and resize LQ images to match GT
+            # Resize LQ images to match GT dimensions
             h_gt, w_gt = img_gt.shape[:2]
             h_lq_a, w_lq_a = img_lq_a.shape[:2]
             h_lq_b, w_lq_b = img_lq_b.shape[:2]
@@ -101,21 +101,32 @@ class PairedSiameseImageDataset(BaseDataset):
             if (h_lq_a != expected_h_lq or w_lq_a != expected_w_lq or
                 h_lq_b != expected_h_lq or w_lq_b != expected_w_lq):
                 print(f"[WARNING] Image shape mismatch: GT({img_gt.shape}), LQ_A({img_lq_a.shape}), LQ_B({img_lq_b.shape})")
-                # Resize LQ images to match GT dimensions
+                # Ensure exact dimensions to avoid rounding errors
                 img_lq_a = cv2.resize(img_lq_a, (w_gt, h_gt), interpolation=cv2.INTER_CUBIC)
                 img_lq_b = cv2.resize(img_lq_b, (w_gt, h_gt), interpolation=cv2.INTER_CUBIC)
                 print(f"[DEBUG] Resized LQ_A to {img_lq_a.shape}, LQ_B to {img_lq_b.shape}")
 
-            # Crop and augment if training
+            # Verify resized dimensions
+            if img_lq_a.shape[:2] != (h_gt, w_gt) or img_lq_b.shape[:2] != (h_gt, w_gt):
+                raise ValueError(f"[ERROR] Resized LQ images do not match GT dimensions: GT({h_gt}, {w_gt}), LQ_A({img_lq_a.shape[:2]}), LQ_B({img_lq_b.shape[:2]})")
+
+            # Crop if training and gt_size is specified
             if self.phase == 'train' and self.gt_size is not None:
                 if h_gt < self.gt_size or w_gt < self.gt_size:
                     raise ValueError(f"[ERROR] Image too small to crop: {gt_path} ({h_gt}x{w_gt})")
 
+                # Ensure crop coordinates are valid
                 rnd_h = random.randint(0, h_gt - self.gt_size)
                 rnd_w = random.randint(0, w_gt - self.gt_size)
                 img_gt = img_gt[rnd_h:rnd_h + self.gt_size, rnd_w:rnd_w + self.gt_size, :]
                 img_lq_a = img_lq_a[rnd_h:rnd_h + self.gt_size, rnd_w:rnd_w + self.gt_size, :]
                 img_lq_b = img_lq_b[rnd_h:rnd_h + self.gt_size, rnd_w:rnd_w + self.gt_size, :]
+
+                # Verify crop sizes
+                for name, img, path in [('GT', img_gt, gt_path), ('LQ_A', img_lq_a, lq_a_path), ('LQ_B', img_lq_b, lq_b_path)]:
+                    if img.shape[0] != self.gt_size or img.shape[1] != self.gt_size:
+                        raise ValueError(f"[ERROR] Invalid crop size for {name}: {img.shape} (expected {self.gt_size}x{self.gt_size}) at {path}")
+
                 print(f"[DEBUG] Cropped images to {self.gt_size}x{self.gt_size}: GT shape={img_gt.shape}, LQ_A shape={img_lq_a.shape}, LQ_B shape={img_lq_b.shape}")
 
                 img_gt, img_lq_a, img_lq_b = augment([img_gt, img_lq_a, img_lq_b], self.use_flip, self.use_rot)
@@ -125,6 +136,10 @@ class PairedSiameseImageDataset(BaseDataset):
             img_lq_a = img2tensor(img_lq_a, bgr2rgb=True, float32=True)
             img_lq_b = img2tensor(img_lq_b, bgr2rgb=True, float32=True)
             print(f"[DEBUG] Converted to tensors: GT shape={img_gt.shape}, LQ_A shape={img_lq_a.shape}, LQ_B shape={img_lq_b.shape}")
+
+            # Verify tensor shapes
+            if img_gt.shape != img_lq_a.shape or img_gt.shape != img_lq_b.shape:
+                raise ValueError(f"[ERROR] Tensor shape mismatch: GT({img_gt.shape}), LQ_A({img_lq_a.shape}), LQ_B({img_lq_b.shape})")
 
             # Normalize tensors
             for t, name in [(img_gt, 'GT'), (img_lq_a, 'LQ_A'), (img_lq_b, 'LQ_B')]:
