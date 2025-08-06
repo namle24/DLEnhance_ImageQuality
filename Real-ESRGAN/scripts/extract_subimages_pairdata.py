@@ -6,9 +6,18 @@ from multiprocessing import Pool
 from os import path as osp
 from tqdm import tqdm
 
-from basicsr.utils import scandir
-
-
+def scandir(dir_path, suffix=None, recursive=False, full_path=False):
+    """Custom scandir function to mimic basicsr.utils.scandir"""
+    for root, dirs, files in os.walk(dir_path):
+        for filename in sorted(files):
+            if suffix is None or filename.endswith(suffix):
+                if full_path:
+                    yield os.path.join(root, filename)
+                else:
+                    yield filename
+        if not recursive:
+            break
+        
 def main():
     """A multi-thread tool to crop large images to sub-images for faster IO.
     Modified to support only HR, LR_x2, and LR_x4 folders.
