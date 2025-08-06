@@ -4,7 +4,7 @@ from os import path as osp
 
 from basicsr.utils import get_root_logger, scandir
 from basicsr.utils.registry import MODEL_REGISTRY
-from realesrgan.models.realesrgan_siamese_model import RealESRGANSiameseModel
+from .realesrgan_siamese_model import RealESRGANSiameseModel
 
 
 __all__ = ['build_model']
