@@ -5,7 +5,7 @@ root_gt = '/datasets/RealESRGAN_data/dataset/train'
 root_lq_a = '/datasets/RealESRGAN_data/dataset/train'
 root_lq_b = '/datasets/RealESRGAN_data/dataset/train'
 
-meta_info_path = '/datasets/RealESRGAN_data/meta_info_triplet_nosub.txt'
+meta_info_path = '/datasets/RealESRGAN_data/meta_info/meta_info_triplet_nosub.txt'
 
 missing_triplets = []
 
