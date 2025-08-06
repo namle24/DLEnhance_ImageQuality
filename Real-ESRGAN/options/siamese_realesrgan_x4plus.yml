@@ -11,7 +11,7 @@ datasets:
     dataroot_gt: /datasets/RealESRGAN_data/dataset/train
     dataroot_lq_a: /datasets/RealESRGAN_data/dataset/train
     dataroot_lq_b: /datasets/RealESRGAN_data/dataset/train
-    meta_info: /datasets/RealESRGAN_data/meta_info_triplet_nosub.txt
+    meta_info_file: /datasets/RealESRGAN_data/meta_info_triplet_nosub.txt
     io_backend:
       type: disk
 
