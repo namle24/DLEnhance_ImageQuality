@@ -19,6 +19,11 @@ class PairedSiameseImageDataset(BaseDataset):
         self.mean = opt.get('mean', [0.0, 0.0, 0.0])
         self.std = opt.get('std', [1.0, 1.0, 1.0])
         self.gt_size = opt.get('gt_size', None)
+        if isinstance(self.gt_size, str):
+            if self.gt_size.lower() == 'none':
+                self.gt_size = None
+            else:
+                self.gt_size = int(self.gt_size)
         self.use_flip = opt.get('use_flip', True)
         self.use_rot = opt.get('use_rot', True)
         self.phase = opt.get('phase', 'train')
@@ -59,7 +64,8 @@ class PairedSiameseImageDataset(BaseDataset):
 
             # Check nếu bất kỳ ảnh nào rỗng
             if img_gt is None or img_lq_a is None or img_lq_b is None:
-                raise ValueError("One of the images is None.")
+                raise ValueError(f"Image None: GT({gt_path}), LQ_A({lq_a_path}), LQ_B({lq_b_path})")
+
 
             # Crop và augment nếu training
             if self.phase == 'train' and self.gt_size is not None:
