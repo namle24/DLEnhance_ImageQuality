@@ -10,6 +10,7 @@ from basicsr.utils.registry import DATASET_REGISTRY
 class PairedSiameseImageDataset(Dataset):
     def __init__(self, opt):
         self.opt = opt
+        self.gt_size = self.opt.get('gt_size', None)
         self.gt_folder = opt['dataroot_gt']
         self.lq_folder_a = opt['dataroot_lq_a']
         self.lq_folder_b = opt['dataroot_lq_b']
