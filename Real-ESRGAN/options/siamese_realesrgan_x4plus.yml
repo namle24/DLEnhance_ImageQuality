@@ -21,7 +21,7 @@ datasets:
 
     gt_size: 128
     use_hflip: true
-    use_rot: true
+    use_rot: false
     
     use_shuffle: true
     num_worker_per_gpu: 4
