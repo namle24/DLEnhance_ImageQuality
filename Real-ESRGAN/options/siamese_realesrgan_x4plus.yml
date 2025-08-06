@@ -8,9 +8,10 @@ datasets:
   train:
     name: TrainSiamese
     type: PairedSiameseImageDataset
-    dataroot_gt: /datasets/RealESRGAN_data/dataset/train/HR_sub
-    dataroot_lq_a: /datasets/RealESRGAN_data/dataset/train/LR_light_sub
-    dataroot_lq_b: /datasets/RealESRGAN_data/dataset/train/LR_moderate_sub
+    dataroot_gt: /datasets/RealESRGAN_data/dataset/train
+    dataroot_lq_a: /datasets/RealESRGAN_data/dataset/train
+    dataroot_lq_b: /datasets/RealESRGAN_data/dataset/train
+    meta_info: /home/namlh/DLEnhance_ImageQuality/datasets/RealESRGAN_data/meta_info/meta_info_triplet.txt
     io_backend:
       type: disk
 
