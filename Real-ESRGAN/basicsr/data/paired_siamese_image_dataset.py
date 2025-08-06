@@ -58,9 +58,19 @@ class PairedSiameseImageDataset(BaseDataset):
             lq_a_bytes = self.file_client.get(lq_a_path, 'lq_a')
             lq_b_bytes = self.file_client.get(lq_b_path, 'lq_b')
 
+            # Sau khi imfrombytes
             img_gt = imfrombytes(gt_bytes, float32=True)
             img_lq_a = imfrombytes(lq_a_bytes, float32=True)
             img_lq_b = imfrombytes(lq_b_bytes, float32=True)
+
+            # Check nếu bất kỳ ảnh nào None
+            if img_gt is None or img_lq_a is None or img_lq_b is None:
+                raise ValueError(f"Image None: GT({gt_path}), LQ_A({lq_a_path}), LQ_B({lq_b_path})")
+
+            # Check nếu ảnh không cùng shape
+            if img_gt.shape != img_lq_a.shape or img_gt.shape != img_lq_b.shape:
+                raise ValueError(f"Image shape mismatch: GT({img_gt.shape}), LQ_A({img_lq_a.shape}), LQ_B({img_lq_b.shape})")
+
 
             # Check nếu bất kỳ ảnh nào rỗng
             if img_gt is None or img_lq_a is None or img_lq_b is None:
