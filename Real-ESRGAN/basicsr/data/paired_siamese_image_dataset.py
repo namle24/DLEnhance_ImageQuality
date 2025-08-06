@@ -79,7 +79,16 @@ class PairedSiameseImageDataset(Dataset):
             # flip, rotate
             img_gt, img_lq_a, img_lq_b = augment(
                 [img_gt, img_lq_a, img_lq_b], self.use_flip, self.use_rot)
-            
+        
+        for img_type, img, path in [
+            ("GT", img_gt, self.paths_gt[index]),
+            ("LQ_A", img_lq_a, self.paths_lq_a[index]),
+            ("LQ_B", img_lq_b, self.paths_lq_b[index]),
+        ]:
+            if img is None:
+                print(f"[ERROR] Không đọc được ảnh {img_type} từ path: {path}")
+                raise ValueError(f"Ảnh {img_type} bị lỗi: {path}")
+        
         # Chuyển sang tensor
         img_gt = img2tensor(img_gt, bgr2rgb=True, float32=True)
         img_lq_a = img2tensor(img_lq_a, bgr2rgb=True, float32=True)
