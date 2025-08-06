@@ -34,7 +34,7 @@ datasets:
   val:
     name: validation
     type: PairedImageDataset
-     dataroot_gt: /datasets/RealESRGAN_data/dataset/test/HR
+    dataroot_gt: /datasets/RealESRGAN_data/dataset/test/HR
     dataroot_lq: /datasets/RealESRGAN_data/dataset/test/LR_moderate
     io_backend:
       type: disk
