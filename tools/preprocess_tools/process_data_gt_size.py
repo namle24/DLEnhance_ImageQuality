@@ -2,9 +2,9 @@ import os
 import cv2
 
 # Cấu hình thư mục
-gt_dir = '/datasets/RealESRGAN_data/dataset/train/HR_sub'
-lq_a_dir = '/datasets/RealESRGAN_data/dataset/train/LR_light_sub'
-lq_b_dir = '/datasets/RealESRGAN_data/dataset/train/LR_moderate_sub'
+gt_dir = '/datasets/RealESRGAN_data/dataset/train/HR'
+lq_a_dir = '/datasets/RealESRGAN_data/dataset/train/LR_light'
+lq_b_dir = '/datasets/RealESRGAN_data/dataset/train/LR_moderate'
 gt_size = 128  # thay đổi theo cấu hình của bạn
 
 img_names = sorted(os.listdir(gt_dir))
