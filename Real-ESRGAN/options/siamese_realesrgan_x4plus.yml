@@ -31,7 +31,12 @@ network_g:
   num_block: 23
   num_grow_ch: 32
   return_intermediate: true 
-  
+
+network_d:
+  type: UNetDiscriminatorSN
+  num_in_ch: 3
+  num_feat: 64
+
 path:
   pretrain_network_g: ~
   param_key_g: params_ema
