@@ -1,48 +1,86 @@
+from basicsr.data.data_util import get_image_paths
+from basicsr.data.transforms import augment
+from basicsr.utils import FileClient, imfrombytes, img2tensor
+from torch.utils.data import Dataset
 import random
 import cv2
-import numpy as np
-import torch
-import torch.utils.data as data
-from basicsr.data.paired_image_dataset import PairedImageDataset
+
 from basicsr.utils.registry import DATASET_REGISTRY
-from basicsr.data.transforms import augment, paired_random_crop
-from basicsr.utils import img2tensor, scandir
-from basicsr.data.util import imfrombytes, FileClient
 
 @DATASET_REGISTRY.register()
-class PairedSiameseImageDataset(PairedImageDataset):
+class PairedSiameseImageDataset(Dataset):
     def __init__(self, opt):
-        print(">>> Loading PAIRED SIAMESE IMAGE DATASET")
-        # Gọi init của PairedImageDataset để setup self.paths_gt, self.paths_lq
-        super().__init__(opt)
-        self.paths_lq_a = self.get_image_paths(opt['io_backend'], opt['dataroot_lq_a'])
-        self.paths_lq_b = self.get_image_paths(opt['io_backend'], opt['dataroot_lq_b'])
+        self.opt = opt
+        self.gt_folder = opt['dataroot_gt']
+        self.lq_folder_a = opt['dataroot_lq_a']
+        self.lq_folder_b = opt['dataroot_lq_b']
+        self.io_backend_opt = opt['io_backend']
+
+        # Load danh sách đường dẫn ảnh
+        self.paths_gt = get_image_paths(self.io_backend_opt['type'], self.gt_folder)
+        self.paths_lq_a = get_image_paths(self.io_backend_opt['type'], self.lq_folder_a)
+        self.paths_lq_b = get_image_paths(self.io_backend_opt['type'], self.lq_folder_b)
 
         assert len(self.paths_gt) == len(self.paths_lq_a) == len(self.paths_lq_b), \
-            f"Mismatch: GT={len(self.paths_gt)}, LQ_A={len(self.paths_lq_a)}, LQ_B={len(self.paths_lq_b)}"
+            f"Mismatch dataset length: GT={len(self.paths_gt)}, A={len(self.paths_lq_a)}, B={len(self.paths_lq_b)}"
+
+        self.file_client = None
+        self.mean = opt.get('mean', [0.0, 0.0, 0.0])
+        self.std = opt.get('std', [1.0, 1.0, 1.0])
+        self.use_flip = opt.get('use_flip', True)
+        self.use_rot = opt.get('use_rot', True)
+        self.gt_size = opt.get('gt_size', None)
+
+    def __len__(self):
+        return len(self.paths_gt)
 
     def __getitem__(self, index):
+        if self.file_client is None:
+            self.file_client = FileClient(self.io_backend_opt.pop('type'), **self.io_backend_opt)
+
+        # Load ảnh
         gt_path = self.paths_gt[index]
         lq_a_path = self.paths_lq_a[index]
         lq_b_path = self.paths_lq_b[index]
 
-        img_gt = imfrombytes(self.file_client.get(gt_path), float32=True)
-        img_lq_a = imfrombytes(self.file_client.get(lq_a_path), float32=True)
-        img_lq_b = imfrombytes(self.file_client.get(lq_b_path), float32=True)
+        gt_bytes = self.file_client.get(gt_path, 'gt')
+        lq_a_bytes = self.file_client.get(lq_a_path, 'lq_a')
+        lq_b_bytes = self.file_client.get(lq_b_path, 'lq_b')
 
-        # Paired crop
-        img_gt, img_lq_a = paired_random_crop(img_gt, img_lq_a, self.opt['gt_size'], self.opt['scale'])
-        _, img_lq_b = paired_random_crop(img_gt, img_lq_b, self.opt['gt_size'], self.opt['scale'])
+        img_gt = imfrombytes(gt_bytes, float32=True)
+        img_lq_a = imfrombytes(lq_a_bytes, float32=True)
+        img_lq_b = imfrombytes(lq_b_bytes, float32=True)
 
-        # Augment
-        img_gt, img_lq_a, img_lq_b = augment([img_gt, img_lq_a, img_lq_b], self.opt['use_hflip'], self.opt['use_rot'])
+        # Augment (nếu có)
+        if self.opt['phase'] == 'train':
+            gt_size = self.gt_size
+            # random crop
+            h, w = img_gt.shape[:2]
+            rnd_h = random.randint(0, max(0, h - gt_size))
+            rnd_w = random.randint(0, max(0, w - gt_size))
+            img_gt = img_gt[rnd_h:rnd_h + gt_size, rnd_w:rnd_w + gt_size, :]
+            img_lq_a = img_lq_a[rnd_h:rnd_h + gt_size, rnd_w:rnd_w + gt_size, :]
+            img_lq_b = img_lq_b[rnd_h:rnd_h + gt_size, rnd_w:rnd_w + gt_size, :]
 
-        # To tensor
-        img_gt, img_lq_a, img_lq_b = img2tensor([img_gt, img_lq_a, img_lq_b], bgr2rgb=True, float32=True)
+            # flip, rotate
+            img_gt, img_lq_a, img_lq_b = augment([img_gt, img_lq_a, img_lq_b],
+                                                 self.use_flip, self.use_rot)
+
+        # Chuyển sang tensor
+        img_gt = img2tensor(img_gt, bgr2rgb=True, float32=True)
+        img_lq_a = img2tensor(img_lq_a, bgr2rgb=True, float32=True)
+        img_lq_b = img2tensor(img_lq_b, bgr2rgb=True, float32=True)
+
+        # Normalize
+        for t in [img_gt, img_lq_a, img_lq_b]:
+            for c in range(3):
+                t[c, :, :] = (t[c, :, :] - self.mean[c]) / self.std[c]
 
         return {
             'gt': img_gt,
             'lq_a': img_lq_a,
             'lq_b': img_lq_b,
-            'gt_path': gt_path
+            'gt_path': gt_path,
+            'lq_a_path': lq_a_path,
+            'lq_b_path': lq_b_path
         }
