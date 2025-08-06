@@ -1,6 +1,6 @@
 name: train_realesrgan_siamese
 model_type: RealESRGANSiameseModel
-
+num_gpu: 1
 scale: 4
 gt_size: 128
 
