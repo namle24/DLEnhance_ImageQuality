@@ -19,8 +19,7 @@ datasets:
     gt_size: 256
     use_hflip: true
     use_rot: false
-
-  dataloader:
+    scale: 4
     num_workers: 0
     use_shuffle: true
     batch_size_per_gpu: 6
