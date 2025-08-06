@@ -1,10 +1,9 @@
-from basicsr.data.data_util import get_image_paths
-from basicsr.data.transforms import augment
-from basicsr.utils import FileClient, imfrombytes, img2tensor
-from torch.utils.data import Dataset
+import os
 import random
 import cv2
-
+from torch.utils.data import Dataset
+from basicsr.utils import FileClient, imfrombytes, img2tensor, scandir
+from basicsr.data.transforms import augment
 from basicsr.utils.registry import DATASET_REGISTRY
 
 @DATASET_REGISTRY.register()
@@ -16,10 +15,9 @@ class PairedSiameseImageDataset(Dataset):
         self.lq_folder_b = opt['dataroot_lq_b']
         self.io_backend_opt = opt['io_backend']
 
-        # Load danh sách đường dẫn ảnh
-        self.paths_gt = get_image_paths(self.io_backend_opt['type'], self.gt_folder)
-        self.paths_lq_a = get_image_paths(self.io_backend_opt['type'], self.lq_folder_a)
-        self.paths_lq_b = get_image_paths(self.io_backend_opt['type'], self.lq_folder_b)
+        self.paths_gt = sorted(scandir(self.gt_folder, full_path=True))
+        self.paths_lq_a = sorted(scandir(self.lq_folder_a, full_path=True))
+        self.paths_lq_b = sorted(scandir(self.lq_folder_b, full_path=True))
 
         assert len(self.paths_gt) == len(self.paths_lq_a) == len(self.paths_lq_b), \
             f"Mismatch dataset length: GT={len(self.paths_gt)}, A={len(self.paths_lq_a)}, B={len(self.paths_lq_b)}"
