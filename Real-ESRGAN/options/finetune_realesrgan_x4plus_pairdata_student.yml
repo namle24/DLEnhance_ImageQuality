@@ -20,7 +20,7 @@ datasets:
     type: RealESRGANPairedDataset
     dataroot_gt: /datasets/RealESRGAN_data/dataset/train
     dataroot_lq: /datasets/RealESRGAN_data/dataset/train
-    meta_info: /home/namlh/DLEnhance_ImageQuality/datasets/RealESRGAN_data/meta_info/meta_info_moderate_sub_pair.txt
+    meta_info: /datasets/RealESRGAN_data/meta_info/meta_info_moderate_sub_pair.txt
     io_backend:
       type: disk
     gt_size: 256
@@ -60,6 +60,7 @@ path:
   param_key_g: params_ema
   strict_load_g: false
   pretrain_network_d: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/finetune_RealESRGANx4plus_400k_pairdata_21000state/models/net_d_365000.pth
+  param_key_d: params
   strict_load_d: true
   resume_state: ~
 
