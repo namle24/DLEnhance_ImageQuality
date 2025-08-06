@@ -27,9 +27,9 @@ if __name__ == '__main__':
         '--input',
         nargs='+',
         default=[
-            '/datasets/RealESRGAN_data/dataset/train/HR_sub',
-            '/datasets/RealESRGAN_data/dataset/train/LR_light_sub',
-            '/datasets/RealESRGAN_data/dataset/train/LR_moderate_sub'
+            '/datasets/RealESRGAN_data/dataset/train/HR',
+            '/datasets/RealESRGAN_data/dataset/train/LR_light',
+            '/datasets/RealESRGAN_data/dataset/train/LR_moderate'
         ],
         help='Input folders: [HR, LQ_A, LQ_B]'
     )
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--meta_info',
         type=str,
-        default='/datasets/RealESRGAN_data/meta_info/meta_info_triplet.txt',
+        default='/datasets/RealESRGAN_data/meta_info/meta_info_triplet_nosub.txt',
         help='Output path for meta info file'
     )
     args = parser.parse_args()
