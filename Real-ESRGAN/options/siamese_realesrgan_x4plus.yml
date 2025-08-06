@@ -8,6 +8,7 @@ datasets:
   train:
     name: TrainSiamese
     type: PairedSiameseImageDataset
+    phase: train
     dataroot_gt: /datasets/RealESRGAN_data/dataset/train
     dataroot_lq_a: /datasets/RealESRGAN_data/dataset/train
     dataroot_lq_b: /datasets/RealESRGAN_data/dataset/train
