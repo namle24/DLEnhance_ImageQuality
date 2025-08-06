@@ -37,33 +37,46 @@ class PairedSiameseImageDataset(Dataset):
         if self.file_client is None:
             self.file_client = FileClient(self.io_backend_opt.pop('type'), **self.io_backend_opt)
 
-        # Load ảnh
+        # Lấy đường dẫn ảnh
         gt_path = self.paths_gt[index]
         lq_a_path = self.paths_lq_a[index]
         lq_b_path = self.paths_lq_b[index]
 
+        # Đọc ảnh dạng bytes (dùng FileClient)
         gt_bytes = self.file_client.get(gt_path, 'gt')
         lq_a_bytes = self.file_client.get(lq_a_path, 'lq_a')
         lq_b_bytes = self.file_client.get(lq_b_path, 'lq_b')
 
+        # Chuyển bytes sang ảnh float32
         img_gt = imfrombytes(gt_bytes, float32=True)
         img_lq_a = imfrombytes(lq_a_bytes, float32=True)
         img_lq_b = imfrombytes(lq_b_bytes, float32=True)
 
+        # Kiểm tra ảnh có bị None không
+        if img_gt is None:
+            raise IOError(f"Cannot decode GT image from: {gt_path}")
+        if img_lq_a is None:
+            raise IOError(f"Cannot decode LQ_A image from: {lq_a_path}")
+        if img_lq_b is None:
+            raise IOError(f"Cannot decode LQ_B image from: {lq_b_path}")
+
         # Augment (nếu có)
         if self.opt['phase'] == 'train':
             gt_size = self.gt_size
-            # random crop
             h, w = img_gt.shape[:2]
-            rnd_h = random.randint(0, max(0, h - gt_size))
-            rnd_w = random.randint(0, max(0, w - gt_size))
+            if h < gt_size or w < gt_size:
+                raise ValueError(f"GT image too small ({h}x{w}) for crop size {gt_size}")
+
+            # random crop
+            rnd_h = random.randint(0, h - gt_size)
+            rnd_w = random.randint(0, w - gt_size)
             img_gt = img_gt[rnd_h:rnd_h + gt_size, rnd_w:rnd_w + gt_size, :]
             img_lq_a = img_lq_a[rnd_h:rnd_h + gt_size, rnd_w:rnd_w + gt_size, :]
             img_lq_b = img_lq_b[rnd_h:rnd_h + gt_size, rnd_w:rnd_w + gt_size, :]
 
             # flip, rotate
-            img_gt, img_lq_a, img_lq_b = augment([img_gt, img_lq_a, img_lq_b],
-                                                 self.use_flip, self.use_rot)
+            img_gt, img_lq_a, img_lq_b = augment(
+                [img_gt, img_lq_a, img_lq_b], self.use_flip, self.use_rot)
 
         # Chuyển sang tensor
         img_gt = img2tensor(img_gt, bgr2rgb=True, float32=True)
@@ -83,3 +96,4 @@ class PairedSiameseImageDataset(Dataset):
             'lq_a_path': lq_a_path,
             'lq_b_path': lq_b_path
         }
+
