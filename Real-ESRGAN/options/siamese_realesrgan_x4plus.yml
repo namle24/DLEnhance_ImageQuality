@@ -13,6 +13,8 @@ datasets:
     dataroot_lq_b: /datasets/RealESRGAN_data/dataset/train/LR_moderate_sub
     io_backend:
       type: disk
+
+    gt_size: 128
     use_hflip: true
     use_rot: true
     
