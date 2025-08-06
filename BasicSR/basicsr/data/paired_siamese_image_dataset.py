@@ -9,8 +9,9 @@ from basicsr.utils import img2tensor, scandir
 from basicsr.data.util import imfrombytes, FileClient
 
 @DATASET_REGISTRY.register()
-class PairedImageDatasetSiamese(PairedImageDataset):
+class PairedSiameseImageDataset(data.Dataset):
     def __init__(self, opt):
+        print(">>> Loading PAIRED SIAMESE IMAGE DATASET")
         self.opt = opt
         self.gt_folder = opt['dataroot_gt']
         self.lq_folder_a = opt['dataroot_lq_a']
@@ -44,4 +45,3 @@ class PairedImageDatasetSiamese(PairedImageDataset):
             'lq_b': img_lq_b,
             'gt_path': gt_path
         }
-print(">>> Loading PAIRED SIAMESE IMAGE DATASET")

@@ -36,6 +36,7 @@ class PairedImageDataset(data.Dataset):
     """
 
     def __init__(self, opt):
+        print(">>> Loading PAIRED IMAGE DATASET")
         super(PairedImageDataset, self).__init__()
         self.opt = opt
         # file client (io backend)
@@ -104,4 +105,3 @@ class PairedImageDataset(data.Dataset):
 
     def __len__(self):
         return len(self.paths)
-print(">>> Loading PAIRED IMAGE DATASET")
