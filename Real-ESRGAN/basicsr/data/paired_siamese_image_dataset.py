@@ -13,8 +13,9 @@ class PairedSiameseImageDataset(BaseDataset):
     def __init__(self, opt):
         super().__init__(opt)
         self.io_backend_opt = opt['io_backend']
+        self.opt = opt
 
-        # Load từ meta_info_file
+        # Load paths từ meta_info_file
         self.paths_gt, self.paths_lq_a, self.paths_lq_b = [], [], []
         with open(opt['meta_info_file'], 'r') as f:
             for line in f:
@@ -53,10 +54,15 @@ class PairedSiameseImageDataset(BaseDataset):
         img_lq_a = imfrombytes(lq_a_bytes, float32=True)
         img_lq_b = imfrombytes(lq_b_bytes, float32=True)
 
+        # Kiểm tra lỗi ảnh
+        for name, img, path in [('GT', img_gt, gt_path), ('LQ_A', img_lq_a, lq_a_path), ('LQ_B', img_lq_b, lq_b_path)]:
+            if img is None or img.size == 0:
+                raise ValueError(f"[ERROR] Không thể đọc ảnh {name}: {path}")
+
         if self.phase == 'train' and self.gt_size is not None:
             h, w = img_gt.shape[:2]
             if h < self.gt_size or w < self.gt_size:
-                raise ValueError(f"Ảnh quá nhỏ để crop: {gt_path} ({h}x{w})")
+                raise ValueError(f"[ERROR] Ảnh quá nhỏ để crop: {gt_path} ({h}x{w})")
 
             rnd_h = random.randint(0, h - self.gt_size)
             rnd_w = random.randint(0, w - self.gt_size)
