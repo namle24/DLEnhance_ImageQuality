@@ -22,7 +22,7 @@ datasets:
     scale: 4
     num_workers: 0
     use_shuffle: true
-    batch_size_per_gpu: 6
+    batch_size_per_gpu: 2
     num_worker_per_gpu: 0
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
@@ -47,6 +47,7 @@ path:
   param_key_g: params_ema
   strict_load_g: true
   resume_state: ~
+
 train:
   ema_decay: 0.999
   optim_g:
@@ -67,7 +68,6 @@ train:
 
   total_iter: 100000
   warmup_iter: -1
-  
 
   pixel_opt:
     type: L1Loss
@@ -97,4 +97,3 @@ logger:
   wandb:
     project: ~
     resume_id: ~
-
