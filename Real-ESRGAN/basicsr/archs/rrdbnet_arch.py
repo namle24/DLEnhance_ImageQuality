@@ -129,6 +129,6 @@ class RRDBNet(nn.Module):
         # Extract features from specific RRDB blocks
         for i, block in enumerate(self.body):
             feat = block(feat)
-            if i in [3, 6, 7]:  # Select blocks 2, 4, 6 for feature extraction
+            if i in [3, 5, 8]:  # Select blocks 2, 4, 6 for feature extraction
                 features[f'block_{i}'] = feat
         return features
