@@ -41,12 +41,12 @@ datasets:
 
 # network structures
 network_g:
-  type: RRDBNetStudent
+  type: RRDBNet
   num_in_ch: 3
   num_out_ch: 3
-  num_feat: 48  # Reduced for student
-  num_block: 16  # Reduced for student
-  num_grow_ch: 24  # Reduced for student
+  num_feat: 64  # Reduced for student
+  num_block: 23  # Reduced for student
+  num_grow_ch: 32  # Reduced for student
 
 network_d:
   type: UNetDiscriminatorSN
