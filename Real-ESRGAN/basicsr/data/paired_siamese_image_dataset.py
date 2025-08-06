@@ -34,8 +34,6 @@ class PairedSiameseImageDataset(Dataset):
         return len(self.paths_gt)
 
     def __getitem__(self, index):
-        print(f"[DEBUG] Đang load index: {index}")
-        print(f"[DEBUG] Paths: {self.paths_gt[index]}, {self.paths_lq_a[index]}, {self.paths_lq_b[index]}")
         if self.file_client is None:
             self.file_client = FileClient(self.io_backend_opt.pop('type'), **self.io_backend_opt)
 
