@@ -45,7 +45,7 @@ datasets:
 
 # network structures
 network_g:
-  type: RRDBNet
+  type: RRDBNetStudent
   num_in_ch: 3
   num_out_ch: 3
   num_feat: 64

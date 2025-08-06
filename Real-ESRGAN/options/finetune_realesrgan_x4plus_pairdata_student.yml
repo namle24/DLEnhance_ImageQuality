@@ -1,6 +1,6 @@
 # general settings
 name: finetune_RealESRGANx4plus_teacher_student_degradation
-model_type: RealESRGANModel
+model_type: RealESRGANModelStudent
 scale: 4
 num_gpu: auto
 manual_seed: 0
@@ -18,9 +18,9 @@ datasets:
   train:
     name: DIV2K
     type: RealESRGANPairedDataset
-    dataroot_gt: /storage/student12/Real-ESRGAN/data/DIV2K+_dataset/train
-    dataroot_lq: /storage/student12/Real-ESRGAN/data/DIV2K+_dataset/train
-    meta_info: /storage/student12/Real-ESRGAN/Real-ESRGAN/dataset/meta_info/meta_info_DIV2K_sub_pair.txt
+    dataroot_gt: /datasets/RealESRGAN_data/dataset/train
+    dataroot_lq: /datasets/RealESRGAN_data/dataset/train
+    meta_info: /home/namlh/DLEnhance_ImageQuality/datasets/RealESRGAN_data/meta_info/meta_info_moderate_sub_pair.txt
     io_backend:
       type: disk
     gt_size: 256
@@ -34,14 +34,14 @@ datasets:
   val:
     name: validation
     type: PairedImageDataset
-    dataroot_gt: /storage/student12/Real-ESRGAN/data/RealSR(V3)/Canon/Test/4/HR
-    dataroot_lq: /storage/student12/Real-ESRGAN/data/RealSR(V3)/Canon/Test/4/LRx4
+     dataroot_gt: /datasets/RealESRGAN_data/dataset/test/HR
+    dataroot_lq: /datasets/RealESRGAN_data/dataset/test/LR_moderate
     io_backend:
       type: disk
 
 # network structures
 network_g:
-  type: RRDBNet
+  type: RRDBNetStudent
   num_in_ch: 3
   num_out_ch: 3
   num_feat: 48  # Reduced for student
