@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from basicsr.utils.registry import ARCH_REGISTRY
-
+from torch.nn import functional as F
+from basicsr.archs.arch_util import pixel_unshuffle
 
 @ARCH_REGISTRY.register()
 class RRDBNetFeatOut(RRDBNet):
@@ -10,20 +11,36 @@ class RRDBNetFeatOut(RRDBNet):
 
     def __init__(self, return_intermediate=False, **kwargs):
         super().__init__(**kwargs)
-        self.return_intermediate = return_intermediate  # Di chuyển sau super().__init__()
+        self.return_intermediate = return_intermediate
 
     def forward(self, x, return_feats=None):
-        # Thêm tham số return_feats để tương thích với cả 2 cách gọi
+        # Hỗ trợ cả 2 cách gọi tham số
         return_intermediate = return_feats if return_feats is not None else self.return_intermediate
         
-        if return_intermediate:
-            # Lấy feature đầu ra trước khi pixel shuffle
-            fea = self.conv_first(x)
-            trunk = self.rrdb_trunk(fea)
-            fea = fea + self.trunk_conv(trunk)
-            out = self.upconv1(fea)
-            out = self.upconv2(out)
-            out = self.conv_hr(self.lrelu(self.conv_last(out)))
-            return out, fea  # output + intermediate features
+        if self.scale == 2:
+            feat = pixel_unshuffle(x, scale=2)
+        elif self.scale == 1:
+            feat = pixel_unshuffle(x, scale=4)
         else:
-            return super().forward(x)
+            feat = x
+        
+        feat = self.conv_first(feat)
+        body_feat = self.conv_body(self.body(feat))
+        feat = feat + body_feat  # Đây là intermediate feature chúng ta muốn lấy
+        
+        if return_intermediate:
+            # Lưu intermediate feature trước khi upscale
+            intermediate_feat = feat
+            
+            # Tiếp tục quá trình upscale
+            feat = self.lrelu(self.conv_up1(F.interpolate(feat, scale_factor=2, mode='nearest')))
+            feat = self.lrelu(self.conv_up2(F.interpolate(feat, scale_factor=2, mode='nearest')))
+            out = self.conv_last(self.lrelu(self.conv_hr(feat)))
+            
+            return out, intermediate_feat
+        else:
+            # Chỉ return output cuối cùng
+            feat = self.lrelu(self.conv_up1(F.interpolate(feat, scale_factor=2, mode='nearest')))
+            feat = self.lrelu(self.conv_up2(F.interpolate(feat, scale_factor=2, mode='nearest')))
+            out = self.conv_last(self.lrelu(self.conv_hr(feat)))
+            return out
