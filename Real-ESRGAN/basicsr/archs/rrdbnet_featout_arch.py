@@ -9,11 +9,14 @@ class RRDBNetFeatOut(RRDBNet):
     """RRDBNet mở rộng để xuất đặc trưng trung gian (feature maps) cho Knowledge Distillation."""
 
     def __init__(self, return_intermediate=False, **kwargs):
-        self.return_intermediate = return_intermediate
         super().__init__(**kwargs)
+        self.return_intermediate = return_intermediate  # Di chuyển sau super().__init__()
 
-    def forward(self, x):
-        if self.return_intermediate:
+    def forward(self, x, return_feats=None):
+        # Thêm tham số return_feats để tương thích với cả 2 cách gọi
+        return_intermediate = return_feats if return_feats is not None else self.return_intermediate
+        
+        if return_intermediate:
             # Lấy feature đầu ra trước khi pixel shuffle
             fea = self.conv_first(x)
             trunk = self.rrdb_trunk(fea)
