@@ -48,3 +48,40 @@ class RealESRGANSiameseModel(RealESRGANModel):
             'l_percep': l_percep.item() if isinstance(l_percep, torch.Tensor) else 0,
             'l_style': l_style.item() if isinstance(l_style, torch.Tensor) else 0
         }
+
+    @torch.no_grad()
+    def validation(self, dataloader, current_iter, tb_logger, save_img=False):
+        self.net_g.eval()  # Đánh giá student
+        
+        avg_psnr = 0.0
+        avg_ssim = 0.0
+        cnt = 0
+
+        for val_data in dataloader:
+            lq = val_data['lq'].to(self.device)  # LQ_B từ dataset chuẩn
+            gt = val_data['gt'].to(self.device)
+
+            output = self.net_g(lq)  # CHỈ evaluate student
+
+            crop_border = self.opt['val'].get('crop_border', 4)
+            avg_psnr += calculate_psnr(output, gt, crop_border=crop_border)
+            avg_ssim += calculate_ssim(output, gt, crop_border=crop_border)
+            cnt += 1
+
+            if save_img:
+                save_img_path = osp.join(
+                    self.opt['path']['visualization'],
+                    'val_images',
+                    f'{current_iter:08d}_{cnt:03d}.png'
+                )
+                imwrite(tensor2img(output), save_img_path)
+
+        # Log metrics
+        self.log_dict['val/psnr'] = avg_psnr / cnt
+        self.log_dict['val/ssim'] = avg_ssim / cnt
+
+        if tb_logger:
+            tb_logger.add_scalar('val/psnr', avg_psnr / cnt, current_iter)
+            tb_logger.add_scalar('val/ssim', avg_ssim / cnt, current_iter)
+
+        self.net_g.train()

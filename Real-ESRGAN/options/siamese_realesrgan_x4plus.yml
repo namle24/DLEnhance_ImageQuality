@@ -20,10 +20,20 @@ datasets:
     scale: 4
     num_workers: 0
     use_shuffle: true
-    batch_size_per_gpu: 2
+    batch_size_per_gpu: 8
     num_worker_per_gpu: 0
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
+
+  val:
+      name: ValStandard  
+      type: PairedImageDataset 
+      dataroot_gt: /datasets/RealESRGAN_data/dataset/test/HR
+      dataroot_lq: /datasets/RealESRGAN_data/dataset/test/LR_moderate
+      io_backend:
+        type: disk
+      scale: 4
+      batch_size_per_gpu: 8
 
 network_g:
   type: RRDBNetFeatOut
@@ -85,8 +95,17 @@ train:
   lambda_kd_feat: 1.0
 
 val:
-  val_freq: 5000
-  save_img: true
+  val_freq: !!float 5e3
+  save_img: True
+  metrics:
+    psnr:
+      type: calculate_psnr
+      crop_border: 4
+      test_y_channel: true
+    ssim:
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: true
 
 logger:
   print_freq: 100
