@@ -1,4 +1,5 @@
 import torch
+from basicsr.metrics import calculate_psnr, calculate_ssim
 from basicsr.utils.registry import MODEL_REGISTRY
 from realesrgan.models.realesrgan_model import RealESRGANModel
 
