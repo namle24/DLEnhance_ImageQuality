@@ -62,8 +62,7 @@ path:
   pretrain_network_d: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/finetune_RealESRGANx4plus_400k_pairdata_21000state/models/net_d_365000.pth
   param_key_d: params
   strict_load_d: true
-  resume_state: ~
-
+  resume_state: /home/DLEnhance_ImageQuality/Real-ESRGAN/experiments/finetune_RealESRGANx4plus_teacher_student_degradation_ver2_20250808/training_states/10000.state
 # training settings
 train:
   ema_decay: 0.999
