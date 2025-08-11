@@ -65,11 +65,10 @@ class RealESRGANSiameseModel(RealESRGANModel):
             lq = val_data['lq'].to(self.device)
             gt = val_data['gt'].to(self.device)
 
-            output = self.net_g(lq, return_feats=False)  # Đảm bảo chỉ nhận tensor output
+            output = self.net_g(lq, return_feats=False)  
             
-            # Chuyển tensor sang numpy array trước khi tính toán
-            output_img = tensor2img(output)  # shape (H,W,3) [0-255] uint8
-            gt_img = tensor2img(gt)          # shape (H,W,3) [0-255] uint8
+            output_img = tensor2img(output)  
+            gt_img = tensor2img(gt)         
 
             crop_border = self.opt['val'].get('crop_border', 4)
             avg_psnr += calculate_psnr(output_img, gt_img, crop_border=crop_border)

@@ -14,7 +14,6 @@ class RRDBNetFeatOut(RRDBNet):
         self.return_intermediate = return_intermediate
 
     def forward(self, x, return_feats=None):
-        # Hỗ trợ cả 2 cách gọi tham số
         return_intermediate = return_feats if return_feats is not None else self.return_intermediate
         
         if self.scale == 2:
@@ -26,20 +25,17 @@ class RRDBNetFeatOut(RRDBNet):
         
         feat = self.conv_first(feat)
         body_feat = self.conv_body(self.body(feat))
-        feat = feat + body_feat  # Đây là intermediate feature chúng ta muốn lấy
+        feat = feat + body_feat  
         
         if return_intermediate:
-            # Lưu intermediate feature trước khi upscale
             intermediate_feat = feat
             
-            # Tiếp tục quá trình upscale
             feat = self.lrelu(self.conv_up1(F.interpolate(feat, scale_factor=2, mode='nearest')))
             feat = self.lrelu(self.conv_up2(F.interpolate(feat, scale_factor=2, mode='nearest')))
             out = self.conv_last(self.lrelu(self.conv_hr(feat)))
             
             return out, intermediate_feat
         else:
-            # Chỉ return output cuối cùng
             feat = self.lrelu(self.conv_up1(F.interpolate(feat, scale_factor=2, mode='nearest')))
             feat = self.lrelu(self.conv_up2(F.interpolate(feat, scale_factor=2, mode='nearest')))
             out = self.conv_last(self.lrelu(self.conv_hr(feat)))
