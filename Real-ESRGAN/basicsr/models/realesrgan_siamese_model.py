@@ -2,6 +2,8 @@ import torch
 from basicsr.metrics import calculate_psnr, calculate_ssim
 from basicsr.utils.registry import MODEL_REGISTRY
 from realesrgan.models.realesrgan_model import RealESRGANModel
+import os.path as osp
+from basicsr.utils import imwrite, tensor2img
 
 @MODEL_REGISTRY.register()
 class RealESRGANSiameseModel(RealESRGANModel):
@@ -52,18 +54,22 @@ class RealESRGANSiameseModel(RealESRGANModel):
 
     @torch.no_grad()
     def validation(self, dataloader, current_iter, tb_logger, save_img=False):
-        self.net_g.eval()  # Đánh giá student
+        self.net_g.eval()  # Chỉ đánh giá student
         
         avg_psnr = 0.0
         avg_ssim = 0.0
         cnt = 0
 
         for val_data in dataloader:
-            lq = val_data['lq'].to(self.device)  # LQ_B từ dataset chuẩn
+            lq = val_data['lq'].to(self.device)  # LR_B từ validation set
             gt = val_data['gt'].to(self.device)
 
-            output = self.net_g(lq)  # CHỈ evaluate student
+            # Đảm bảo model chỉ trả về tensor
+            output = self.net_g(lq, return_feats=False)
+            if isinstance(output, tuple):  # Nếu có return_feats=True
+                output = output[0]  # Chỉ lấy output chính
 
+            # Tính toán metrics
             crop_border = self.opt['val'].get('crop_border', 4)
             avg_psnr += calculate_psnr(output, gt, crop_border=crop_border)
             avg_ssim += calculate_ssim(output, gt, crop_border=crop_border)
