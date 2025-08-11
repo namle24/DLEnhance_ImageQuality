@@ -52,27 +52,28 @@ class RealESRGANSiameseModel(RealESRGANModel):
             'l_style': l_style.item() if isinstance(l_style, torch.Tensor) else 0
         }
 
+    
     @torch.no_grad()
     def validation(self, dataloader, current_iter, tb_logger, save_img=False):
-        self.net_g.eval()  # Chỉ đánh giá student
+        self.net_g.eval()
         
         avg_psnr = 0.0
         avg_ssim = 0.0
         cnt = 0
 
         for val_data in dataloader:
-            lq = val_data['lq'].to(self.device)  # LR_B từ validation set
+            lq = val_data['lq'].to(self.device)
             gt = val_data['gt'].to(self.device)
 
-            # Đảm bảo model chỉ trả về tensor
-            output = self.net_g(lq, return_feats=False)
-            if isinstance(output, tuple):  # Nếu có return_feats=True
-                output = output[0]  # Chỉ lấy output chính
+            output = self.net_g(lq, return_feats=False)  # Đảm bảo chỉ nhận tensor output
+            
+            # Chuyển tensor sang numpy array trước khi tính toán
+            output_img = tensor2img(output)  # shape (H,W,3) [0-255] uint8
+            gt_img = tensor2img(gt)          # shape (H,W,3) [0-255] uint8
 
-            # Tính toán metrics
             crop_border = self.opt['val'].get('crop_border', 4)
-            avg_psnr += calculate_psnr(output, gt, crop_border=crop_border)
-            avg_ssim += calculate_ssim(output, gt, crop_border=crop_border)
+            avg_psnr += calculate_psnr(output_img, gt_img, crop_border=crop_border)
+            avg_ssim += calculate_ssim(output_img, gt_img, crop_border=crop_border)
             cnt += 1
 
             if save_img:
@@ -81,7 +82,7 @@ class RealESRGANSiameseModel(RealESRGANModel):
                     'val_images',
                     f'{current_iter:08d}_{cnt:03d}.png'
                 )
-                imwrite(tensor2img(output), save_img_path)
+                imwrite(output_img, save_img_path)
 
         # Log metrics
         self.log_dict['val/psnr'] = avg_psnr / cnt
