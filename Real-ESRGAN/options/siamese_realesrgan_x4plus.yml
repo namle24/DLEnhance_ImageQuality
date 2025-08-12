@@ -20,12 +20,11 @@ datasets:
     use_rot: false
     scale: 4
     num_workers: 2
-    num_worker_per_gpu: 2
     use_shuffle: true
     batch_size_per_gpu: 4
-    max_retry: 3  # Retry for corrupted images
-    skip_corrupted: true  # Skip corrupted images
-    dataset_enlarge_ratio: 100  # Increase dataset size by repeating samples
+    num_worker_per_gpu: 2
+    dataset_enlarge_ratio: 1
+    prefetch_mode: ~
 
   # val:
   #     name: ValStandard  
@@ -57,7 +56,6 @@ path:
   param_key_g: params_ema
   strict_load_g: true
   resume_state: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese/training_states/15000.state
-
 
 train:
   ema_decay: 0.999
