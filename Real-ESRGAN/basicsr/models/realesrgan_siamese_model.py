@@ -4,6 +4,7 @@ from basicsr.utils.registry import MODEL_REGISTRY
 from realesrgan.models.realesrgan_model import RealESRGANModel
 import os.path as osp
 from basicsr.utils import imwrite, tensor2img
+from torch.cuda.amp import GradScaler
 
 @MODEL_REGISTRY.register()
 class RealESRGANSiameseModel(RealESRGANModel):
