@@ -11,9 +11,6 @@ class RealESRGANSiameseModel(RealESRGANModel):
         self.lq_a = data['lq_a'].to(self.device)
         self.lq_b = data['lq_b'].to(self.device)
         self.gt = data['gt'].to(self.device)
-        super().__init__(opt)
-        self.kd_warmup_iters = opt['train'].get('kd_warmup_iters', 5000)
-        self.current_iter = 0
     def optimize_parameters(self, current_iter):
         # Teacher forward
         with torch.no_grad():
@@ -35,12 +32,6 @@ class RealESRGANSiameseModel(RealESRGANModel):
         l_percep, l_style = 0, 0
         if self.cri_perceptual:
             l_percep, l_style = self.cri_perceptual(self.output_b, self.gt)
-
-        # gan loss
-            fake_g_pred = self.net_d(self.output)
-            l_g_gan = self.cri_gan(fake_g_pred, True, is_disc=False)
-            l_g_total += l_g_gan
-            loss_dict['l_g_gan'] = l_g_gan
             
         # Total
         loss = l_pix + \
