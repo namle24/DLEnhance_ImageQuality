@@ -7,7 +7,7 @@ from basicsr.utils import imwrite, tensor2img
 
 @MODEL_REGISTRY.register()
 class RealESRGANSiameseModel(RealESRGANModel):
-    def feed_data(self, data, opt):
+    def feed_data(self, data):
         self.lq_a = data['lq_a'].to(self.device)
         self.lq_b = data['lq_b'].to(self.device)
         self.gt = data['gt'].to(self.device)
