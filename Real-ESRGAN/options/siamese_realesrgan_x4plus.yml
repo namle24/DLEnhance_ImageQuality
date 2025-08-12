@@ -92,16 +92,16 @@ train:
     perceptual_weight: 1.0
     style_weight: 0
 
-  gan_opt:
-    type: GANLoss
-    gan_type: vanilla
-    real_label_val: 1.0
-    fake_label_val: 0.0
-    loss_weight: 0
+  # gan_opt:
+  #   type: GANLoss
+  #   gan_type: vanilla
+  #   real_label_val: 1.0
+  #   fake_label_val: 0.0
+  #   loss_weight: 0
 
   lambda_kd_out: 0.05 
   lambda_kd_feat: 0.03
-  kd_warmup_iters: 5000
+  # kd_warmup_iters: 5000
 
 val:
   val_freq: !!float 5e3
