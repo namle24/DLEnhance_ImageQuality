@@ -55,6 +55,7 @@ class RealESRGANSiameseModel(RealESRGANModel):
     
     @torch.no_grad()
     def validation(self, dataloader, current_iter, tb_logger, save_img=False):
+        torch.cuda.empty_cache()
         self.net_g.eval()
         
         avg_psnr = 0.0
