@@ -26,15 +26,15 @@ datasets:
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
 
-  # val:
-  #     name: ValStandard  
-  #     type: PairedImageDataset 
-  #     dataroot_gt: /datasets/RealESRGAN_data/dataset/test/HR
-  #     dataroot_lq: /datasets/RealESRGAN_data/dataset/test/LR_moderate
-  #     io_backend:
-  #       type: disk
-  #     scale: 4
-  #     batch_size_per_gpu: 4
+  val:
+      name: ValStandard  
+      type: PairedImageDataset 
+      dataroot_gt: /datasets/RealESRGAN_data/dataset/test/HR
+      dataroot_lq: /datasets/RealESRGAN_data/dataset/test/LR_moderate
+      io_backend:
+        type: disk
+      scale: 4
+      batch_size_per_gpu: 4
 
 network_g:
   type: RRDBNetFeatOut
@@ -91,6 +91,16 @@ train:
     use_input_norm: true
     perceptual_weight: 0.1
     style_weight: 0.05
+
+  gan_opt:
+    type: GANLoss
+    gan_type: vanilla
+    real_label_val: 1.0
+    fake_label_val: 0.0
+    loss_weight: !!float 1e-1
+
+  net_d_iters: 1
+  net_d_init_iters: 0
 
   lambda_kd_out: 0.2
   lambda_kd_feat: 0.2
