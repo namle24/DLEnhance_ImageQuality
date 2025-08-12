@@ -26,15 +26,13 @@ datasets:
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
 
-  # val:
-  #     name: ValStandard  
-  #     type: PairedImageDataset 
-  #     dataroot_gt: /datasets/RealESRGAN_data/dataset/test/HR
-  #     dataroot_lq: /datasets/RealESRGAN_data/dataset/test/LR_moderate
-  #     io_backend:
-  #       type: disk
-  #     scale: 4
-  #     batch_size_per_gpu: 4
+  val:
+      name: ValStandard  
+      type: PairedImageDataset 
+      dataroot_gt: /datasets/RealESRGAN_data/dataset/test/HR
+      dataroot_lq: /datasets/RealESRGAN_data/dataset/test/LR_moderate
+      io_backend:
+        type: disk
 
 network_g:
   type: RRDBNetFeatOut
@@ -95,18 +93,18 @@ train:
   lambda_kd_out: 0.05
   lambda_kd_feat: 0.05
 
-# val:
-#   val_freq: !!float 5e3
-#   save_img: True
-#   metrics:
-#     psnr:
-#       type: calculate_psnr
-#       crop_border: 4
-#       test_y_channel: false
-#     ssim:
-#       type: calculate_ssim
-#       crop_border: 4
-#       test_y_channel: false
+val:
+  val_freq: !!float 5e3
+  save_img: True
+  metrics:
+    psnr:
+      type: calculate_psnr
+      crop_border: 4
+      test_y_channel: false
+    ssim:
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: false
 
 logger:
   print_freq: 100
