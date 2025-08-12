@@ -11,6 +11,7 @@ class RealESRGANSiameseModel(RealESRGANModel):
         self.lq_a = data['lq_a'].to(self.device)
         self.lq_b = data['lq_b'].to(self.device)
         self.gt = data['gt'].to(self.device)
+
     def optimize_parameters(self, current_iter):
         # Teacher forward
         with torch.no_grad():
@@ -32,7 +33,7 @@ class RealESRGANSiameseModel(RealESRGANModel):
         l_percep, l_style = 0, 0
         if self.cri_perceptual:
             l_percep, l_style = self.cri_perceptual(self.output_b, self.gt)
-            
+        
         # Total
         loss = l_pix + \
                self.opt['train']['lambda_kd_out'] * l_kd_out + \
@@ -51,8 +52,7 @@ class RealESRGANSiameseModel(RealESRGANModel):
             'l_style': l_style.item() if isinstance(l_style, torch.Tensor) else 0
         }
 
-    
     def validation(self, dataloader, current_iter, tb_logger, save_img=False):
-        """Chỉ validate student network"""
         with torch.no_grad():
             return super().validation(dataloader, current_iter, tb_logger, save_img)
+    
