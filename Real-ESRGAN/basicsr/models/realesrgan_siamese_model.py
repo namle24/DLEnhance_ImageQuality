@@ -33,7 +33,7 @@ class RealESRGANSiameseModel(RealESRGANModel):
         l_percep, l_style = 0, 0
         if self.cri_perceptual:
             l_percep, l_style = self.cri_perceptual(self.output_b, self.gt)
-        
+
         # Total
         loss = l_pix + \
                self.opt['train']['lambda_kd_out'] * l_kd_out + \
