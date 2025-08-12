@@ -5,6 +5,7 @@ from realesrgan.models.realesrgan_model import RealESRGANModel
 import os.path as osp
 from basicsr.utils import imwrite, tensor2img
 from torch.cuda.amp import autocast
+from collections import OrderedDict
 
 @MODEL_REGISTRY.register()
 class RealESRGANSiameseModel(RealESRGANModel):
