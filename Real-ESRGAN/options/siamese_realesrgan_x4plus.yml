@@ -20,6 +20,7 @@ datasets:
     use_rot: false
     scale: 4
     num_workers: 2
+    num_worker_per_gpu: 2
     use_shuffle: true
     batch_size_per_gpu: 4
     max_retry: 3  # Retry for corrupted images
