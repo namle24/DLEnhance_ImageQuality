@@ -40,7 +40,7 @@ network_g:
 
 # path
 path: #/storage/student12/Real-ESRGAN/Real-ESRGAN/experiments/finetune_RealESRGANx4plus_400k_pairdata/models/net_g_355000.pth
-  pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese/models/net_g_85000.pth
+  pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese/models/net_g_90000.pth
   strict_load_g: true
   param_key: ~
 
@@ -53,11 +53,11 @@ val:
     psnr: # metric name, can be arbitrary
       type: calculate_psnr
       crop_border: 4
-      test_y_channel: true
+      test_y_channel: false
     ssim:
       type: calculate_ssim
       crop_border: 4
-      test_y_channel: true
+      test_y_channel: false
     niqe:
       type: calculate_niqe
       crop_border: 4
