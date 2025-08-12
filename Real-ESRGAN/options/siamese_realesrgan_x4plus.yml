@@ -105,18 +105,18 @@ train:
   lambda_kd_out: 0.2
   lambda_kd_feat: 0.2
 
-# val:
-#   val_freq: !!float 5e3
-#   save_img: True
-#   metrics:
-#     psnr:
-#       type: calculate_psnr
-#       crop_border: 4
-#       test_y_channel: false
-#     ssim:
-#       type: calculate_ssim
-#       crop_border: 4
-#       test_y_channel: false
+val:
+  val_freq: !!float 5e3
+  save_img: True
+  metrics:
+    psnr:
+      type: calculate_psnr
+      crop_border: 4
+      test_y_channel: false
+    ssim:
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: false
 
 logger:
   print_freq: 100
