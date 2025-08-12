@@ -55,7 +55,7 @@ path:
   pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRNet_x4plus.pth
   param_key_g: params_ema
   strict_load_g: true
-  resume_state: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese/training_states/20000.state
+  resume_state: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese/training_states/85000.state
 
 train:
   ema_decay: 0.999
@@ -89,11 +89,11 @@ train:
       'conv5_4': 1
     vgg_type: vgg19
     use_input_norm: true
-    perceptual_weight: 1.0
+    perceptual_weight: 0.1
     style_weight: 0.05
 
-  lambda_kd_out: 1.0
-  lambda_kd_feat: 1.0
+  lambda_kd_out: 0.2
+  lambda_kd_feat: 0.2
 
 # val:
 #   val_freq: !!float 5e3
