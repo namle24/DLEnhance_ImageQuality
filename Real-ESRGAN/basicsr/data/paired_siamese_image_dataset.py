@@ -3,7 +3,7 @@ import random
 import cv2
 import numpy as np
 from typing import Optional, Tuple
-
+import torch
 from basicsr.data.base_dataset import BaseDataset
 from basicsr.utils import FileClient, imfrombytes, img2tensor
 from basicsr.utils.registry import DATASET_REGISTRY
