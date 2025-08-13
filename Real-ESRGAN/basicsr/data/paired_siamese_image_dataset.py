@@ -3,6 +3,7 @@ import random
 import cv2
 import numpy as np
 import torch
+from typing import Optional, Tuple, List
 from basicsr.data.base_dataset import BaseDataset
 from basicsr.utils import FileClient, imfrombytes, img2tensor
 from basicsr.utils.registry import DATASET_REGISTRY
@@ -10,130 +11,168 @@ from basicsr.data.transforms import augment
 
 @DATASET_REGISTRY.register()
 class PairedSiameseImageDataset(BaseDataset):
-    """Dataset for Siamese Real-ESRGAN using triplet (GT, LQ_A, LQ_B) from meta_info_file."""
+    """Enhanced dataset for Siamese Real-ESRGAN with triplets (GT, LQ_A, LQ_B)."""
 
     def __init__(self, opt):
         super().__init__(opt)
-        self.io_backend_opt = opt['io_backend']
-        self.mean = opt.get('mean', [0.0, 0.0, 0.0])
-        self.std = opt.get('std', [1.0, 1.0, 1.0])
-        self.gt_size = opt.get('gt_size', None)
-        self.scale = opt.get('scale', 4)
-        if isinstance(self.gt_size, str):
-            if self.gt_size.lower() == 'none':
-                self.gt_size = None
-            else:
-                self.gt_size = int(self.gt_size)
-        self.use_flip = opt.get('use_hflip', True)
-        self.use_rot = opt.get('use_rot', True)
-        self.phase = opt.get('phase', 'train')
+        # Initialize with error handling
+        try:
+            self.io_backend_opt = opt['io_backend']
+            self.mean = np.array(opt.get('mean', [0.0, 0.0, 0.0]), dtype=np.float32)
+            self.std = np.array(opt.get('std', [1.0, 1.0, 1.0]), dtype=np.float32)
+            self.gt_size = self._parse_gt_size(opt.get('gt_size'))
+            self.scale = opt.get('scale', 4)
+            self.use_flip = opt.get('use_hflip', True)
+            self.use_rot = opt.get('use_rot', True)
+            self.phase = opt.get('phase', 'train')
+            self.max_retry = opt.get('max_retry', 3)
+            self.skip_corrupted = opt.get('skip_corrupted', True)
 
-        self.paths_gt = []
-        self.paths_lq_a = []
-        self.paths_lq_b = []
+            self.paths_gt, self.paths_lq_a, self.paths_lq_b = self._load_meta_info(opt)
+            self.file_client = None
+            
+            print(f'[INFO] Dataset initialized with {len(self.paths_gt)} valid triplets')
+        except Exception as e:
+            raise RuntimeError(f"Dataset initialization failed: {str(e)}")
 
-        meta_file = opt['meta_info_file']
-        with open(meta_file, 'r') as f:
-            for line in f:
-                gt, lq_a, lq_b = line.strip().split(',')
-                gt_path = os.path.join(opt['dataroot_gt'], gt.strip())
-                lq_a_path = os.path.join(opt['dataroot_lq_a'], lq_a.strip())
-                lq_b_path = os.path.join(opt['dataroot_lq_b'], lq_b.strip())
+    def _parse_gt_size(self, gt_size):
+        """Safe GT size parsing"""
+        if isinstance(gt_size, str):
+            return None if gt_size.lower() == 'none' else int(gt_size)
+        return gt_size
 
-                if not os.path.isfile(gt_path):
-                    print(f"[ERROR] GT file not found: {gt_path}")
-                    continue
-                if not os.path.isfile(lq_a_path):
-                    print(f"[ERROR] LQ_A file not found: {lq_a_path}")
-                    continue
-                if not os.path.isfile(lq_b_path):
-                    print(f"[ERROR] LQ_B file not found: {lq_b_path}")
-                    continue
+    def _load_meta_info(self, opt) -> Tuple[List[str], List[str], List[str]]:
+        """Load meta info with validation"""
+        paths_gt, paths_lq_a, paths_lq_b = [], [], []
+        try:
+            with open(opt['meta_info_file'], 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    
+                    parts = line.split(',')
+                    if len(parts) != 3:
+                        print(f"[WARN] Invalid line format: {line}")
+                        continue
 
-                self.paths_gt.append(gt_path)
-                self.paths_lq_a.append(lq_a_path)
-                self.paths_lq_b.append(lq_b_path)
+                    gt, lq_a, lq_b = parts
+                    gt_path = os.path.abspath(os.path.join(opt['dataroot_gt'], gt.strip()))
+                    lq_a_path = os.path.abspath(os.path.join(opt['dataroot_lq_a'], lq_a.strip()))
+                    lq_b_path = os.path.abspath(os.path.join(opt['dataroot_lq_b'], lq_b.strip()))
 
-        if not self.paths_gt:
-            raise ValueError("[ERROR] No valid image triplets found in meta_info_file!")
+                    if not all(os.path.isfile(p) for p in [gt_path, lq_a_path, lq_b_path]):
+                        print(f"[WARN] Missing files in triplet: {gt_path} | {lq_a_path} | {lq_b_path}")
+                        continue
 
-        self.file_client = None
-        print(f'[INFO] PairedSiameseImageDataset: {len(self.paths_gt)} samples loaded.')
+                    paths_gt.append(gt_path)
+                    paths_lq_a.append(lq_a_path)
+                    paths_lq_b.append(lq_b_path)
+
+            if not paths_gt:
+                raise ValueError("No valid triplets found in meta_info_file!")
+            return paths_gt, paths_lq_a, paths_lq_b
+        except Exception as e:
+            raise RuntimeError(f"Failed to load meta info: {str(e)}")
+
+    def _load_image(self, path: str, tag: str) -> Optional[np.ndarray]:
+        """Safe image loading with retry mechanism"""
+        for attempt in range(self.max_retry):
+            try:
+                img_bytes = self.file_client.get(path, tag)
+                img = imfrombytes(img_bytes, float32=True)
+                
+                if img is None or img.size == 0:
+                    raise ValueError(f"Empty image: {path}")
+                if len(img.shape) != 3 or img.shape[2] != 3:
+                    raise ValueError(f"Image is not RGB: {path}")
+                if img.max() > 1.0 or img.min() < 0.0:
+                    print(f"[WARN] Image {path} has invalid range [{img.min()}, {img.max()}]")
+                return img
+            except Exception as e:
+                if attempt == self.max_retry - 1:
+                    if self.skip_corrupted:
+                        print(f"[ERROR] Failed to load {tag} image after {self.max_retry} attempts: {path}")
+                        return None
+                    raise
+                continue
+        return None
+
+    def _process_patch(self, img_gt: np.ndarray, img_lq_a: np.ndarray, img_lq_b: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Process and augment image triplet"""
+        # Resize LQ images
+        h, w = img_gt.shape[:2]
+        lq_size = (w // self.scale, h // self.scale)
+        img_lq_a = cv2.resize(img_lq_a, lq_size, interpolation=cv2.INTER_AREA)
+        img_lq_b = cv2.resize(img_lq_b, lq_size, interpolation=cv2.INTER_AREA)
+
+        # Training-specific processing
+        if self.phase == 'train' and self.gt_size:
+            lq_crop_size = self.gt_size // self.scale
+            
+            # Pad if needed (reflection padding)
+            pad_h = max(0, lq_crop_size - img_lq_a.shape[0])
+            pad_w = max(0, lq_crop_size - img_lq_a.shape[1])
+            if pad_h > 0 or pad_w > 0:
+                img_lq_a = cv2.copyMakeBorder(img_lq_a, 0, pad_h, 0, pad_w, cv2.BORDER_REFLECT)
+                img_lq_b = cv2.copyMakeBorder(img_lq_b, 0, pad_h, 0, pad_w, cv2.BORDER_REFLECT)
+                img_gt = cv2.copyMakeBorder(img_gt, 0, pad_h * self.scale, 0, pad_w * self.scale, cv2.BORDER_REFLECT)
+
+            # Random crop
+            y = random.randint(0, img_lq_a.shape[0] - lq_crop_size)
+            x = random.randint(0, img_lq_a.shape[1] - lq_crop_size)
+            
+            img_lq_a = img_lq_a[y:y+lq_crop_size, x:x+lq_crop_size]
+            img_lq_b = img_lq_b[y:y+lq_crop_size, x:x+lq_crop_size]
+            img_gt = img_gt[y*self.scale:(y+lq_crop_size)*self.scale, 
+                          x*self.scale:(x+lq_crop_size)*self.scale]
+
+        # Augmentation
+        img_gt, img_lq_a, img_lq_b = augment([img_gt, img_lq_a, img_lq_b], self.use_flip, self.use_rot)
+        return img_gt, img_lq_a, img_lq_b
+
+    def _normalize(self, img: np.ndarray) -> torch.Tensor:
+        """Normalize image to tensor"""
+        img = img2tensor(img, bgr2rgb=True, float32=True)
+        img = (img - torch.from_numpy(self.mean).view(3, 1, 1)) / torch.from_numpy(self.std).view(3, 1, 1)
+        return img
 
     def __getitem__(self, index):
+        # Initialize file client if needed
+        if self.file_client is None:
+            self.file_client = FileClient(self.io_backend_opt.pop('type'), **self.io_backend_opt)
+
+        gt_path = self.paths_gt[index]
+        lq_a_path = self.paths_lq_a[index]
+        lq_b_path = self.paths_lq_b[index]
+
         try:
-            if self.file_client is None:
-                self.file_client = FileClient(self.io_backend_opt.pop('type'), **self.io_backend_opt)
+            # Load with error handling
+            img_gt = self._load_image(gt_path, 'gt')
+            img_lq_a = self._load_image(lq_a_path, 'lq_a')
+            img_lq_b = self._load_image(lq_b_path, 'lq_b')
+            
+            if None in [img_gt, img_lq_a, img_lq_b]:
+                if self.skip_corrupted:
+                    return self.__getitem__((index + 1) % len(self))
+                raise ValueError("Failed to load one or more images")
 
-            gt_path = self.paths_gt[index]
-            lq_a_path = self.paths_lq_a[index]
-            lq_b_path = self.paths_lq_b[index]
-
-            # Load images
-            img_gt = imfrombytes(self.file_client.get(gt_path, 'gt'), float32=True)
-            img_lq_a = imfrombytes(self.file_client.get(lq_a_path, 'lq_a'), float32=True)
-            img_lq_b = imfrombytes(self.file_client.get(lq_b_path, 'lq_b'), float32=True)
-
-            # Check image validity
-            for name, img, path in [('GT', img_gt, gt_path), ('LQ_A', img_lq_a, lq_a_path), ('LQ_B', img_lq_b, lq_b_path)]:
-                if img is None or img.size == 0:
-                    raise ValueError(f"Invalid image {name}: {path}")
-                if len(img.shape) != 3 or img.shape[2] != 3:
-                    raise ValueError(f"Image {name} is not RGB: {path}")
-
-            # Calculate expected LQ size
-            h_gt, w_gt = img_gt.shape[:2]
-            expected_h_lq = h_gt // self.scale
-            expected_w_lq = w_gt // self.scale
-
-            # Resize LQ images to expected size
-            img_lq_a = cv2.resize(img_lq_a, (expected_w_lq, expected_h_lq), interpolation=cv2.INTER_AREA)
-            img_lq_b = cv2.resize(img_lq_b, (expected_w_lq, expected_h_lq), interpolation=cv2.INTER_AREA)
-
-            # For training, crop fixed-size patches
-            if self.phase == 'train' and self.gt_size is not None:
-                lq_crop_size = self.gt_size // self.scale
-                
-                # Pad images if they're too small
-                if img_lq_a.shape[0] < lq_crop_size or img_lq_a.shape[1] < lq_crop_size:
-                    pad_h = max(0, lq_crop_size - img_lq_a.shape[0])
-                    pad_w = max(0, lq_crop_size - img_lq_a.shape[1])
-                    
-                    img_lq_a = cv2.copyMakeBorder(img_lq_a, 0, pad_h, 0, pad_w, cv2.BORDER_REFLECT)
-                    img_lq_b = cv2.copyMakeBorder(img_lq_b, 0, pad_h, 0, pad_w, cv2.BORDER_REFLECT)
-                    img_gt = cv2.copyMakeBorder(img_gt, 0, pad_h * self.scale, 0, pad_w * self.scale, cv2.BORDER_REFLECT)
-
-                # Random crop
-                top = random.randint(0, img_lq_a.shape[0] - lq_crop_size)
-                left = random.randint(0, img_lq_a.shape[1] - lq_crop_size)
-                
-                img_lq_a = img_lq_a[top:top + lq_crop_size, left:left + lq_crop_size, :]
-                img_lq_b = img_lq_b[top:top + lq_crop_size, left:left + lq_crop_size, :]
-                img_gt = img_gt[top*self.scale:(top + lq_crop_size)*self.scale, 
-                            left*self.scale:(left + lq_crop_size)*self.scale, :]
-
-            # Data augmentation
-            img_gt, img_lq_a, img_lq_b = augment([img_gt, img_lq_a, img_lq_b], self.use_flip, self.use_rot)
-
-            # Convert to tensor and normalize
-            def _process(img):
-                img = img2tensor(img, bgr2rgb=True, float32=True)
-                for c in range(3):
-                    img[c] = (img[c] - self.mean[c]) / self.std[c]
-                return img
+            # Process images
+            img_gt, img_lq_a, img_lq_b = self._process_patch(img_gt, img_lq_a, img_lq_b)
 
             return {
-                'gt': _process(img_gt),
-                'lq_a': _process(img_lq_a),
-                'lq_b': _process(img_lq_b),
+                'gt': self._normalize(img_gt),
+                'lq_a': self._normalize(img_lq_a),
+                'lq_b': self._normalize(img_lq_b),
                 'gt_path': gt_path,
                 'lq_a_path': lq_a_path,
                 'lq_b_path': lq_b_path
             }
-
         except Exception as e:
-            print(f"Error loading index {index}: {e}")
-            return self.__getitem__((index + 1) % self.__len__())
+            print(f"Error processing index {index}: {str(e)}")
+            if self.skip_corrupted:
+                return self.__getitem__((index + 1) % len(self))
+            raise
 
     def __len__(self):
         return len(self.paths_gt)

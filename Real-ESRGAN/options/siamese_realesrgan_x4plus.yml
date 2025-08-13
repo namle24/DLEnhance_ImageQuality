@@ -16,6 +16,7 @@ datasets:
     io_backend:
       type: disk
     gt_size: 256
+    max_retry: 3
     use_hflip: true
     use_rot: false
     scale: 4
@@ -26,13 +27,13 @@ datasets:
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
 
-  # val:
-  #     name: ValStandard  
-  #     type: PairedImageDataset 
-  #     dataroot_gt: /datasets/RealESRGAN_data/dataset/test/HR
-  #     dataroot_lq: /datasets/RealESRGAN_data/dataset/test/LR_moderate
-  #     io_backend:
-  #       type: disk
+  val:
+      name: ValStandard  
+      type: PairedImageDataset 
+      dataroot_gt: /datasets/RealESRGAN_data/dataset/test/HR
+      dataroot_lq: /datasets/RealESRGAN_data/dataset/test/LR_moderate
+      io_backend:
+        type: disk
 
 network_g:
   type: RRDBNetFeatOut
@@ -51,9 +52,10 @@ network_d:
 
 path:
   pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRNet_x4plus.pth
+  pretrain_network_teacher: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRGAN_x4plus.pth
   param_key_g: params_ema
   strict_load_g: true
-  resume_state: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese/training_states/85000.state
+  resume_state: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese/training_states/120000.state
 
 train:
   ema_decay: 0.999
@@ -90,21 +92,29 @@ train:
     perceptual_weight: 1.0
     style_weight: 0.05
 
-  lambda_kd_out: 0.05
-  lambda_kd_feat: 0.05
+  gan_opt:
+    type: GANLoss
+    gan_type: vanilla
+    real_label_val: 1.0
+    fake_label_val: 0.0
+    loss_weight: 0.1  
 
-# val:
-#   val_freq: !!float 5e3
-#   save_img: True
-#   metrics:
-#     psnr:
-#       type: calculate_psnr
-#       crop_border: 4
-#       test_y_channel: false
-#     ssim:
-#       type: calculate_ssim
-#       crop_border: 4
-#       test_y_channel: false
+  lambda_kd_out: 0.01  
+  lambda_kd_feat: 0.005
+  kd_warmup_iters: 5000
+
+val:
+  val_freq: !!float 5e3
+  save_img: True
+  metrics:
+    psnr:
+      type: calculate_psnr
+      crop_border: 4
+      test_y_channel: false
+    ssim:
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: false
 
 logger:
   print_freq: 100
