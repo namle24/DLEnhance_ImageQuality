@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import os
 from collections import OrderedDict
 from basicsr.metrics import calculate_psnr, calculate_ssim
 from basicsr.utils.registry import MODEL_REGISTRY
@@ -28,14 +29,22 @@ class RealESRGANSiameseModel(RealESRGANModel):
     def feed_data(self, data):
         """Enhanced data feeding with better error handling."""
         try:
-            self.lq_a = data['lq_a'].to(self.device)
-            self.lq_b = data['lq_b'].to(self.device) 
-            self.gt = data['gt'].to(self.device)
+            # For training with siamese data
+            if 'lq_a' in data and 'lq_b' in data:
+                self.lq_a = data['lq_a'].to(self.device)
+                self.lq_b = data['lq_b'].to(self.device) 
+            # For validation with standard paired data
+            elif 'lq' in data:
+                self.lq_b = data['lq'].to(self.device)
+                # Use same input for both branches during validation
+                self.lq_a = data['lq'].to(self.device)
+                
+            self.gt = data['gt'].to(self.device) if 'gt' in data else None
             
             # Apply USM sharpening for better training
-            if hasattr(self, 'usm_sharpener'):
+            if self.gt is not None and hasattr(self, 'usm_sharpener'):
                 self.gt_usm = self.usm_sharpener(self.gt)
-            else:
+            elif self.gt is not None:
                 self.gt_usm = self.gt
                 
         except Exception as e:
@@ -164,6 +173,9 @@ class RealESRGANSiameseModel(RealESRGANModel):
 
     def nondist_validation(self, dataloader, current_iter, tb_logger, save_img):
         """Enhanced validation with multiple metrics."""
+        # Disable synthetic degradation during validation
+        self.is_train = False
+        
         dataset_name = dataloader.dataset.opt['name']
         with_metrics = self.opt['val'].get('metrics') is not None
         use_pbar = self.opt['val'].get('pbar', False)
@@ -177,10 +189,14 @@ class RealESRGANSiameseModel(RealESRGANModel):
 
         pbar = None
         if use_pbar:
+            from tqdm import tqdm
             pbar = tqdm(total=len(dataloader), unit='image')
 
         for idx, val_data in enumerate(dataloader):
             img_name = osp.splitext(osp.basename(val_data['lq_path'][0]))[0]
+            
+            # For validation, use LQ as input (simulate real-world scenario)
+            val_data['lq_b'] = val_data['lq'] 
             self.feed_data(val_data)
             self.test()
 
@@ -191,12 +207,10 @@ class RealESRGANSiameseModel(RealESRGANModel):
             if 'gt' in visuals:
                 gt_img = tensor2img([visuals['gt']])
                 metric_data['img2'] = gt_img
-                del self.gt
 
             # Calculate metrics
-            if with_metrics:
+            if with_metrics and 'gt' in visuals:
                 for name, opt_ in self.opt['val']['metrics'].items():
-                    metric_data['img'] = sr_img
                     if name == 'psnr':
                         psnr_val = calculate_psnr(sr_img, gt_img, crop_border=opt_.get('crop_border', 0))
                         self.metric_results[dataset_name][name].append(psnr_val)
@@ -206,12 +220,9 @@ class RealESRGANSiameseModel(RealESRGANModel):
 
             # Save images
             if save_img:
-                if self.opt['is_train']:
-                    save_img_path = osp.join(self.opt['path']['visualization'], img_name,
-                                           f'{img_name}_{current_iter}.png')
-                else:
-                    save_img_path = osp.join(self.opt['path']['visualization'], dataset_name,
-                                           f'{img_name}_{self.opt["name"]}.png')
+                save_img_dir = osp.join(self.opt['path']['visualization'], dataset_name)
+                os.makedirs(save_img_dir, exist_ok=True)
+                save_img_path = osp.join(save_img_dir, f'{img_name}_{current_iter}.png')
                 imwrite(sr_img, save_img_path)
 
             if use_pbar:
@@ -223,14 +234,15 @@ class RealESRGANSiameseModel(RealESRGANModel):
 
         if with_metrics:
             for metric_name, values in self.metric_results[dataset_name].items():
-                avg_val = sum(values) / len(values)
-                
-                # Log to console
-                print(f'{dataset_name}_{metric_name}: {avg_val:.4f}')
-                
-                # Log to tensorboard
-                if tb_logger:
-                    tb_logger.add_scalar(f'metrics/{dataset_name}_{metric_name}', avg_val, current_iter)
+                if values:  # Check if list is not empty
+                    avg_val = sum(values) / len(values)
+                    
+                    # Log to console
+                    print(f'{dataset_name}_{metric_name}: {avg_val:.4f}')
+                    
+                    # Log to tensorboard
+                    if tb_logger:
+                        tb_logger.add_scalar(f'metrics/{dataset_name}_{metric_name}', avg_val, current_iter)
 
         # Set back to training mode
         self.is_train = True
