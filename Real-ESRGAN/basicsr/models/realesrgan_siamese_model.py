@@ -166,9 +166,15 @@ class RealESRGANSiameseModel(RealESRGANModel):
         if self.ema_decay > 0:
             self.model_ema(decay=self.ema_decay)
 
-        # Store loss values
-        loss_dict['lambda_kd_out'] = lambda_kd_out
-        loss_dict['lambda_kd_feat'] = lambda_kd_feat
+        # Store loss values (convert scalars to tensors for logging)
+        loss_dict['lambda_kd_out'] = torch.tensor(lambda_kd_out, device=self.device)
+        loss_dict['lambda_kd_feat'] = torch.tensor(lambda_kd_feat, device=self.device)
+        
+        # Convert all scalar values to tensors for reduce_loss_dict compatibility
+        for key, value in list(loss_dict.items()):
+            if isinstance(value, (int, float)):
+                loss_dict[key] = torch.tensor(value, device=self.device)
+        
         self.log_dict = self.reduce_loss_dict(loss_dict)
 
     def nondist_validation(self, dataloader, current_iter, tb_logger, save_img):
