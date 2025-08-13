@@ -22,19 +22,20 @@ class RealESRGANSiameseModel(RealESRGANModel):
                 num_grow_ch=opt['network_g'].get('num_grow_ch', 32)
             )
             
-            # Hoặc Cách 2: Sử dụng hàm có sẵn từ RealESRGANModel
-            if hasattr(super(), 'build_network'):
-                self.net_g_teacher = super().build_network(opt['network_g'])
+            # Load weights với xử lý linh hoạt key
+            load_path = opt['path']['pretrain_network_teacher']
+            param_key = opt['path'].get('param_key_teacher', 'params_ema')  # Mặc định là 'params_ema'
+            strict_load = opt['path'].get('strict_load_g', False)
             
-            self.load_network(
-                self.net_g_teacher,
-                opt['path']['pretrain_network_teacher'],
-                opt['path'].get('param_key_teacher', 'params')
-            )
+            load_net = torch.load(load_path)
+            if param_key is not None and param_key in load_net:
+                load_net = load_net[param_key]
+            self.net_g_teacher.load_state_dict(load_net, strict=strict_load)
+            
             self.net_g_teacher.eval()
             for param in self.net_g_teacher.parameters():
                 param.requires_grad = False
-    
+
     def feed_data(self, data):
         if self.is_train:
             self.lq_a = data['lq_a'].to(self.device)
