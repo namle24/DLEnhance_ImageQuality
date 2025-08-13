@@ -40,8 +40,8 @@ datasets:
   val:
     name: ValSet5  
     type: PairedImageDataset 
-    dataroot_gt: /datasets/RealESRGAN_data/dataset/test/Set5/HR
-    dataroot_lq: /datasets/RealESRGAN_data/dataset/test/Set5/LR_bicubic/X4
+    dataroot_gt: /datasets/RealESRGAN_data/benchmark_datasets/Set5/Set5/GTmod12
+    dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/Set5/Set5/LRbicx4
     io_backend:
       type: disk
 
