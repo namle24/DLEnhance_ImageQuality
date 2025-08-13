@@ -52,8 +52,8 @@ network_d:
 
 path:
   pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRNet_x4plus.pth
-  param_key_g: params_ema
-  strict_load_g: true
+  param_key_g: params
+  strict_load_g: false
   pretrain_network_teacher: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRGAN_x4plus.pth
   param_key_teacher: params_ema
   resume_state: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese/training_states/120000.state

@@ -34,7 +34,7 @@ class RealESRGANSiameseModel(RealESRGANModel):
             self.net_g_teacher.eval()
             for param in self.net_g_teacher.parameters():
                 param.requires_grad = False
-
+    
     def feed_data(self, data):
         if self.is_train:
             self.lq_a = data['lq_a'].to(self.device)
