@@ -32,7 +32,7 @@ datasets:
     # Dataloader settings
     num_workers: 4
     use_shuffle: true
-    batch_size_per_gpu: 4  # Reduced for stability
+    batch_size_per_gpu: 6  # Reduced for stability
     num_worker_per_gpu: 4
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
@@ -65,7 +65,7 @@ path:
   pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRGAN_x4plus.pth
   param_key_g: params_ema
   strict_load_g: false  # Allow partial loading
-  resume_state: ~ 
+  resume_state: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese_improved/training_states/80000.state
 
 train:
   ema_decay: 0.999
