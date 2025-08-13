@@ -10,12 +10,22 @@ class RealESRGANSiameseModel(RealESRGANModel):
     def __init__(self, opt):
         super().__init__(opt)
         
-        # KD-specific settings
         self.kd_warmup_iters = opt['train'].get('kd_warmup_iters', 5000)
         
         if opt['path'].get('pretrain_network_teacher'):
-            from basicsr.models import build_network
-            self.net_g_teacher = build_network(opt['network_g'])
+            from basicsr.archs.rrdbnet_arch import RRDBNet
+            self.net_g_teacher = RRDBNet(
+                num_in_ch=opt['network_g'].get('num_in_ch', 3),
+                num_out_ch=opt['network_g'].get('num_out_ch', 3),
+                num_feat=opt['network_g'].get('num_feat', 64),
+                num_block=opt['network_g'].get('num_block', 23),
+                num_grow_ch=opt['network_g'].get('num_grow_ch', 32)
+            )
+            
+            # Hoặc Cách 2: Sử dụng hàm có sẵn từ RealESRGANModel
+            if hasattr(super(), 'build_network'):
+                self.net_g_teacher = super().build_network(opt['network_g'])
+            
             self.load_network(
                 self.net_g_teacher,
                 opt['path']['pretrain_network_teacher'],

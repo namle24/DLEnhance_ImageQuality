@@ -36,7 +36,7 @@ datasets:
         type: disk
 
 network_g:
-  type: RRDBNetFeatOut
+  type: RRDBNet
   num_in_ch: 3
   num_out_ch: 3
   scale: 4
