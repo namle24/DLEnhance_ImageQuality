@@ -13,21 +13,17 @@ class RealESRGANSiameseModel(RealESRGANModel):
         # KD-specific settings
         self.kd_warmup_iters = opt['train'].get('kd_warmup_iters', 5000)
         
-        # Teacher model (chỉ khi có path)
         if opt['path'].get('pretrain_network_teacher'):
-            self.net_g_teacher = self._init_teacher(opt)
-
-    def _init_teacher(self, opt):
-        teacher = self.build_network(opt['network_g'])
-        self.load_network(
-            teacher,
-            opt['path']['pretrain_network_teacher'],
-            opt['path'].get('param_key_teacher', 'params')
-        )
-        teacher.eval()
-        for param in teacher.parameters():
-            param.requires_grad = False
-        return teacher
+            from basicsr.models import build_network
+            self.net_g_teacher = build_network(opt['network_g'])
+            self.load_network(
+                self.net_g_teacher,
+                opt['path']['pretrain_network_teacher'],
+                opt['path'].get('param_key_teacher', 'params')
+            )
+            self.net_g_teacher.eval()
+            for param in self.net_g_teacher.parameters():
+                param.requires_grad = False
 
     def feed_data(self, data):
         if self.is_train:
