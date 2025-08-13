@@ -52,7 +52,5 @@ class RealESRGANSiameseModel(RealESRGANModel):
             'l_style': l_style.item() if isinstance(l_style, torch.Tensor) else 0
         }
 
-    def validation(self, dataloader, current_iter, tb_logger, save_img=False):
-        with torch.no_grad():
-            return super().validation(dataloader, current_iter, tb_logger, save_img)
+    
     

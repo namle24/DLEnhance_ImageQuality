@@ -40,7 +40,7 @@ network_g:
 
 # path
 path: #/storage/student12/Real-ESRGAN/Real-ESRGAN/experiments/finetune_RealESRGANx4plus_400k_pairdata/models/net_g_355000.pth
-  pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/finetune_RealESRGANx4plus_teacher_student_degradation_ver2_20250808/models/net_g_15000.pth
+  pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese/models/net_g_120000.pth
   strict_load_g: true
   param_key: ~
 
