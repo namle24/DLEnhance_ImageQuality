@@ -34,13 +34,13 @@ network_g:
   type: RRDBNet
   num_in_ch: 3
   num_out_ch: 3
-  num_feat: 64
-  num_block: 23
-  num_grow_ch: 32
+  num_feat: 48
+  num_block: 16
+  num_grow_ch: 24
 
 # path
 path: #/storage/student12/Real-ESRGAN/Real-ESRGAN/experiments/finetune_RealESRGANx4plus_400k_pairdata/models/net_g_355000.pth
-  pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/net_g_575000_RealESRGAN_teacher.pth
+  pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/net_g_855000_student.pth
   strict_load_g: true
   param_key: ~
 
