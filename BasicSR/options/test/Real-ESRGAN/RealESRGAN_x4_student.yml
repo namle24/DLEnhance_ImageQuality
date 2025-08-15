@@ -1,4 +1,4 @@
-name: RealESRGAN_student_x4
+name: RealESRGAN_original_x4
 model_type: RealESRGANModel
 scale: 4
 num_gpu: 4
