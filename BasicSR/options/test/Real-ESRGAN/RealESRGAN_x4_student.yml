@@ -5,29 +5,29 @@ num_gpu: 4
 manual_seed: 0
 
 datasets:
-  # test_1:  # the 1st test dataset
-  #   name: Set5
-  #   type: PairedImageDataset
-  #   dataroot_gt: /datasets/RealESRGAN_data/benchmark_datasets/Set5/Set5/GTmod12
-  #   dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/Set5/Set5/LRbicx4
-  #   io_backend:
-  #     type: disk
-  # test_2:  # the 2nd test dataset
-  #   name: Set14
-  #   type: PairedImageDataset
-  #   dataroot_gt: /datasets/RealESRGAN_data/benchmark_datasets/Set14/Set14/GTmod12
-  #   dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/Set14/Set14/LRbicx4
-  #   io_backend:
-  #     type: disk
-      
-  test_3:  
-    name: RealSR_V2
+  test_1:  # the 1st test dataset
+    name: Set5
     type: PairedImageDataset
-    dataroot_gt: /datasets/RealESRGAN_data/benchmark_datasets/RealSR(V3)/Canon/HR
-    dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/RealSR(V3)/Canon/LR
-    # filename_tmpl: '{}x4'
+    dataroot_gt: /datasets/RealESRGAN_data/benchmark_datasets/Set5/Set5/GTmod12
+    dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/Set5/Set5/LRbicx4
     io_backend:
       type: disk
+  test_2:  # the 2nd test dataset
+    name: Set14
+    type: PairedImageDataset
+    dataroot_gt: /datasets/RealESRGAN_data/benchmark_datasets/Set14/Set14/GTmod12
+    dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/Set14/Set14/LRbicx4
+    io_backend:
+      type: disk
+      
+  # test_3:  
+  #   name: RealSR_V2
+  #   type: PairedImageDataset
+  #   dataroot_gt: /datasets/RealESRGAN_data/benchmark_datasets/RealSR(V3)/Canon/HR
+  #   dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/RealSR(V3)/Canon/LR
+  #   # filename_tmpl: '{}x4'
+  #   io_backend:
+  #     type: disk
 
 # network structures
 network_g:
@@ -40,7 +40,7 @@ network_g:
 
 # path
 path: #/storage/student12/Real-ESRGAN/Real-ESRGAN/experiments/finetune_RealESRGANx4plus_400k_pairdata/models/net_g_355000.pth
-  pretrain_network_g: /storage/student12/Real-ESRGAN/Real-ESRGAN/experiments/finetune_RealESRGANx4plus_400k_pairdata/models/net_g_5000.pth
+  pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/finetune_RealESRGANx4plus_400k_pairdata_21000state/models/net_g_5000.pth
   strict_load_g: true
   param_key: ~
 
