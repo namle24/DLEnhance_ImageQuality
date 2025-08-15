@@ -23,8 +23,8 @@ datasets:
   test_3:  
     name: RealSR_V3(Canon)
     type: PairedImageDataset
-    dataroot_gt: /datasets/RealESRGAN_data/benchmark_datasets/RealSR(V3)/Canon/HR
-    dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/RealSR(V3)/Canon/LR
+    dataroot_gt: /datasets/RealESRGAN_data/benchmark_datasets/RealSR(V3)/Nikon/HR
+    dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/RealSR(V3)/Nikon/LR
     # filename_tmpl: '{}x4'
     io_backend:
       type: disk
