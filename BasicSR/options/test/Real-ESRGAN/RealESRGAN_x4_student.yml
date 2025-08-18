@@ -9,14 +9,14 @@ datasets:
     name: BSD100
     type: PairedImageDataset
     dataroot_gt: /datasets/RealESRGAN_data/benchmark_datasets/BSDS100/BSD100
-    dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/BSDS100/BSD100LQ
+    dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/BSDS100/BSD100_LQ
     io_backend:
       type: disk
   test_2:  # the 2nd test dataset
     name: urban100
     type: PairedImageDataset
     dataroot_gt: /datasets/RealESRGAN_data/benchmark_datasets/urban100/urban100
-    dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/urban100/urban100LQ
+    dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/urban100/urban100_LQ
     io_backend:
       type: disk
       
