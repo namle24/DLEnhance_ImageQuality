@@ -4,7 +4,7 @@ import math
 import time
 import torch
 from os import path as osp
-
+from basicsr.train import train_pipeline
 from basicsr.data import build_dataloader, build_dataset
 from basicsr.data.data_sampler import EnlargedSampler
 from basicsr.data.prefetch_dataloader import CPUPrefetcher, CUDAPrefetcher
