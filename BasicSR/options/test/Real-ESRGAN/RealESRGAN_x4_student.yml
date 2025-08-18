@@ -50,14 +50,17 @@ val:
   suffix: ~  # add suffix to saved images, if None, use exp name
 
   metrics:
-    psnr: # metric name, can be arbitrary
-      type: calculate_psnr
-      crop_border: 4
-      test_y_channel: false
-    ssim:
-      type: calculate_ssim
-      crop_border: 4
-      test_y_channel: false
-    niqe:
-      type: calculate_niqe
+    # psnr: # metric name, can be arbitrary
+    #   type: calculate_psnr
+    #   crop_border: 4
+    #   test_y_channel: true
+    # ssim:
+    #   type: calculate_ssim
+    #   crop_border: 4
+    #   test_y_channel: true
+    # niqe:
+    #   type: calculate_niqe
+    #   crop_border: 4
+    lpips:
+      type: calculate_lpips
       crop_border: 4
