@@ -8,7 +8,7 @@ datasets:
   test_1:  # the 1st test dataset
     name: BSD100
     type: PairedImageDataset
-    dataroot_gt: /datasets/RealESRGAN_data/benchmark_datasets/BSDS100/BSD100
+    dataroot_gt: /datasets/RealESRGAN_data/benchmark_datasets/BSDS100/BSDSS100
     dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/BSDS100/BSD100_LQ
     io_backend:
       type: disk
