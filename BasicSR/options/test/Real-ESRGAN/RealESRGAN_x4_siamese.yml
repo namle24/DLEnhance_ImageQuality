@@ -40,7 +40,11 @@ network_g:
 
 # path
 path: 
+<<<<<<< HEAD
   pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese_improved/models/net_g_200000.pth
+=======
+  pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese_improved/models/net_g_340000.pth
+>>>>>>> parent of 30543ff (evaluate)
   strict_load_g: true
   param_key_g: params_ema
 
