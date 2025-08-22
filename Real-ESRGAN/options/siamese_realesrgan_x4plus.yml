@@ -64,7 +64,7 @@ path:
   # Load pretrained Real-ESRGAN for initialization
   pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRGAN_x4plus.pth
   param_key_g: params_ema
-  strict_load_g: false  # Allow partial loading
+  strict_load_g: true  # Allow partial loading
   resume_state: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese_improved/training_states/400000.state
 
 train:
@@ -84,10 +84,10 @@ train:
     betas: [0.9, 0.999]
 
   scheduler:
-  type: CosineAnnealingRestartLR
-  periods: [400000, 200000]   
-  restart_weights: [1, 1]
-  eta_min: 1e-06
+    type: CosineAnnealingRestartLR
+    periods: [400000, 200000]   
+    restart_weights: [1, 1]
+    eta_min: 1e-06
 
 
   total_iter: 600000
