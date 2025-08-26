@@ -12,7 +12,7 @@ datasets:
     dataroot_gt: /datasets/RealESRGAN_data/dataset/train
     dataroot_lq_a: /datasets/RealESRGAN_data/dataset/train
     dataroot_lq_b: /datasets/RealESRGAN_data/dataset/train
-    meta_info_file: /datasets/RealESRGAN_data/meta_info/meta_info_moderate_sub.txt
+    meta_info_file: /datasets/RealESRGAN_data/meta_info/meta_info_triplet_nosub.txt
     io_backend:
       type: disk
     gt_size: 256
