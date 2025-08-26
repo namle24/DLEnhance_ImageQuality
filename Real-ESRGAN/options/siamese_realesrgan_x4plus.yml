@@ -66,7 +66,7 @@ path:
   param_key_g: params_ema
   strict_load_g: true  # Allow partial loading
   resume_state: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese_improved/training_states/395000.state
-  resume_schedulers: false
+  
 
 train:
   ema_decay: 0.999
