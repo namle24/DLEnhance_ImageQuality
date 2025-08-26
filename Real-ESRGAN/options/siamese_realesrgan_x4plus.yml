@@ -30,10 +30,10 @@ datasets:
     noise_prob: 0.05
     
     # Dataloader settings
-    num_workers: 4
+    num_workers: 6
     use_shuffle: true
     batch_size_per_gpu: 4  # Reduced for stability
-    num_worker_per_gpu: 4
+    num_worker_per_gpu: 6
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
 
@@ -65,7 +65,7 @@ path:
   pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRGAN_x4plus.pth
   param_key_g: params_ema
   strict_load_g: true  # Allow partial loading
-  resume_state: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese_improved/training_states/395000.state
+  resume_state: ~
   
 
 train:
@@ -85,13 +85,12 @@ train:
     betas: [0.9, 0.999]
 
   scheduler:
-    type: CosineAnnealingRestartLR
-    periods: [100000, 100000]  # 2 chu kỳ 100K iterations cho 200K iterations còn lại
-    restart_weights: [1, 1]
-    eta_min: !!float 1e-6
+    type: MultiStepLR
+    milestones: [200000, 400000, 500000]
+    gamma: 0.5
 
   total_iter: 600000
-  warmup_iter: 5000  # Warmup period
+  warmup_iter: 10000  # Warmup period
 
   # Loss configuration
   pixel_opt:
