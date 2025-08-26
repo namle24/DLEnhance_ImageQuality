@@ -27,7 +27,7 @@ if __name__ == '__main__':
         '--input',
         nargs='+',
         default=[
-            '/datasets/RealESRGAN_data/dataset/train/HR',
+            '/datasets/RealESRGAN_data/dataset/train/HR_sub',
             '/datasets/RealESRGAN_data/dataset/train/LR_light_sub',
             '/datasets/RealESRGAN_data/dataset/train/LR_moderate_sub'
         ],
