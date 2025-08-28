@@ -30,10 +30,10 @@ datasets:
     noise_prob: 0.05
     
     # Dataloader settings
-    num_workers: 6
+    num_workers: 4
     use_shuffle: true
     batch_size_per_gpu: 4  # Reduced for stability
-    num_worker_per_gpu: 6
+    num_worker_per_gpu: 4
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
 
@@ -125,6 +125,20 @@ train:
   lambda_kd_out: 0.15      # Increased from 0.05
   lambda_kd_feat: 0.15     # Increased from
 
+val:
+  val_freq: !!float 5e3
+  save_img: True
+
+  metrics:
+    psnr: # metric name
+      type: calculate_psnr
+      crop_border: 4
+      test_y_channel: true
+    ssim: # metric name
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: true
+      
 logger:
   print_freq: 100
   save_checkpoint_freq: !!float 5e3
