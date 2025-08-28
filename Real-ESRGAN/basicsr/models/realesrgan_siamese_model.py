@@ -79,15 +79,21 @@ class RealESRGANSiameseModel(RealESRGANModel):
         # Teacher forward (no gradient)
         with torch.no_grad():
             if hasattr(self.net_g, 'module'):
-                self.output_a, self.feat_a = self.net_g.module(self.lq_a, return_feats=True)
+                output_tuple = self.net_g.module(self.lq_a, return_feats=True)
             else:
-                self.output_a, self.feat_a = self.net_g(self.lq_a, return_feats=True)
+                output_tuple = self.net_g(self.lq_a, return_feats=True)
+            # Trích xuất output và features từ tuple
+            self.output_a = output_tuple[0]
+            self.feat_a = output_tuple[1] if len(output_tuple) > 1 else None
 
         # Student forward
         if hasattr(self.net_g, 'module'):
-            self.output_b, self.feat_b = self.net_g.module(self.lq_b, return_feats=True)
+            output_tuple = self.net_g.module(self.lq_b, return_feats=True)
         else:
-            self.output_b, self.feat_b = self.net_g(self.lq_b, return_feats=True)
+            output_tuple = self.net_g(self.lq_b, return_feats=True)
+        # Trích xuất output và features từ tuple
+        self.output_b = output_tuple[0]
+        self.feat_b = output_tuple[1] if len(output_tuple) > 1 else None
 
         l_g_total = 0
         loss_dict = OrderedDict()
@@ -259,16 +265,20 @@ class RealESRGANSiameseModel(RealESRGANModel):
             self.net_g_ema.eval()
             with torch.no_grad():
                 if hasattr(self.net_g_ema, 'module'):
-                    self.output = self.net_g_ema.module(self.lq_b)
+                    output_tuple = self.net_g_ema.module(self.lq_b)
                 else:
-                    self.output = self.net_g_ema(self.lq_b)
+                    output_tuple = self.net_g_ema(self.lq_b)
+                # Chỉ trích xuất output, không lấy features
+                self.output = output_tuple[0] if isinstance(output_tuple, tuple) else output_tuple
         else:
             self.net_g.eval()
             with torch.no_grad():
                 if hasattr(self.net_g, 'module'):
-                    self.output = self.net_g.module(self.lq_b)  
+                    output_tuple = self.net_g.module(self.lq_b)
                 else:
-                    self.output = self.net_g(self.lq_b)
+                    output_tuple = self.net_g(self.lq_b)
+                # Chỉ trích xuất output, không lấy features
+                self.output = output_tuple[0] if isinstance(output_tuple, tuple) else output_tuple
             self.net_g.train()
 
     def get_current_visuals(self):
