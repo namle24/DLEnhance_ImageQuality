@@ -65,7 +65,7 @@ path:
   pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRGAN_x4plus.pth
   param_key_g: params_ema
   strict_load_g: true  # Allow partial loading
-  resume_state: ~
+  resume_state: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese_improved_ver2/training_states/10000.state
   
 
 train:
@@ -138,7 +138,7 @@ val:
       type: calculate_ssim
       crop_border: 4
       test_y_channel: true
-      
+
 logger:
   print_freq: 100
   save_checkpoint_freq: !!float 5e3
