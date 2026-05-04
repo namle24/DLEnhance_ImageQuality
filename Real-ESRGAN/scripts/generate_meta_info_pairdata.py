@@ -33,7 +33,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--meta_info',
         type=str,
-        default='/datasets/RealESRGAN_data/meta_info/meta_info_moderate.txt', #datasets/RealESRGAN_data/meta_info/meta_info_light_sub_pair.txt
+        default='/datasets/RealESRGAN_data/meta_info/meta_info_moderate_sub.txt', #datasets/RealESRGAN_data/meta_info/meta_info_light_sub_pair.txt
         help='txt path for meta info')
     args = parser.parse_args()
 

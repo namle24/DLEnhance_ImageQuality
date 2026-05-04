@@ -1,4 +1,4 @@
-name: train_realesrgan_siamese_improved
+name: train_realesrgan_siamese_improved_ver2
 model_type: RealESRGANSiameseModel
 num_gpu: 1
 scale: 4
@@ -9,10 +9,10 @@ datasets:
     name: TrainSiamese
     type: PairedSiameseImageDataset
     phase: train
-    dataroot_gt: /datasets/RealESRGAN_data/dataset/train
-    dataroot_lq_a: /datasets/RealESRGAN_data/dataset/train
-    dataroot_lq_b: /datasets/RealESRGAN_data/dataset/train
-    meta_info_file: /datasets/RealESRGAN_data/meta_info/meta_info_triplet_nosub.txt
+    dataroot_gt: /home/namlh/data/dataset/train
+    dataroot_lq_a: /home/namlh/data/dataset/train
+    dataroot_lq_b: /home/namlh/data/dataset/train
+    meta_info_file: /home/namlh/data/dataset/meta_info/meta_info_triplet_ver1.txt
     io_backend:
       type: disk
     gt_size: 256
@@ -30,18 +30,18 @@ datasets:
     noise_prob: 0.05
     
     # Dataloader settings
-    num_workers: 4
+    num_workers: 6
     use_shuffle: true
-    batch_size_per_gpu: 4  # Reduced for stability
-    num_worker_per_gpu: 4
+    batch_size_per_gpu: 12  # Reduced for stability
+    num_worker_per_gpu: 6
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
 
   val:
     name: ValSet5  
     type: PairedImageDataset 
-    dataroot_gt: /datasets/RealESRGAN_data/benchmark_datasets/Set5/Set5/GTmod12
-    dataroot_lq: /datasets/RealESRGAN_data/benchmark_datasets/Set5/Set5/LRbicx4
+    dataroot_gt: /home/namlh/data/benchmark_datasets/Set5/Set5/GTmod12
+    dataroot_lq: /home/namlh/data/benchmark_datasets/Set5/Set5/LRbicx4
     io_backend:
       type: disk
 
@@ -62,40 +62,38 @@ network_d:
 
 path:
   # Load pretrained Real-ESRGAN for initialization
-  pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/RealESRGAN_x4plus.pth
+  pretrain_network_g: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/weights/net_g_455000.pth
   param_key_g: params_ema
   strict_load_g: false  # Allow partial loading
-  resume_state: /home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_realesrgan_siamese_improved/training_states/400000.state
-
+  resume_state: ~
 train:
   ema_decay: 0.999
   
   # Improved optimizer settings
   optim_g:
     type: Adam
-    lr: !!float 2e-5  # Lower learning rate for stability
+    lr: !!float 1e-4  # Lower learning rate for stability
     weight_decay: 0
     betas: [0.9, 0.999]
     
   optim_d:
     type: Adam
-    lr: !!float 2e-5  # Match generator LR
+    lr: !!float 1e-4  # Match generator LR
     weight_decay: 0
     betas: [0.9, 0.999]
 
   scheduler:
-    type: CosineAnnealingRestartLR
-    periods: [200000, 200000]
-    restart_weights: [1, 1]
-    eta_min: !!float 1e-6
+    type: MultiStepLR
+    milestones: [200000, 400000, 500000]
+    gamma: 0.5
 
-  total_iter: 400000
-  warmup_iter: 5000  # Warmup period
+  total_iter: 600000
+  warmup_iter: 10000  # Warmup period
 
   # Loss configuration
   pixel_opt:
     type: L1Loss
-    loss_weight: 1.0
+    loss_weight: 2.0
     reduction: mean
 
   perceptual_opt:
@@ -109,22 +107,38 @@ train:
     vgg_type: vgg19
     use_input_norm: true
     range_norm: false
-    perceptual_weight: 1.5
-    style_weight: 0.5
+    perceptual_weight: 1.2
+    style_weight: 1.0
 
   gan_opt:
     type: GANLoss
     gan_type: vanilla
     real_label_val: 1.0
     fake_label_val: 0.0
-    loss_weight: !!float 2e-1
+    loss_weight: 0.5
 
   # Enhanced Knowledge Distillation settings
   progressive_kd: true
-  warmup_kd_iters: 5000
+  warmup_kd_iters: 40000
   lambda_kd_out: 0.15      # Increased from 0.05
-  lambda_kd_feat: 0.15   # Increased from
+  lambda_kd_feat: 0.15
+  lambda_consistency: 0.075   # Increased from
 
+val:
+    val_freq: 5000.0
+    save_img: True
+    metrics:
+      psnr:
+        type: calculate_psnr
+        crop_border: 4
+        test_y_channel: True
+      
+      ssim:
+        type: calculate_ssim
+        crop_border: 4
+        test_y_channel: True
+      
+  
 logger:
   print_freq: 100
   save_checkpoint_freq: !!float 5e3
