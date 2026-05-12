@@ -30,6 +30,22 @@ class RealisticDegradationGenerator:
         self.jpeg_quality_range = jpeg_quality_range
         self.blur_types = ['gaussian', 'aniso', 'generalized', 'motion', 'defocus', 'sinc']
         self.blur_probs = [0.3, 0.15, 0.1, 0.2, 0.15, 0.2]
+        self.degradation_levels = {
+            90: dict(noise_sigma_range=[1, 10],  jpeg_quality_range=[75, 95], blur_prob=0.4),
+            80: dict(noise_sigma_range=[5, 15],  jpeg_quality_range=[60, 85], blur_prob=0.6),
+            70: dict(noise_sigma_range=[10, 20], jpeg_quality_range=[45, 70], blur_prob=0.7),
+            60: dict(noise_sigma_range=[15, 25], jpeg_quality_range=[30, 55], blur_prob=0.8),
+        }
+
+    def set_level(self, level):
+        if level in self.degradation_levels:
+            params = self.degradation_levels[level]
+            self.noise_sigma_range = params['noise_sigma_range']
+            self.jpeg_quality_range = params['jpeg_quality_range']
+            self.blur_prob = params['blur_prob']
+            logging.info(f"Degradation level set to {level}: {params}")
+        else:
+            logging.warning(f"Level {level} not found in DEGRADATION_LEVELS. Keeping current settings.")
 
     def _random_resize(self, img, scale_factor=None):
         if scale_factor is None:
