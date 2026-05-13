@@ -24,7 +24,7 @@ def feather_mask(mask, kernel_size=15, sigma=3):
     return np.expand_dims(feathered, axis=-1)
 
 def process_single_image(args):
-    img_path, output_dir, scale, level, patch_size, save_mask = args
+    img_path, output_dir, scale, level, patch_size, save_mask, lq_dir = args
     
     try:
         hr_img = cv2.imread(img_path)
@@ -33,10 +33,23 @@ def process_single_image(args):
         
         h, w = hr_img.shape[:2]
         
+        # 0. Get LQ image if provided
+        lq_full = None
+        if lq_dir:
+            fname = os.path.basename(img_path)
+            lq_full_path = os.path.join(lq_dir, fname)
+            lq_full = cv2.imread(lq_full_path)
+            if lq_full is None:
+                logging.warning(f"LQ image not found for {fname} in {lq_dir}")
+                return
+            if lq_full.shape != hr_img.shape:
+                lq_full = cv2.resize(lq_full, (w, h), interpolation=cv2.INTER_NEAREST)
+
         # 1. Random crop to patch_size x patch_size
         if h < patch_size or w < patch_size:
-            # Resize if too small
             hr_img = cv2.resize(hr_img, (max(w, patch_size), max(h, patch_size)), interpolation=cv2.INTER_CUBIC)
+            if lq_full is not None:
+                lq_full = cv2.resize(lq_full, (hr_img.shape[1], hr_img.shape[0]), interpolation=cv2.INTER_NEAREST)
             h, w = hr_img.shape[:2]
             
         top = random.randint(0, h - patch_size)
@@ -46,23 +59,21 @@ def process_single_image(args):
         # 2. Compute complexity mask (75% complexity)
         mask_binary = compute_complexity_mask(hr_patch, degrade_ratio=0.75, patch_size=16)
         
-        # 3. Generate Degraded version
-        generator = RealisticDegradationGenerator()
-        generator.set_level(level)
+        # 3. Get Degraded version
+        if lq_full is not None:
+            lr_upsampled = lq_full[top:top+patch_size, left:left+patch_size]
+        else:
+            generator = RealisticDegradationGenerator()
+            generator.set_level(level)
+            lr_img = generator.apply_degradation(hr_patch, scale)
+            lr_upsampled = cv2.resize(lr_img, (patch_size, patch_size), interpolation=cv2.INTER_NEAREST)
         
-        # Scale factor typically 0.25 for x4
-        target_h, target_w = int(patch_size * scale), int(patch_size * scale)
-        lr_img = generator.apply_degradation(hr_patch, scale)
-        
-        # 4. Upsample LR back to HR size using NEAREST NEIGHBOR (per user requirement)
-        lr_upsampled = cv2.resize(lr_img, (patch_size, patch_size), interpolation=cv2.INTER_NEAREST)
-        
-        # 5. Blend with Gaussian Feathering
+        # 4. Blend with Gaussian Feathering
         mask_feathered = feather_mask(mask_binary, kernel_size=15, sigma=3)
         pd_lq = (hr_patch.astype(np.float32) * (1.0 - mask_feathered) + 
                  lr_upsampled.astype(np.float32) * mask_feathered).astype(np.uint8)
         
-        # 6. Save results
+        # 5. Save results
         base_name = os.path.splitext(os.path.basename(img_path))[0]
         suffix = f"_p{patch_size}_l{level}_{random.randint(1000, 9999)}"
         
@@ -78,7 +89,6 @@ def process_single_image(args):
         if save_mask:
             mask_path = os.path.join(output_dir, "mask", f"{base_name}{suffix}.png")
             os.makedirs(os.path.dirname(mask_path), exist_ok=True)
-            # Save visual mask (0-255)
             cv2.imwrite(mask_path, (mask_binary * 255).astype(np.uint8))
             
     except Exception as e:
@@ -87,6 +97,7 @@ def process_single_image(args):
 def main():
     parser = argparse.ArgumentParser(description='Generate PD-MAE Dataset')
     parser.add_argument('--input', type=str, required=True, help='Input HR directory')
+    parser.add_argument('--lq_dir', type=str, default=None, help='Optional: Pre-generated full-LQ directory')
     parser.add_argument('--output', type=str, required=True, help='Output directory')
     parser.add_argument('--scale', type=float, default=0.25, help='Degradation scale (0.25 for x4)')
     parser.add_argument('--level', type=int, default=80, choices=[60, 70, 80, 90], help='Degradation level')
@@ -115,7 +126,7 @@ def main():
     process_args = []
     for img_path in image_files:
         for _ in range(args.num_patches):
-            process_args.append((img_path, args.output, args.scale, args.level, args.patch_size, args.save_mask))
+            process_args.append((img_path, args.output, args.scale, args.level, args.patch_size, args.save_mask, args.lq_dir))
             
     n_workers = args.workers if args.workers else max(1, cpu_count() - 1)
     
