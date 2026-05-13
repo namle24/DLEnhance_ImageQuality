@@ -96,7 +96,7 @@ def process_single_image(args):
 
 def main():
     parser = argparse.ArgumentParser(description='Generate PD-MAE Dataset')
-    parser.add_argument('--input', type=str, required=True, help='Input HR directory')
+    parser.add_argument('--input', '--hr_dir', type=str, required=True, help='Input HR directory')
     parser.add_argument('--lq_dir', type=str, default=None, help='Optional: Pre-generated full-LQ directory')
     parser.add_argument('--output', type=str, required=True, help='Output directory')
     parser.add_argument('--scale', type=float, default=0.25, help='Degradation scale (0.25 for x4)')
