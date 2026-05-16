@@ -43,7 +43,8 @@ def unpatchify(x, p=8):
 
 def train():
     parser = argparse.ArgumentParser(description='PD-MAE Stage 1 Pretrain')
-    parser.add_argument('--data_root', type=str, nargs='+', required=True, help='Path(s) to PD dataset(s)')
+    parser.add_argument('--hr_dir', type=str, required=True, help='Path to HR patches folder')
+    parser.add_argument('--lq_dirs', type=str, nargs='+', required=True, help='Path(s) to LR patches folders (60, 70, 80, 90)')
     parser.add_argument('--output_dir', type=str, default='PD_MAE_SR/checkpoints/stage1', help='Output dir')
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--lr', type=float, default=1e-4)
@@ -68,13 +69,15 @@ def train():
     if args.use_wandb:
         try:
             import wandb
-            wandb.init(project="PD-MAE-SR", config=args, name="Stage1-Pretrain")
+            wandb.init(project="PD-MAE-SR", config=args, name="Stage1-Pretrain-Dynamic")
         except ImportError:
             logging.warning("wandb is not installed. Running without wandb logging.")
             args.use_wandb = False
     
-    # 1. Setup Data
-    dataset = PDMAEDataset(args.data_root, patch_size=args.patch_size, mae_patch_size=args.mae_patch_size)
+    # 1. Setup Data (Dynamic Blending)
+    dataset = PDMAEDataset(args.hr_dir, args.lq_dirs, 
+                           patch_size=args.patch_size, 
+                           mae_patch_size=args.mae_patch_size)
     dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True)
     
     # 2. Setup Model
