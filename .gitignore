@@ -169,15 +169,24 @@ graph/
 **/*.onnx
 
 # Data and Experiments
-**/datasets/
+**/datasets/**/*.png
+**/datasets/**/*.npy
 **/data/
-**/experiments/
 **/logs/
 **/tb_logger/
-**/results/
 **/checkpoint/
 **/checkpoints/
 **/pretrained_models/
+**/results/
+
+# Specifically ignore large files in experiments but keep scripts
+**/experiments/**/*.pth
+**/experiments/**/*.ckpt
+**/experiments/**/*.pt
+**/experiments/**/*.h5
+**/experiments/**/*.log
+**/experiments/**/*.json
+**/experiments/*/
 
 # Junk and Temp
 .idea/
