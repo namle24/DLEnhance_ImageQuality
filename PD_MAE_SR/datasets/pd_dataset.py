@@ -59,8 +59,14 @@ class PDMAEDataset(Dataset):
             hr_patch = cv2.resize(hr_img, (self.patch_size, self.patch_size))
 
         # 2. Re-compute Mask from HR patch (Novelty: Complexity-based)
-        # This fixes the missing mask folder issue
         mask_binary = compute_complexity_mask(hr_patch, degrade_ratio=self.degrade_ratio, patch_size=self.mae_patch_size)
+        
+        # 3. Downsample mask to MAE patch grid (e.g., 256/8 = 32x32)
+        # mask_binary is 256x256, we need 32x32
+        mask_patch_grid = cv2.resize(mask_binary.astype(np.uint8), 
+                                     (self.patch_size // self.mae_patch_size, 
+                                      self.patch_size // self.mae_patch_size), 
+                                     interpolation=cv2.INTER_NEAREST)
         
         # Convert to RGB and Tensors
         lq_rgb = cv2.cvtColor(lq_patch, cv2.COLOR_BGR2RGB)
@@ -69,7 +75,8 @@ class PDMAEDataset(Dataset):
         lq_tensor = torch.from_numpy(lq_rgb).permute(2, 0, 1).float() / 255.0
         hr_tensor = torch.from_numpy(hr_rgb).permute(2, 0, 1).float() / 255.0
         
-        mask_indices = mask_binary.astype(np.int64).flatten()
+        # Flatten the patch-level mask
+        mask_indices = mask_patch_grid.astype(np.int64).flatten()
         mask_indices = torch.from_numpy(mask_indices)
         
         return {
