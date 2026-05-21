@@ -32,4 +32,21 @@
     - **Visual Confirmation:** Color space is correct, and reconstruction quality is improving rapidly.
 - **Result:** Infrastructure is robust, conceptually sound, and **Approved** for full-scale 200k training on ICT Lab Server.
 
+
 ---
+
+## 21/05/2026 — Phase 3: Transition to Stage 2 - HR Structure Fine-Tuning (Completed)
+- **HROnlyDataset Implementation:**
+    - Created `HROnlyDataset` in `datasets/hr_dataset.py` to train strictly on clean `HR_sub` images.
+    - Implemented crop-to-patch logic (`256x256`) and an exact `75%` random grid mask (`768` out of `1024` patches of size `8x8`).
+    - Blacked out (assigned `0` to BGR channels) the pixels under masked patches to serve as inputs, and set target to fully intact HR patches.
+- **Stage 2 Training Customization:**
+    - Created `train_stage2.py` in `experiments/train_stage2.py` incorporating new dataset dataloaders.
+    - Added `--pretrain` argument to load model weights strictly from Stage 1 Iter 200k checkpoint while resetting optimizer and scheduler states.
+    - Adjusted hyperparameters for fine-tuning: `lr = 1e-5` (10x smaller than Stage 1), total iterations `T_max = 100000` (100k), and Cosine Annealing scheduler decaying to `1e-6`.
+    - Maintained Option X loss computation strictly targeting blacked-out patches.
+- **Project Tracking & User Guide:**
+    - Documented tasks and progress in `task.md` and created `walkthrough.md` mapping out verification commands for the user to run on the server:
+      - Dataset image count check: `ls ~/data/dataset/train/HR_sub | wc -l`
+      - 100-iteration smoke test command for pipeline validation.
+      - Full 100k iteration Stage 2 training command.
