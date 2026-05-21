@@ -41,6 +41,55 @@ def unpatchify(x, p=8):
     imgs = x.reshape(shape=(x.shape[0], 3, h * p, w * p))
     return imgs
 
+def verify_loaded_weights(model, checkpoint_path):
+    if not os.path.exists(checkpoint_path):
+        logging.warning(f"Checkpoint path not found for verification: {checkpoint_path}")
+        return
+    
+    checkpoint = torch.load(checkpoint_path, map_location='cpu')
+    state_dict = checkpoint.get('model_state_dict', checkpoint)
+    
+    logging.info("=== VERIFYING WEIGHT LOADING (STAGE 1 CHECKPOINT) ===")
+    logging.info(f"Loaded checkpoint metadata - Iteration: {checkpoint.get('iter', 'N/A')}, Loss: {checkpoint.get('loss', 'N/A')}")
+    
+    # Layer weights to check
+    test_layers = [
+        ('encoder.patch_embed.weight', model.encoder.patch_embed.weight),
+        ('encoder.blocks.0.attn.qkv.weight', model.encoder.blocks[0].attn.qkv.weight),
+        ('decoder.decoder_embed.weight', model.decoder.decoder_embed.weight)
+    ]
+    
+    all_matched = True
+    for name, param in test_layers:
+        if name in state_dict:
+            ckpt_param = state_dict[name]
+            
+            # Stats comparison
+            model_mean, model_std = param.data.mean().item(), param.data.std().item()
+            ckpt_mean, ckpt_std = ckpt_param.mean().item(), ckpt_param.std().item()
+            
+            is_equal = torch.allclose(param.data.cpu(), ckpt_param, atol=1e-6)
+            logging.info(f"Layer '{name}':")
+            logging.info(f"  - Model: mean={model_mean:.6f}, std={model_std:.6f}")
+            logging.info(f"  - Ckpt:  mean={ckpt_mean:.6f}, std={ckpt_std:.6f}")
+            logging.info(f"  - Exact Match: {is_equal}")
+            
+            # Simple non-zero checks to verify they are not randomly initialized close to 0
+            if model_std < 1e-5:
+                logging.error(f"  - Warning: Layer '{name}' has suspicious near-zero standard deviation.")
+                all_matched = False
+            if not is_equal:
+                all_matched = False
+        else:
+            logging.warning(f"Layer '{name}' not found in checkpoint state_dict.")
+            all_matched = False
+            
+    if all_matched:
+        logging.info("Result: Model weights are perfectly matching the Stage 1 checkpoint!")
+    else:
+        logging.error("Result: Model weights mismatch or loading error detected!")
+    logging.info("====================================================")
+
 def train():
     parser = argparse.ArgumentParser(description='PD-MAE Stage 2 HR Structure Fine-Tuning')
     parser.add_argument('--data_root', type=str, required=True, help='Path to HR_sub folder containing clean HR images')
@@ -49,6 +98,7 @@ def train():
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--lr', type=float, default=1e-5, help='Learning rate (Stage 2 uses 1e-5)')
     parser.add_argument('--iters', type=int, default=100000, help='Total iterations (Stage 2 uses 100000)')
+    parser.add_argument('--degrade_ratio', type=float, default=0.75, help='Masking ratio (default: 0.75)')
     parser.add_argument('--patch_size', type=int, default=256)
     parser.add_argument('--mae_patch_size', type=int, default=8)
     parser.add_argument('--save_freq', type=int, default=5000)
@@ -74,10 +124,11 @@ def train():
             logging.warning("wandb is not installed. Running without wandb logging.")
             args.use_wandb = False
     
-    # 1. Setup Data (Clean HR with 75% Random Grid Mask)
+    # 1. Setup Data (Clean HR with configurable Random Grid Mask)
     dataset = HROnlyDataset(args.data_root, 
                             patch_size=args.patch_size, 
-                            mae_patch_size=args.mae_patch_size)
+                            mae_patch_size=args.mae_patch_size,
+                            degrade_ratio=args.degrade_ratio)
     dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True)
     
     # 2. Setup Model
@@ -91,6 +142,9 @@ def train():
             # Load with strict matching
             model.load_state_dict(state_dict, strict=True)
             logging.info(f"Successfully loaded Stage 1 pre-trained model weights from {args.pretrain} (Optimizer/Scheduler reset).")
+            
+            # Run deep validation metrics on weight stats
+            verify_loaded_weights(model, args.pretrain)
         else:
             raise FileNotFoundError(f"Stage 1 pre-trained checkpoint not found at: {args.pretrain}")
     
@@ -116,6 +170,7 @@ def train():
             raise FileNotFoundError(f"Stage 2 resume checkpoint not found at: {args.resume}")
     
     logging.info(f"Starting Stage 2 HR Structure Fine-Tuning for {args.iters} iterations...")
+    logging.info(f"Configuration: mask_ratio={args.degrade_ratio}, lr={args.lr}, batch_size={args.batch_size}")
     
     pbar = tqdm(total=args.iters, initial=current_iter)
     
@@ -174,19 +229,26 @@ def train():
             if current_iter % args.val_freq == 0 or current_iter == 100:
                 model.eval()
                 with torch.no_grad():
-                    # Just take the last batch for visualization
-                    recon = unpatchify(pred, p=args.mae_patch_size)
+                    # Move forward pass inside eval block for accurate visualization
+                    pred_vis = model(lq)
+                    recon = unpatchify(pred_vis, p=args.mae_patch_size)
+                    
+                    # Core Fix: Find the sample in the batch with the highest texture complexity (variance)
+                    # This prevents saving flat gradient/gray backgrounds and ensures highly complex features are checked
+                    vars = torch.var(hr, dim=(1, 2, 3)) # [B]
+                    best_idx = torch.argmax(vars).item()
+                    
                     # Clamp and convert for saving
-                    recon_img = (recon[0].permute(1, 2, 0).cpu().numpy() * 255).clip(0, 255).astype('uint8')
-                    hr_img = (hr[0].permute(1, 2, 0).cpu().numpy() * 255).clip(0, 255).astype('uint8')
-                    lq_img = (lq[0].permute(1, 2, 0).cpu().numpy() * 255).clip(0, 255).astype('uint8')
+                    recon_img = (recon[best_idx].permute(1, 2, 0).cpu().numpy() * 255).clip(0, 255).astype('uint8')
+                    hr_img = (hr[best_idx].permute(1, 2, 0).cpu().numpy() * 255).clip(0, 255).astype('uint8')
+                    lq_img = (lq[best_idx].permute(1, 2, 0).cpu().numpy() * 255).clip(0, 255).astype('uint8')
                     
                     # Create comparison (Input lq / Predicted recon / Ground-Truth hr)
                     comparison = np.hstack((lq_img, recon_img, hr_img))
                     comparison_bgr = cv2.cvtColor(comparison, cv2.COLOR_RGB2BGR)
                     vis_path = os.path.join(args.output_dir, f"vis_iter{current_iter}.png")
                     cv2.imwrite(vis_path, comparison_bgr)
-                    logging.info(f"Saved visualization: {vis_path}")
+                    logging.info(f"Saved visualization: {vis_path} (chosen batch index {best_idx} with max variance {vars[best_idx].item():.4f})")
                     if args.use_wandb:
                         wandb.log({"reconstruction_vis": wandb.Image(comparison)}, step=current_iter)
                 model.train()
