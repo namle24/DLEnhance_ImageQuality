@@ -1,18 +1,28 @@
 import torch
 from torch import nn as nn
 from torch.nn import functional as F
-import sys
+import importlib.util
 import os
 
-pd_mae_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../PD_MAE_SR'))
-if pd_mae_path not in sys.path:
-    sys.path.append(pd_mae_path)
+# Load PDMAE by absolute file path (avoids `archs` name clashes on sys.path).
+_proj_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+_pd_mae_mae_arch = os.path.join(_proj_root, 'PD_MAE_SR', 'archs', 'mae_arch.py')
 
-try:
-    from archs.mae_arch import PDMAE
-except ImportError:
-    PDMAE = None
-    print("Warning: Could not import PDMAE from PD_MAE_SR")
+_pdmae_import_err = None
+PDMAE = None
+if os.path.isfile(_pd_mae_mae_arch):
+    try:
+        _spec = importlib.util.spec_from_file_location('pd_mae_sr_mae_arch', _pd_mae_mae_arch)
+        _mod = importlib.util.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)
+        PDMAE = _mod.PDMAE
+    except Exception as e:
+        _pdmae_import_err = e
+else:
+    _pdmae_import_err = FileNotFoundError(_pd_mae_mae_arch)
+
+if PDMAE is None:
+    print(f'Warning: Could not import PDMAE from {_pd_mae_mae_arch}: {_pdmae_import_err}')
 
 from basicsr.utils.registry import ARCH_REGISTRY
 from .arch_util import default_init_weights, make_layer, pixel_unshuffle
@@ -39,7 +49,10 @@ class PD_MAE_Encoder_Wrapper(nn.Module):
     def __init__(self, checkpoint_path=None, img_size=256, patch_size=8):
         super().__init__()
         if PDMAE is None:
-            raise ImportError("PDMAE class is not available.")
+            raise ImportError(
+                f'PDMAE class is not available. Expected mae_arch at: {_pd_mae_mae_arch}. '
+                f'Import error: {_pdmae_import_err}'
+            ) from _pdmae_import_err
         self.mae = PDMAE(img_size=img_size, patch_size=patch_size)
         if checkpoint_path and os.path.exists(checkpoint_path):
             ckpt = torch.load(checkpoint_path, map_location='cpu')
