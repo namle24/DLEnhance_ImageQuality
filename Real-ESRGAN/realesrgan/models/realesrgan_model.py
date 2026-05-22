@@ -224,6 +224,19 @@ class RealESRGANModel(SRGANModel):
                 if l_g_style is not None:
                     l_g_total += l_g_style
                     loss_dict['l_g_style'] = l_g_style
+            
+            # PD-MAE Consistency loss
+            net_g_bare = self.net_g.module if hasattr(self.net_g, 'module') else self.net_g
+            if getattr(net_g_bare, 'use_sft', False) and hasattr(net_g_bare, 'mae_wrapper'):
+                with torch.no_grad():
+                    mae_feat_hr = net_g_bare.mae_wrapper(l1_gt)
+                mae_feat_sr = net_g_bare.mae_wrapper(self.output)
+                l_g_mae = F.mse_loss(mae_feat_sr, mae_feat_hr)
+                
+                weight_mae = self.opt.get('mae_weight', 0.1)
+                l_g_total += weight_mae * l_g_mae
+                loss_dict['l_g_mae'] = l_g_mae
+
             # gan loss
             fake_g_pred = self.net_d(self.output)
             l_g_gan = self.cri_gan(fake_g_pred, True, is_disc=False)

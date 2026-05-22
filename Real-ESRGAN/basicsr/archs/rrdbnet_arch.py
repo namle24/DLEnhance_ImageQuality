@@ -1,9 +1,81 @@
 import torch
 from torch import nn as nn
 from torch.nn import functional as F
+import sys
+import os
+
+pd_mae_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../PD_MAE_SR'))
+if pd_mae_path not in sys.path:
+    sys.path.append(pd_mae_path)
+
+try:
+    from archs.mae_arch import PDMAE
+except ImportError:
+    PDMAE = None
+    print("Warning: Could not import PDMAE from PD_MAE_SR")
 
 from basicsr.utils.registry import ARCH_REGISTRY
 from .arch_util import default_init_weights, make_layer, pixel_unshuffle
+
+
+class SFT_Layer(nn.Module):
+    def __init__(self, rrdb_channels=64, mae_channels=384):
+        super().__init__()
+        self.scale_conv = nn.Conv2d(mae_channels, rrdb_channels, 1)
+        self.shift_conv = nn.Conv2d(mae_channels, rrdb_channels, 1)
+    
+    def forward(self, rrdb_feat, mae_feat):
+        mae_resized = F.interpolate(mae_feat,
+                                    size=rrdb_feat.shape[-2:],
+                                    mode='bilinear',
+                                    align_corners=False)
+        scale = self.scale_conv(mae_resized)
+        shift = self.shift_conv(mae_resized)
+        return rrdb_feat * (1 + scale) + shift
+
+
+class PD_MAE_Encoder_Wrapper(nn.Module):
+    """Load Stage 2 checkpoint, extract spatial features cho SFT"""
+    def __init__(self, checkpoint_path=None, img_size=256, patch_size=8):
+        super().__init__()
+        if PDMAE is None:
+            raise ImportError("PDMAE class is not available.")
+        self.mae = PDMAE(img_size=img_size, patch_size=patch_size)
+        if checkpoint_path and os.path.exists(checkpoint_path):
+            ckpt = torch.load(checkpoint_path, map_location='cpu')
+            if 'model_state_dict' in ckpt:
+                self.mae.load_state_dict(ckpt['model_state_dict'])
+            else:
+                self.mae.load_state_dict(ckpt)
+        else:
+            print(f"Warning: MAE checkpoint not found at {checkpoint_path}. Using uninitialized weights.")
+        
+        # Frozen hoàn toàn — không train lại
+        for param in self.mae.parameters():
+            param.requires_grad = False
+    
+    def forward(self, x):
+        # Resize LQ input to HR size (256x256) for MAE Encoder if needed
+        # since MAE was pretrained on HR patches (256x256)
+        # Expected input shape: [B, C, H, W]
+        img_size = int((self.mae.encoder.num_patches) ** 0.5 * self.mae.encoder.patch_size)
+        if x.shape[-2] != img_size or x.shape[-1] != img_size:
+            x_resized = F.interpolate(x, size=(img_size, img_size), mode='bicubic', align_corners=False)
+        else:
+            x_resized = x
+            
+        # Extract encoder features (không qua decoder)
+        # Output: [B, num_patches+1, 384] → reshape về spatial map
+        feat = self.mae.encoder(x_resized)  # [B, L+1, 384]
+        feat = feat[:, 1:, :]       # Bỏ cls token → [B, L, 384]
+        
+        # Reshape về spatial: [B, 384, H/p, W/p]
+        h = w = int(feat.shape[1] ** 0.5)
+        feat = feat.permute(0, 2, 1).reshape(
+            feat.shape[0], 384, h, w
+        )
+        return feat
+
 
 
 class ResidualDenseBlock(nn.Module):
@@ -84,15 +156,25 @@ class RRDBNet(nn.Module):
         num_grow_ch (int): Channels for each growth. Default: 32.
     """
 
-    def __init__(self, num_in_ch, num_out_ch, scale=4, num_feat=64, num_block=23, num_grow_ch=32):
+    def __init__(self, num_in_ch, num_out_ch, scale=4, num_feat=64, num_block=23, num_grow_ch=32, use_sft=False, mae_checkpoint=None, img_size=256):
         super(RRDBNet, self).__init__()
         self.scale = scale
+        self.use_sft = use_sft
         if scale == 2:
             num_in_ch = num_in_ch * 4
         elif scale == 1:
             num_in_ch = num_in_ch * 16
         self.conv_first = nn.Conv2d(num_in_ch, num_feat, 3, 1, 1)
-        self.body = make_layer(RRDB, num_block, num_feat=num_feat, num_grow_ch=num_grow_ch)
+        
+        self.body = nn.ModuleList([RRDB(num_feat, num_grow_ch=num_grow_ch) for _ in range(num_block)])
+        
+        if self.use_sft:
+            self.mae_wrapper = PD_MAE_Encoder_Wrapper(checkpoint_path=mae_checkpoint, img_size=img_size)
+            self.sft_layers = nn.ModuleDict({
+                str(i): SFT_Layer(rrdb_channels=num_feat, mae_channels=384) 
+                for i in [4, 9, 14, 19]
+            })
+            
         self.conv_body = nn.Conv2d(num_feat, num_feat, 3, 1, 1)
         # upsample
         self.conv_up1 = nn.Conv2d(num_feat, num_feat, 3, 1, 1)
@@ -109,8 +191,20 @@ class RRDBNet(nn.Module):
             feat = pixel_unshuffle(x, scale=4)
         else:
             feat = x
+            
+        mae_feat = None
+        if self.use_sft:
+            mae_feat = self.mae_wrapper(x)
+            
         feat = self.conv_first(feat)
-        body_feat = self.conv_body(self.body(feat))
+        
+        body_feat = feat
+        for i, block in enumerate(self.body):
+            body_feat = block(body_feat)
+            if self.use_sft and str(i) in self.sft_layers:
+                body_feat = self.sft_layers[str(i)](body_feat, mae_feat)
+                
+        body_feat = self.conv_body(body_feat)
         feat = feat + body_feat
         # upsample
         feat = self.lrelu(self.conv_up1(F.interpolate(feat, scale_factor=2, mode='nearest')))

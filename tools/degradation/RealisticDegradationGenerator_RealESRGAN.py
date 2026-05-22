@@ -223,10 +223,11 @@ class RealisticDegradationGenerator:
 # Instance chung cho multiprocessing
 generator_instance = None
 
-def init_worker(scale_factor):
-    global generator_instance
+def init_worker(scale_factor, level=None):
+    global generator_instance, global_scale_factor
     generator_instance = RealisticDegradationGenerator()
-    global global_scale_factor
+    if level is not None:
+        generator_instance.set_level(level)
     global_scale_factor = scale_factor
 
 def process_image(args):
@@ -296,7 +297,7 @@ def process_dataset(input_dir, output_dir, scale_factor=0.25, n_workers=None):
                 lr_output_path = os.path.join(lr_dir, rel_path)
                 args_list.append((img_path, lr_output_path))
             logging.info(f"Đang xử lý {len(args_list)} ảnh từ {hr_dir} vào {lr_dir}...")
-            with Pool(n_workers, initializer=init_worker, initargs=(scale_factor,)) as pool:
+            with Pool(n_workers, initializer=init_worker, initargs=(scale_factor, level)) as pool:
                 list(tqdm(pool.imap(process_image, args_list), total=len(args_list)))
 
 if __name__ == '__main__':
@@ -305,5 +306,6 @@ if __name__ == '__main__':
     parser.add_argument('--output', type=str, required=True, help='Output directory for degraded LR images')
     parser.add_argument('--scale', type=float, default=0.25, help='Scale factor for degradation (e.g., 0.25 for x4, 0.5 for x2)')
     parser.add_argument('--workers', type=int, default=None, help='Number of worker processes')
+    parser.add_argument('--level', type=int, default=None, help='Degradation level')
     args = parser.parse_args()
-    process_dataset(args.input, args.output, args.scale, args.workers)
+    process_dataset(args.input, args.output, args.scale, args.workers, args.level)

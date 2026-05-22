@@ -48,11 +48,29 @@
     - Added deep weight statistical validation (`verify_loaded_weights`) and a texture-prioritizing visualization selector (`max-variance` selection).
 - **Verification & Validation Results:**
     - Confirmed dataset size: **150,877 clean images** in `HR_sub`.
-    - Successfully ran a **100-iteration smoke test** on ICT Lab Server.
-    - Pretrained Stage 1 weights napped with strict matching successfully (Optimizer and scheduler states reset).
-    - Saved iteration 100 checkpoint (`pd_mae_s2_iter100.pth`) and validation visualization (`vis_iter100.png`).
-    - **Final Iter 100 Loss:** `0.016130` (very clean, indicating excellent convergence dynamics).
-    - **Optimization Decision:** Reduced masking ratio to **50%** (`--degrade_ratio 0.50`) after analysis of potential feature collapse. Giving the global self-attention 50% clean HR context successfully prevents out-of-distribution shock and enhances structural prior calibration.
-    - **Result:** Pipeline is fully verified and **Approved** to begin the full 100k iterations Stage 2 fine-tuning with 50% masking.
+- **Issue Detection & Resolution (Iter 20k with 75% mask):**
+    - At iter 20k, visual output showed **complete collapse** — reconstruction was flat gray, no structure.
+    - Root cause: 75% random black masking on a full-sequence encoder creates massive **out-of-distribution shift** (encoder never saw black patches in Stage 1).
+    - Additionally, visualization was sampling low-texture patches (flat gradients), masking the problem.
+    - **Fixes applied:**
+        1. Added `verify_loaded_weights()` — deep statistical validation confirming checkpoint load integrity.
+        2. Implemented **max-variance visualization selector** — always picks the most textured sample in the batch.
+        3. Moved visualization forward pass inside `model.eval()` + `torch.no_grad()` block for accurate output.
+        4. Made `--degrade_ratio` configurable via CLI argument.
+    - **Decision:** Reduced masking ratio to **50%** (`--degrade_ratio 0.50`).
+- **Diagnostic Smoke Test (50% mask, 100 iters):**
+    - Weight verification: All 3 key layers **Exact Match: True** vs Stage 1 checkpoint (Iter 200k, Loss 0.0037).
+    - **Iter 100 Loss: `0.007503`** (vs `0.016130` at 75% — **2.15x improvement** from mask ratio reduction alone).
+    - Visualization shows **actual flower structure reconstructed** with clear petal details and color fidelity — **no gray collapse**.
+    - **Result:** Full 100k Stage 2 training launched on ICT Lab Server with 50% masking, lr=1e-5, batch_size=32.
 
+---
+## 22/05/2026 — Config Updates for Training
 
+- Added validation dataset (Set14) to `train_pd_mae_realesrgan_x4plus.yml` to enable validation and best‑model checkpointing.
+- Added USM flags (`gt_usm`, `l1_gt_usm`, `percep_gt_usm`, `gan_gt_usm`) to the training config to prevent `KeyError` in `realesrgan_model.py`.
+- Updated the configuration file accordingly (validation block lines 31‑41, USM flags lines 82‑85).
+
+- Applied the same validation dataset (Set14) and USM flags (`gt_usm`, `l1_gt_usm`, `percep_gt_usm`, `gan_gt_usm`) to `train_pd_mae_stage3.yml`.
+- Adjusted learning rate to 5e-5 and total iterations to 200000 for further fine‑tuning.
+- Updated the configuration file accordingly (validation block and USM flags lines similar to Stage 2).
