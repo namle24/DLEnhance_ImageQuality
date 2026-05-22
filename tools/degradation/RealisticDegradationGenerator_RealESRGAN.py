@@ -257,48 +257,38 @@ def process_image(args):
         logging.error(f"Lỗi khi xử lý {img_path}: {e}")
 
 def process_dataset(input_dir, output_dir, scale_factor=0.25, n_workers=None, level=None):
+
     if n_workers is None:
         n_workers = max(1, cpu_count() - 1)
+
     logging.info(f"Processing with scale factor {scale_factor}")
-    for mode in ['train', 'test']:
-        mode_dir = os.path.join(input_dir, mode)
-        if not os.path.exists(mode_dir):
-            logging.warning(f"Thư mục {mode_dir} không tồn tại, bỏ qua")
-            continue
-        datasets = [d for d in os.listdir(mode_dir) if os.path.isdir(os.path.join(mode_dir, d))]
-        for dataset in datasets:
-            dataset_path = os.path.join(mode_dir, dataset)
-            hr_dir = os.path.join(dataset_path, f"{dataset}_HR")
-            if not os.path.exists(hr_dir):
-                hr_dir = os.path.join(dataset_path, 'HR')
-            if not os.path.exists(hr_dir):
-                logging.warning(f"Thư mục HR {hr_dir} không tồn tại, bỏ qua")
-                continue
-            lr_dir = os.path.join(output_dir, mode, dataset, f"{dataset}_LR")
-            new_hr_dir = os.path.join(output_dir, mode, dataset, os.path.basename(hr_dir))
-            if hr_dir != new_hr_dir:
-                os.makedirs(new_hr_dir, exist_ok=True)
-                logging.info(f"Tạo liên kết ảnh HR từ {hr_dir} tới {new_hr_dir}")
-            image_files = []
-            for ext in ['*.png', '*.jpg', '*.jpeg', '*.bmp', '*.tif']:
-                image_files.extend(glob.glob(os.path.join(hr_dir, '**', ext), recursive=True))
-            if not image_files:
-                logging.warning(f"Không tìm thấy ảnh HR trong {hr_dir}")
-                continue
-            args_list = []
-            for img_path in image_files:
-                rel_path = os.path.relpath(img_path, hr_dir)
-                if hr_dir != new_hr_dir:
-                    hr_output_path = os.path.join(new_hr_dir, rel_path)
-                    os.makedirs(os.path.dirname(hr_output_path), exist_ok=True)
-                    if not os.path.exists(hr_output_path):
-                        import shutil
-                        shutil.move(img_path, hr_output_path)
-                lr_output_path = os.path.join(lr_dir, rel_path)
-                args_list.append((img_path, lr_output_path))
-            logging.info(f"Đang xử lý {len(args_list)} ảnh từ {hr_dir} vào {lr_dir}...")
-            with Pool(n_workers, initializer=init_worker, initargs=(scale_factor, level)) as pool:
-                list(tqdm(pool.imap(process_image, args_list), total=len(args_list)))
+
+    image_files = []
+
+    for ext in ['*.png', '*.jpg', '*.jpeg', '*.bmp', '*.tif']:
+        image_files.extend(
+            glob.glob(os.path.join(input_dir, ext))
+        )
+
+    if not image_files:
+        logging.warning(f"Không tìm thấy ảnh trong {input_dir}")
+        return
+
+    args_list = []
+
+    for img_path in image_files:
+        filename = os.path.basename(img_path)
+        output_path = os.path.join(output_dir, filename)
+        args_list.append((img_path, output_path))
+
+    logging.info(f"Đang xử lý {len(args_list)} ảnh...")
+
+    with Pool(
+        n_workers,
+        initializer=init_worker,
+        initargs=(scale_factor, level)
+    ) as pool:
+        list(tqdm(pool.imap(process_image, args_list), total=len(args_list)))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Apply realistic degradation to images')
