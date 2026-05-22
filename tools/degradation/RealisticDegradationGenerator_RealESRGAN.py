@@ -256,7 +256,7 @@ def process_image(args):
     except Exception as e:
         logging.error(f"Lỗi khi xử lý {img_path}: {e}")
 
-def process_dataset(input_dir, output_dir, scale_factor=0.25, n_workers=None):
+def process_dataset(input_dir, output_dir, scale_factor=0.25, n_workers=None, level=None):
     if n_workers is None:
         n_workers = max(1, cpu_count() - 1)
     logging.info(f"Processing with scale factor {scale_factor}")
