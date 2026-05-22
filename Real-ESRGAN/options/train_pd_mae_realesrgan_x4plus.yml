@@ -7,6 +7,12 @@ manual_seed: 0
 
 high_order_degradation: false
 
+# USM ground-truth targets (read at opt root by RealESRGANModel)
+l1_gt_usm: true
+percep_gt_usm: true
+gan_gt_usm: false
+mae_weight: 0.1
+
 # dataset and data loader settings
 datasets:
   train:
@@ -79,10 +85,6 @@ train:
     lr: !!float 1e-4
     weight_decay: 0
     betas: [0.9, 0.99]
-  gt_usm: true
-  l1_gt_usm: true
-  percep_gt_usm: true
-  gan_gt_usm: false
   scheduler:
     type: MultiStepLR
     milestones: [400000]
@@ -116,8 +118,6 @@ train:
     real_label_val: 1.0
     fake_label_val: 0.0
     loss_weight: !!float 1e-1
-  
-  mae_weight: 0.1
 
 # logging settings
 logger:
