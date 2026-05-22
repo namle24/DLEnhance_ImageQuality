@@ -2,7 +2,7 @@
 name: train_PD_MAE_RealESRGAN_x4plus
 model_type: RealESRGANModel
 scale: 4
-num_gpu: auto  # auto: can infer from your visible devices automatically. official: 4 GPUs
+num_gpu: 1  # single RTX 4500 GPU
 manual_seed: 0
 
 high_order_degradation: false
@@ -23,10 +23,10 @@ datasets:
     
     # data loader
     use_shuffle: true
-    num_worker_per_gpu: 5
-    batch_size_per_gpu: 12
-  dataset_enlarge_ratio: 1
-  prefetch_mode: ~
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 8
+    dataset_enlarge_ratio: 1
+    prefetch_mode: ~
 
   # validation dataset
   val:
@@ -125,7 +125,7 @@ logger:
   save_checkpoint_freq: !!float 5e3
   use_tb_logger: true
   wandb:
-    project: ~
+    project: PD-MAE-RealESRGAN
     resume_id: ~
 
 # dist training settings
