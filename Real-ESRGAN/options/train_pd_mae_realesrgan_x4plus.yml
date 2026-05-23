@@ -26,8 +26,6 @@ datasets:
     gt_size: 256
     use_hflip: True
     use_rot: False
-    val_freq: !!float 5e3
-    save_img: false
 
     # data loader
     use_shuffle: true
@@ -122,21 +120,17 @@ train:
     loss_weight: !!float 1e-1
 
 val:
-    val_freq: !!float 5e3
-    save_img: True
-    metrics:
-      psnr:
-        type: calculate_psnr
-        crop_border: 4
-        test_y_channel: True
-      
-      ssim:
-        type: calculate_ssim
-        crop_border: 4
-        test_y_channel: True
-      niqe:
-      type: calculate_niqe
+  val_freq: !!float 5e3
+  save_img: false
+  metrics:
+    psnr:
+      type: calculate_psnr
       crop_border: 4
+      test_y_channel: true
+    ssim:
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: true
 
 # logging settings
 logger:
