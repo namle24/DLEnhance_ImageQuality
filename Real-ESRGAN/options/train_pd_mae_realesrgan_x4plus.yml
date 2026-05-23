@@ -134,6 +134,9 @@ val:
         type: calculate_ssim
         crop_border: 4
         test_y_channel: True
+      niqe:
+      type: calculate_niqe
+      crop_border: 4
 
 # logging settings
 logger:
