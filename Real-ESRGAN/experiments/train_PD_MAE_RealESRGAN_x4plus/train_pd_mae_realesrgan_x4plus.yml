@@ -1,6 +1,6 @@
-# GENERATE TIME: Fri May 22 18:48:30 2026
+# GENERATE TIME: Sat May 23 09:18:00 2026
 # CMD:
-# Real-ESRGAN/realesrgan/train.py -opt Real-ESRGAN/options/train_pd_mae_realesrgan_x4plus.yml --launcher none
+# Real-ESRGAN/realesrgan/train.py -opt Real-ESRGAN/options/train_pd_mae_realesrgan_x4plus.yml --auto_resume
 
 # general settings
 name: train_PD_MAE_RealESRGAN_x4plus
@@ -30,8 +30,7 @@ datasets:
     gt_size: 256
     use_hflip: True
     use_rot: False
-    val_freq: !!float 5e3
-
+    
     # data loader
     use_shuffle: true
     num_worker_per_gpu: 4
