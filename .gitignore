@@ -196,3 +196,5 @@ graph/
 **/*.pyo
 **/*.pyd
 .ipynb_checkpoints/
+wandb/
+*.wandb
