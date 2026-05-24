@@ -1,5 +1,5 @@
 # general settings
-name: train_PD_MAE_RealESRGAN_x4plus
+name: train_PD_MAE_RealESRGAN_x4plus_20262405
 model_type: RealESRGANModel
 scale: 4
 num_gpu: 1  # single RTX 4500 GPU
@@ -70,7 +70,7 @@ path:
   pretrain_network_g: ~/DLEnhance_ImageQuality/Real-ESRGAN/experiments/pretrained_models/RealESRNet_x4plus.pth
   param_key_g: params_ema
   strict_load_g: false
-  resume_state: ~
+  resume_state: ~/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_PD_MAE_RealESRGAN_x4plus_20262405/training_states/100000.state
 
 # training settings
 train:
