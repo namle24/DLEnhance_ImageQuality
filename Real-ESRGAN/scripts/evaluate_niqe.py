@@ -8,8 +8,7 @@ import numpy as np
 from basicsr.metrics.niqe import calculate_niqe
 
 # thư mục visualization
-root_dir = 'experiments/train_PD_MAE_RealESRGAN_x4plus_20262405/visualization'
-
+root_dir = '/data/home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_PD_MAE_RealESRGAN_x4plus_20262405/visualization'
 # lấy tất cả subfolder
 subfolders = sorted([
     f for f in os.listdir(root_dir)
