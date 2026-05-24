@@ -167,6 +167,13 @@ graph/
 **/*.pt
 **/*.h5
 **/*.onnx
+experiments/
+*.pth
+*.pt
+wandb/
+tb_logger/
+logs/
+results/
 
 # Data and Experiments
 **/datasets/**/*.png
