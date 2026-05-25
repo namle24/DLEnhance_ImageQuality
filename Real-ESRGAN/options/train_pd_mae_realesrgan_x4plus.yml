@@ -11,7 +11,7 @@ high_order_degradation: false
 l1_gt_usm: true
 percep_gt_usm: true
 gan_gt_usm: false
-mae_weight: 0.05
+mae_weight: 0.0
 
 # dataset and data loader settings
 datasets:
@@ -70,7 +70,7 @@ path:
   pretrain_network_g: ~/DLEnhance_ImageQuality/Real-ESRGAN/experiments/pretrained_models/RealESRNet_x4plus.pth
   param_key_g: params_ema
   strict_load_g: false
-  resume_state: ~/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_PD_MAE_RealESRGAN_x4plus_20262405/training_states/100000.state
+  resume_state: ~/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_PD_MAE_RealESRGAN_x4plus_20262405/training_states/110000.state
 
 # training settings
 train:
