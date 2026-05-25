@@ -70,7 +70,7 @@ path:
   pretrain_network_g: ~/DLEnhance_ImageQuality/Real-ESRGAN/experiments/pretrained_models/RealESRNet_x4plus.pth
   param_key_g: params_ema
   strict_load_g: false
-  resume_state: ~/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_PD_MAE_RealESRGAN_x4plus_20262405/training_states/110000.state
+  resume_state: ~/DLEnhance_ImageQuality/Real-ESRGAN/experiments/train_PD_MAE_RealESRGAN_x4plus_20262405/training_states/150000.state
 
 # training settings
 train:
