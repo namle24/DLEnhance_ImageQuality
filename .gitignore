@@ -1,12 +1,14 @@
-# Byte-compiled / optimized / DLL files
+# =============================================================================
+# Python
+# =============================================================================
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
-
-# Distribution / packaging
+*.egg-info/
+*.egg
+.installed.cfg
+MANIFEST
 .Python
 build/
 develop-eggs/
@@ -21,22 +23,36 @@ sdist/
 var/
 wheels/
 share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+__pypackages__/
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+# =============================================================================
+# Virtual Environments
+# =============================================================================
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+# =============================================================================
+# IDE / Editor
+# =============================================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
 
-# Unit test / coverage reports
+# =============================================================================
+# Jupyter
+# =============================================================================
+.ipynb_checkpoints/
+
+# =============================================================================
+# Testing / Coverage
+# =============================================================================
 htmlcov/
 .tox/
 .nox/
@@ -51,156 +67,124 @@ coverage.xml
 .pytest_cache/
 cover/
 
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-.pybuilder/
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-#   For a library or binary, you should probably not check in the .python-version file.
-#   For a build environment, you should check it in.
-# .python-version
-
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or even
-#   fail to install, on other platforms.
-#Pipfile.lock
-
-# poetry
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
-#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
-
-# pdm
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#pdm.lock
-#   pdm plugins project root directory
-.pdm-plugins/
-
-# PEP 582; used by e.g. github.com/pypa/pdm
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
+# =============================================================================
+# Type Checkers
+# =============================================================================
 .mypy_cache/
 .dmypy.json
 dmypy.json
-
-# Pyre type checker
 .pyre/
-
-# pytype static type analyzer
 .pytype/
-
-# Cython debug symbols
 cython_debug/
 
-# PyCharm / JetBrains
-.idea/
-
-# VS Code
-.vscode/
-
-# Project specific ignores
-results/
-graph/
-*.pth
-*.ckpt
-*.weights
-**/*.pth
-**/*.ckpt
-**/*.weights
-**/*.pt
-**/*.h5
-**/*.onnx
-experiments/
+# =============================================================================
+# Deep Learning - Model Weights (sau training)
+# =============================================================================
 *.pth
 *.pt
-wandb/
-tb_logger/
-logs/
-results/
+*.ckpt
+*.weights
+*.h5
+*.onnx
+*.safetensors
+*.bin
 
-# Data and Experiments
-**/datasets/**/*.png
-**/datasets/**/*.npy
-**/data/
-**/logs/
+# =============================================================================
+# Deep Learning - Training Outputs / Experiments
+# =============================================================================
+# Training logs & visualization (giữ log text, ignore binary logs)
+wandb/
+*.wandb
+tb_logger/
 **/tb_logger/
+
+# Experiment outputs (model snapshots, generated images in experiments)
+experiments/**/
+# Nhưng giữ lại các file config/script trong experiments
+!experiments/
+!experiments/**/
+!experiments/**/*.yml
+!experiments/**/*.yaml
+!experiments/**/*.py
+!experiments/**/*.sh
+!experiments/**/*.md
+!**/experiments/
+!**/experiments/**/
+!**/experiments/**/*.yml
+!**/experiments/**/*.yaml
+!**/experiments/**/*.py
+!**/experiments/**/*.sh
+!**/experiments/**/*.md
+
+# Results output
+results/
+**/results/
+
+# Checkpoints
 **/checkpoint/
 **/checkpoints/
 **/pretrained_models/
-**/results/
 
-# Specifically ignore large files in experiments but keep scripts
-**/experiments/**/*.pth
-**/experiments/**/*.ckpt
-**/experiments/**/*.pt
-**/experiments/**/*.h5
-**/experiments/**/*.log
-**/experiments/**/*.json
-**/experiments/*/
+# =============================================================================
+# Dataset - Ignore large training data, KEEP source code in data/ folders
+# =============================================================================
+# KHÔNG dùng **/data/ vì sẽ chặn source code (vd: DRCT/drct/data/)
+# Chỉ ignore dataset contents cụ thể
+**/datasets/**/*.png
+**/datasets/**/*.jpg
+**/datasets/**/*.jpeg
+**/datasets/**/*.bmp
+**/datasets/**/*.tiff
+**/datasets/**/*.npy
+**/datasets/**/*.lmdb
+**/datasets/**/*.mdb
 
-# Junk and Temp
-.idea/
-.vscode/
-**/__pycache__/
-**/*.pyc
-**/*.pyo
-**/*.pyd
-.ipynb_checkpoints/
-wandb/
-*.wandb
+# =============================================================================
+# Images - Ignore output/generated images, KEEP test data & assets nhỏ
+# =============================================================================
+# Ignore ảnh trong Visualization output
+**/Visualization/**/*.png
+**/Visualization/**/*.jpg
+
+# =============================================================================
+# Agent Context / Prompt Markdown Files
+# =============================================================================
+# Các file .md dùng cho agent context, prompt, sketch - KHÔNG push lên
+**/*_context.md
+**/*_context_v2.md
+**/*_sketch.md
+**/*_sketch_v2.md
+**/*_history_context.md
+**/*_Architecture_Analysis.md
+review_*.md
+
+# =============================================================================
+# Graph / Diagram files (giữ .drawio vì nhẹ)
+# =============================================================================
+# graph/ folder - giữ lại vì chỉ có .drawio files
+
+# =============================================================================
+# Misc
+# =============================================================================
+# *.log  -- KHÔNG ignore *.log, giữ lại log để control training
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+*.mo
+*.pot
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+.scrapy
+docs/_build/
+.pybuilder/
+target/
+/site
+celerybeat-schedule
+celerybeat.pid
+*.sage.py
+.spyderproject
+.spyproject
+.ropeproject
+.pdm-plugins/
