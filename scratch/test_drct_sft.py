@@ -24,7 +24,7 @@ def test_drct_sft():
     print("Testing DRCT with SFT injection...")
     
     # Try to find a local checkpoint for testing, or use dummy
-    ckpt_path = os.path.join(proj_root, 'PD_MAE_SR/checkpoints/stage1_smoke_500_v2/pd_mae_s1_iter500.pth')
+    ckpt_path = os.path.join(proj_root, '~/data/dataset/train/PD_MAE_Checkpoints_Stage2/pd_mae_s2_iter100000.pth')
     if not os.path.exists(ckpt_path):
         ckpt_path = None
         print("No local checkpoint found. Running with uninitialized weights.")
