@@ -156,7 +156,6 @@ cython_debug/
 
 # Project specific ignores
 results/
-scratch/
 graph/
 *.pth
 *.ckpt
