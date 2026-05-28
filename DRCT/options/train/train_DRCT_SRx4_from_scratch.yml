@@ -75,7 +75,7 @@ network_g:
 
 # path
 path:
-  pretrain_network_g: ~/DRCT/experiments/pretrained_models/DRCT_X4.pth
+  pretrain_network_g: ~
   strict_load_g: false
   resume_state: ~
 
