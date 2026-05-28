@@ -71,7 +71,7 @@ network_g:
   upsampler: pixelshuffle
   resi_connection: 1conv
   use_sft: true
-  mae_checkpoint: ~/data/dataset/train/PD_MAE_Checkpoints_Stage2/pd_mae_s2_iter100000.pth
+  mae_checkpoint: /data/home/namlh/data/dataset/train/PD_MAE_Checkpoints_Stage2/pd_mae_s2_iter100000.pth
 
 # path
 path:
