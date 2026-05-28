@@ -44,13 +44,13 @@ datasets:
     io_backend:
       type: disk
 
-  # val_3:
-  #   name: Urban100
-  #   type: PairedImageDataset
-  #   dataroot_gt: ./datasets/urban100/GTmod4
-  #   dataroot_lq: ./datasets/urban100/LRbicx4
-  #   io_backend:
-  #     type: disk
+  val_3:
+    name: Set5
+    type: PairedImageDataset
+    dataroot_gt: ~/data/benchmark_datasets/Set5/Set5/GTmod12
+    dataroot_lq: ~/data/benchmark_datasets/Set5/Set5/LRbicx4
+    io_backend:
+      type: disk
 
 # network structures
 network_g:
