@@ -98,32 +98,17 @@ wandb/
 tb_logger/
 **/tb_logger/
 
-# Experiment outputs (model snapshots, generated images in experiments)
-experiments/**/
-# Nhưng giữ lại các file config/script trong experiments
-!experiments/
-!experiments/**/
-!experiments/**/*.yml
-!experiments/**/*.yaml
-!experiments/**/*.py
-!experiments/**/*.sh
-!experiments/**/*.md
-!**/experiments/
-!**/experiments/**/
-!**/experiments/**/*.yml
-!**/experiments/**/*.yaml
-!**/experiments/**/*.py
-!**/experiments/**/*.sh
-!**/experiments/**/*.md
+# Ignore training states/checkpoints instead of whole folders
+*.state
+*.states
+*.optimizer
+*.optim
+*.ckpt.state
+*.pth.tar
+*.tar
 
-# Results output
-results/
-**/results/
-
-# Checkpoints
-**/checkpoint/
-**/checkpoints/
-**/pretrained_models/
+# Keep checkpoint/pretrained folder structure in git.
+# Heavy model/state files inside are already ignored by extension rules above.
 
 # =============================================================================
 # Dataset - Ignore large training data, KEEP source code in data/ folders
@@ -140,17 +125,20 @@ results/
 **/datasets/**/*.mdb
 
 # =============================================================================
-# Images - Ignore output/generated images, KEEP test data & assets nhỏ
+# Images - Ignore images (keep folder structure with .gitkeep)
 # =============================================================================
-# Ignore ảnh trong Visualization output và experiments
-**/Visualization/**/*.png
-**/Visualization/**/*.jpg
-**/visualization/**/*.png
-**/visualization/**/*.jpg
-**/experiments/**/*.png
-**/experiments/**/*.jpg
-**/experiments/**/*.jpeg
-**/experiments/**/*.gif
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tif
+*.tiff
+*.webp
+*.avif
+
+# Keep placeholder files so empty dirs can be tracked
+!**/.gitkeep
 
 # =============================================================================
 # Agent Context / Prompt Markdown Files

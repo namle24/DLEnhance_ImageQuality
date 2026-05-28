@@ -1,0 +1,10 @@
+2026-05-12 22:34:54,021 - INFO - Starting Stage 1 Pretraining for 500 iterations...
+2026-05-12 22:36:03,580 - INFO - Iter 100/500 - Loss: 0.038371 - LR: 9.05e-05
+2026-05-12 22:36:03,642 - INFO - Saved visualization: PD_MAE_SR/checkpoints/stage1_smoke_500_v2\vis_iter100.png
+2026-05-12 22:37:03,083 - INFO - Iter 200/500 - Loss: 0.048467 - LR: 6.58e-05
+2026-05-12 22:38:00,610 - INFO - Iter 300/500 - Loss: 0.007812 - LR: 3.52e-05
+2026-05-12 22:38:57,357 - INFO - Iter 400/500 - Loss: 0.017999 - LR: 1.05e-05
+2026-05-12 22:39:52,292 - INFO - Iter 500/500 - Loss: 0.015826 - LR: 1.00e-06
+2026-05-12 22:39:52,555 - INFO - Saved checkpoint: PD_MAE_SR/checkpoints/stage1_smoke_500_v2\pd_mae_s1_iter500.pth
+2026-05-12 22:39:52,564 - INFO - Saved visualization: PD_MAE_SR/checkpoints/stage1_smoke_500_v2\vis_iter500.png
+2026-05-12 22:39:53,014 - INFO - Training complete.
