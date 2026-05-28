@@ -57,7 +57,7 @@ network_g:
   scale: 4
   use_sft: true
   img_size: 256
-  mae_checkpoint: ~/data/dataset/train/PD_MAE_Checkpoints_Stage2/pd_mae_s2_iter200000.pth
+  mae_checkpoint: ~/data/dataset/train/PD_MAE_Checkpoints_Stage2/pd_mae_s2_iter100000.pth
 
 network_d:
   type: UNetDiscriminatorSN
