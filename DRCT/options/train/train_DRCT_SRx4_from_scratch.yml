@@ -78,7 +78,7 @@ path:
   pretrain_network_g: ~
   strict_load_g: false
   # Phase 2: resume 100k + perceptual loss (adjust folder name if experiments/ has date suffix)
-  resume_state: /data/home/namlh/DLEnhance_ImageQuality/DRCT/experiments/train_PD_MAE_DRCT_x4/training_states/100000.state
+  resume_state: /data/home/namlh/DLEnhance_ImageQuality/DRCT/experiments/train_PD_MAE_DRCT_x4/training_states/105000.state
 
 # training settings
 train:
