@@ -149,7 +149,60 @@ To visually demonstrate the effectiveness of the PD-MAE prior, we present croppe
     \label{fig:qualitative_butterfly}
 \end{figure*}
 
-As shown in the visual comparison, the baseline DRCT often suffers from blur or artifacts under severe sensor noise. In contrast, by incorporating the restoration-oriented structural prior via SFT modulation, our model successfully reconstructs fine details, sharp edges, and clean textures that closely align with the Ground Truth reference.
+\begin{figure*}[!t]
+    \centering
+    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/InputLR_Canon_014.png}\label{fig_lq_c14}}
+    \hfil
+    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/Baseline_Canon_014_500000.png}\label{fig_baseline_c14}}
+    \hfil
+    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/PD_MAE_Canon_014_500000.png}\label{fig_ours_c14}}
+    \hfil
+    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/Canon_014.png}\label{fig_gt_c14}}
+    \caption{Qualitative comparison on the RealSR (Canon\_014) dataset. PD-MAE-DRCT recovers high-frequency edge structures and suppresses chromatic noise artifacts more effectively than the DRCT baseline.}
+    \label{fig:qualitative_canon014}
+\end{figure*}
+
+\begin{figure*}[!t]
+    \centering
+    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/InputLR_Nikon_018.png}\label{fig_lq_nk18}}
+    \hfil
+    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/Baseline_Nikon_018_500000.png}\label{fig_baseline_nk18}}
+    \hfil
+    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/PD_MAE_Nikon_018_500000.png}\label{fig_ours_nk18}}
+    \hfil
+    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/Nikon_018.png}\label{fig_gt_nk18}}
+    \caption{Qualitative comparison on the RealSR (Nikon\_018) dataset. The PD-MAE encoder prior effectively guides the SFT layers to suppress Nikon sensor noise patterns while restoring fine structural details.}
+    \label{fig:qualitative_nikon018}
+\end{figure*}
+
+\begin{figure*}[!t]
+    \centering
+    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/InputLR_Nikon_050.png}\label{fig_lq_nk50}}
+    \hfil
+    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/Baseline_Nikon_050_500000.png}\label{fig_baseline_nk50}}
+    \hfil
+    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/PD_MAE_Nikon_050_500000.png}\label{fig_ours_nk50}}
+    \hfil
+    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/Nikon_050.png}\label{fig_gt_nk50}}
+    \caption{Qualitative comparison on the RealSR (Nikon\_050) dataset. Our method consistently produces sharper textures and cleaner backgrounds compared to the baseline under challenging real-world Nikon camera noise.}
+    \label{fig:qualitative_nikon050}
+\end{figure*}
+
+\begin{figure*}[!t]
+    \centering
+    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/InputLR_baby.png}\label{fig_lq_baby}}
+    \hfil
+    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/Baseline_baby_500000.png}\label{fig_baseline_baby}}
+    \hfil
+    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/PD_MAE_baby_500000.png}\label{fig_ours_baby}}
+    \hfil
+    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/baby.png}\label{fig_gt_baby}}
+    \caption{Qualitative comparison on the Set5 (baby) dataset. Despite the modest PSNR tradeoff on synthetic benchmarks, our model preserves facial skin texture and hair detail more naturally than the baseline.}
+    \label{fig:qualitative_baby}
+\end{figure*}
+
+As shown in Figs. \ref{fig:qualitative_canon}--\ref{fig:qualitative_baby}, the baseline DRCT often suffers from residual blur or noise artifacts, especially on real-world camera data. By incorporating the restoration-oriented structural prior via SFT modulation, our model consistently reconstructs finer details, sharper edges, and cleaner textures that more closely align with the Ground Truth reference.
+
 
 \subsection{Analysis and Discussion}
 The experimental data reveals several critical behaviors of the proposed framework:

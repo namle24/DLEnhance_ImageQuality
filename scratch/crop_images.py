@@ -104,7 +104,7 @@ if __name__ == "__main__":
     # butterfly.png is typically 256x256 or 512x512.
     # Let's target the wing textures near (200, 100, 350, 250) or similar.
     # -------------------------------------------------------------
-    crop_box_bf = (150, 150, 278, 278) # 128x128 region (Adjustable)
+    crop_box_bf = (150, 150, 278, 278)
     crop_and_bbox(
         img_dir=img_dir,
         set_name="butterfly",
@@ -115,12 +115,22 @@ if __name__ == "__main__":
         crop_box=crop_box_bf,
         scale=4
     )
-    
-    # -------------------------------------------------------------
-    # 3. Processing Set 3: Nikon_018
-    # Let's specify crop box for Nikon camera noise set.
-    # -------------------------------------------------------------
-    crop_box_nikon = (400, 400, 600, 600) # x1, y1, x2, y2 (Adjustable)
+
+    # 3. Canon_014
+    crop_box_canon014 = (300, 300, 500, 500)
+    crop_and_bbox(
+        img_dir=img_dir,
+        set_name="Canon_014",
+        lr_name="InputLR_Canon_014.png",
+        base_name="Baseline_Canon_014_500000.png",
+        ours_name="PD_MAE_Canon_014_500000.png",
+        gt_name="Canon_014.png",
+        crop_box=crop_box_canon014,
+        scale=4
+    )
+
+    # 4. Nikon_018
+    crop_box_nikon018 = (400, 400, 700, 700)
     crop_and_bbox(
         img_dir=img_dir,
         set_name="Nikon_018",
@@ -128,6 +138,32 @@ if __name__ == "__main__":
         base_name="Baseline_Nikon_018_500000.png",
         ours_name="PD_MAE_Nikon_018_500000.png",
         gt_name="Nikon_018.png",
-        crop_box=crop_box_nikon,
+        crop_box=crop_box_nikon018,
+        scale=4
+    )
+
+    # 5. Nikon_050
+    crop_box_nikon050 = (400, 400, 700, 700)
+    crop_and_bbox(
+        img_dir=img_dir,
+        set_name="Nikon_050",
+        lr_name="InputLR_Nikon_050.png",
+        base_name="Baseline_Nikon_050_500000.png",
+        ours_name="PD_MAE_Nikon_050_500000.png",
+        gt_name="Nikon_050.png",
+        crop_box=crop_box_nikon050,
+        scale=4
+    )
+
+    # 6. Set5 baby
+    crop_box_baby = (100, 100, 220, 220)
+    crop_and_bbox(
+        img_dir=img_dir,
+        set_name="baby",
+        lr_name="InputLR_baby.png",
+        base_name="Baseline_baby_500000.png",
+        ours_name="PD_MAE_baby_500000.png",
+        gt_name="baby.png",
+        crop_box=crop_box_baby,
         scale=4
     )
