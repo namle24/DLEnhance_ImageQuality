@@ -1,4 +1,4 @@
-name: PD_MAE_DRCT_SRx4
+name: DRCT_baseline_SRx4
 model_type: DRCTModel
 scale: 4
 num_gpu: 1  # set num_gpu: 0 for cpu mode
