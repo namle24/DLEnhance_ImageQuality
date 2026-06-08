@@ -67,9 +67,9 @@ network_g:
 
 # path
 path:
-  pretrain_network_g: ~/DLEnhance_ImageQuality/DRCT/experiments/train_PD_MAE_DRCT_x4/models/net_g_500Kpth
-  strict_load_g: False
-  param_key_g: ~
+  pretrain_network_g: ~/DLEnhance_ImageQuality/DRCT/experiments/train_PD_MAE_DRCT_x4/models/net_g_500000.pth
+  strict_load_g: True
+  param_key_g: ~  
 
 # validation settings
 val:
