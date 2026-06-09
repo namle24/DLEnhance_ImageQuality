@@ -3,6 +3,7 @@
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
 \usepackage{graphicx}
+\graphicspath{{./}{results/}}
 \usepackage{textcomp}
 \usepackage{xcolor}
 \usepackage{booktabs}
@@ -30,9 +31,9 @@ Image Super-Resolution, Masked Autoencoder, Spatial Feature Transform, Real-Worl
 \end{IEEEkeywords}
 
 \section{Introduction}
-Real-world image super-resolution (SR) aims to restore high-quality (HQ) details from low-quality (LQ) observations degraded by unknown mixtures of blur, noise, downsampling, and compression. While generative adversarial networks (GANs) and diffusion models have advanced the perceptual realism of restored images, they often introduce hallucinated artifacts or incur extreme computational costs during inference. On the other hand, feed-forward architectures like the Dense-Residual Connected Transformer (DRCT) exhibit high fidelity but struggle to generalize when faced with severe, out-of-distribution camera noise.
+Real-world image super-resolution (SR) aims to restore high-quality (HQ) details from low-quality (LQ) observations degraded by unknown mixtures of blur, noise, downsampling, and compression. While generative adversarial networks (GANs) and diffusion models have advanced the perceptual realism of restored images, they often introduce hallucinated artifacts or incur extreme computational costs during inference. On the other hand, feed-forward architectures like the Dense-Residual Connected Transformer (DRCT) \cite{hsu2024drct} exhibit high fidelity but struggle to generalize when faced with severe, out-of-distribution camera noise.
 
-Recently, Self-Supervised Learning (SSL) via Masked Autoencoders (MAE) has emerged as a dominant paradigm in computer vision. However, standard MAE models are designed for downstream recognition tasks and suffer from two key limitations when applied to image restoration:
+Recently, Self-Supervised Learning (SSL) via Masked Autoencoders (MAE) \cite{he2022masked} has emerged as a dominant paradigm in computer vision. However, standard MAE models are designed for downstream recognition tasks and suffer from two key limitations when applied to image restoration:
 \begin{enumerate}
     \item \textbf{Degradation Unawareness:} Random patch masking removes content entirely, preventing the encoder from learning the subtle signatures of blur, sensor noise, or compression.
     \item \textbf{Domain Mismatch:} Reconstructing clean patches from masked clean inputs does not align with the blind SR objective, where the network must restore severely degraded regions.
@@ -44,6 +45,17 @@ Our experimental results at 500,000 iterations validate this approach, showing s
 
 \section{Proposed Method}
 The training of the PD-MAE-SR framework is structured into three progressive stages, transitioning from self-supervised restoration pretraining to downstream backbone integration.
+
+\subsection{Architecture Overview}
+Fig. \ref{fig:architecture} summarizes the full PD-MAE-DRCT pipeline. The first two stages train and calibrate a ViT-style MAE encoder on restoration-oriented objectives. Stage 3 freezes the calibrated encoder, extracts a spatial prior $f_{\text{mae}}$, and injects it into DRCT residual dense groups via SFT modulation. The architecture illustration is left as a placeholder and can be replaced by a manually redrawn paper-style diagram.
+
+\begin{figure*}[!t]
+    \centering
+    \fbox{\parbox[c][0.28\textheight][c]{0.92\textwidth}{\centering
+    Architecture diagram placeholder. Replace this box with the final paper-style PD-MAE-DRCT architecture figure.}}
+    \caption{Overall architecture of PD-MAE-DRCT. Stage 1 learns restoration-oriented priors through region-wise partial degradation; Stage 2 recalibrates the encoder on clean HR structure; Stage 3 freezes the PD-MAE encoder and injects its spatial prior into DRCT residual dense groups through SFT layers.}
+    \label{fig:architecture}
+\end{figure*}
 
 \subsection{Stage 1: Partial Degradation MAE Pretraining}
 In the first stage, the objective is to train the encoder to recognize and correct realistic degradations. Unlike standard MAE which randomly masks patches, we employ a \textbf{Region-wise Partial Degradation} strategy based on edge complexity.
@@ -86,7 +98,7 @@ f_{\text{mae}} \in \mathbb{R}^{B \times 384 \times \frac{H}{p} \times \frac{W}{p
 \end{equation}
 where $p = 8$ is the patch size of the encoder. 
 
-These features are projected to match the channel dimensions of DRCT and injected after key Dense-Residual Connected Transformer Groups (DCTG) using Spatial Feature Transform (SFT) layers:
+These features are projected to match the channel dimensions of DRCT and injected after key Dense-Residual Connected Transformer Groups (RDGs) using Spatial Feature Transform (SFT) layers:
 \begin{equation}
 \text{SFT}(F_{\text{drct}}, f_{\text{mae}}) = F_{\text{drct}} \odot (1 + \mathbf{S}(f_{\text{mae}})) + \mathbf{T}(f_{\text{mae}})
 \end{equation}
@@ -102,7 +114,7 @@ where $L_{\text{DRCT\_native}}$ is the original loss combination used by the DRC
 We trained both the baseline DRCT and the proposed PD-MAE-DRCT under identical environments for 500,000 iterations to perform a rigorous comparison.
 
 \subsection{Quantitative Performance}
-Table \ref{tab:results} summarizes the PSNR and NIQE metrics across various synthetic and real-world camera datasets.
+Table \ref{tab:results} summarizes the PSNR and NIQE \cite{mittal2012making} metrics across various synthetic and real-world camera datasets, including the Canon and Nikon subsets of RealSR \cite{cai2019toward}.
 
 \begin{table*}[htbp]
 \centering
@@ -112,96 +124,97 @@ Table \ref{tab:results} summarizes the PSNR and NIQE metrics across various synt
 \toprule
 \textbf{Model} & \textbf{Canon (RealSR)} & \textbf{Nikon (RealSR)} & \textbf{BSDS100} & \textbf{Urban100} & \textbf{Set14} & \textbf{Set5} \\
 \midrule
-DRCT Baseline & 27.18 / 7.14 & 26.59 / 7.34 & 23.93 / 7.42 & 21.59 / 6.01 & - / 7.37 & 27.59 / 7.85 \\
-PD-MAE-DRCT (Ours) & \textbf{27.22} / \textbf{6.82} & \textbf{26.64} / \textbf{6.78} & 23.88 / \textbf{6.57} & 21.49 / \textbf{5.63} & - / \textbf{7.18} & 27.49 / 8.12 \\
+DRCT Baseline & 27.18 / 7.14 & 26.59 / 7.34 & 23.93 / 7.42 & 21.59 / 6.01 & 25.47 / 7.37 & 27.59 / 7.85 \\
+PD-MAE-DRCT (Ours) & \textbf{27.22} / \textbf{6.82} & \textbf{26.64} / \textbf{6.78} & 23.88 / \textbf{6.57} & 21.49 / \textbf{5.63} & 25.36 / \textbf{7.18} & 27.49 / 8.12 \\
 \midrule
-\textbf{Delta (Ours - Base)} & \textbf{+0.04} / \textbf{-0.31} & \textbf{+0.05} / \textbf{-0.56} & -0.05 / \textbf{-0.85} & -0.10 / \textbf{-0.38} & - / \textbf{-0.18} & -0.10 / +0.27 \\
+\textbf{Delta (Ours - Base)} & \textbf{+0.04} / \textbf{-0.31} & \textbf{+0.05} / \textbf{-0.56} & -0.05 / \textbf{-0.85} & -0.10 / \textbf{-0.38} & -0.11 / \textbf{-0.18} & -0.10 / +0.27 \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
+
 \subsection{Qualitative Results}
-To visually demonstrate the effectiveness of the PD-MAE prior, we present cropped regions of restored structures on real-world camera data in Fig. \ref{fig:qualitative_canon} and synthetic benchmarks in Fig. \ref{fig:qualitative_butterfly}. 
+To visually demonstrate the effectiveness of the PD-MAE prior, we present cropped regions of restored structures on synthetic benchmarks in Figs. \ref{fig:qualitative_set5}--\ref{fig:qualitative_bsds100} and real-world camera data in Figs. \ref{fig:qualitative_realsr_canon}--\ref{fig:qualitative_realsr_nikon}.
 
 \begin{figure*}[!t]
     \centering
-    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/InputLR_Canon_004.png}\label{fig_lq_canon}}
+    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/set5-lq.png}\label{fig_lq_set5}}
     \hfil
-    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/Baseline_Canon_004_500000.png}\label{fig_baseline_canon}}
+    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/set5-baseline.png}\label{fig_baseline_set5}}
     \hfil
-    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/PD_MAE_Canon_004_500000.png}\label{fig_ours_canon}}
+    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/set5-ours.png}\label{fig_ours_set5}}
     \hfil
-    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/Canon_004.png}\label{fig_gt_canon}}
-    \caption{Qualitative comparison on the RealSR (Canon\_004) dataset. The proposed PD-MAE-DRCT model successfully removes sensor noise and restores clean geometric structures, closely matching the Ground Truth reference without introducing ringing artifacts.}
-    \label{fig:qualitative_canon}
+    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/set5-gt.png}\label{fig_gt_set5}}
+    \caption{Qualitative comparison on the Set5 (butterfly.png) dataset. Our model restores sharper edges and clearer wing patterns, indicating that the restoration-oriented prior helps guide the SFT layers even under standard synthetic degradation scenarios.}
+    \label{fig:qualitative_set5}
 \end{figure*}
 
 \begin{figure*}[!t]
     \centering
-    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/InputLR_butterfly.png}\label{fig_lq_bf}}
+    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/set14-lq.png}\label{fig_lq_set14}}
     \hfil
-    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/Baseline_butterfly_500000.png}\label{fig_baseline_bf}}
+    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/set14-baseline.png}\label{fig_baseline_set14}}
     \hfil
-    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/PD_MAE_butterfly_500000.png}\label{fig_ours_bf}}
+    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/set14-ours.png}\label{fig_ours_set14}}
     \hfil
-    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/butterfly.png}\label{fig_gt_bf}}
-    \caption{Qualitative comparison on the Set5 (butterfly) dataset. Our model restores sharper edges and clearer wing patterns, indicating that the restoration-oriented prior helps guide the SFT layers even under standard synthetic degradation scenarios.}
-    \label{fig:qualitative_butterfly}
+    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/set14-gt.png}\label{fig_gt_set14}}
+    \caption{Qualitative comparison on the Set14 (zebra.png) dataset. Our model restores sharper black-and-white stripes with significantly fewer ringing artifacts than the baseline.}
+    \label{fig:qualitative_set14}
 \end{figure*}
 
 \begin{figure*}[!t]
     \centering
-    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/InputLR_Canon_014.png}\label{fig_lq_c14}}
+    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/urban100-lq.png}\label{fig_lq_urban100}}
     \hfil
-    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/Baseline_Canon_014_500000.png}\label{fig_baseline_c14}}
+    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/urban100-baseline.png}\label{fig_baseline_urban100}}
     \hfil
-    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/PD_MAE_Canon_014_500000.png}\label{fig_ours_c14}}
+    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/urban100-ours.png}\label{fig_ours_urban100}}
     \hfil
-    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/Canon_014.png}\label{fig_gt_c14}}
-    \caption{Qualitative comparison on the RealSR (Canon\_014) dataset. PD-MAE-DRCT recovers high-frequency edge structures and suppresses chromatic noise artifacts more effectively than the DRCT baseline.}
-    \label{fig:qualitative_canon014}
+    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/urban100-gt.png}\label{fig_gt_urban100}}
+    \caption{Qualitative comparison on the Urban100 (img\_002.png) dataset. The PD-MAE prior successfully guides the reconstruction of regular structures (e.g. window glass lattices) without generating geometric distortions.}
+    \label{fig:qualitative_urban100}
 \end{figure*}
 
 \begin{figure*}[!t]
     \centering
-    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/InputLR_Nikon_018.png}\label{fig_lq_nk18}}
+    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/bsds100-lq.png}\label{fig_lq_bsds100}}
     \hfil
-    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/Baseline_Nikon_018_500000.png}\label{fig_baseline_nk18}}
+    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/bsds100-baseline.png}\label{fig_baseline_bsds100}}
     \hfil
-    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/PD_MAE_Nikon_018_500000.png}\label{fig_ours_nk18}}
+    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/bsds100-ours.png}\label{fig_ours_bsds100}}
     \hfil
-    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/Nikon_018.png}\label{fig_gt_nk18}}
-    \caption{Qualitative comparison on the RealSR (Nikon\_018) dataset. The PD-MAE encoder prior effectively guides the SFT layers to suppress Nikon sensor noise patterns while restoring fine structural details.}
-    \label{fig:qualitative_nikon018}
+    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/bsds100-gt.png}\label{fig_gt_bsds100}}
+    \caption{Qualitative comparison on the BSDS100 (108070.png) dataset. Our method effectively reconstructs fine natural textures like tiger fur while maintaining high perceptual fidelity.}
+    \label{fig:qualitative_bsds100}
 \end{figure*}
 
 \begin{figure*}[!t]
     \centering
-    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/InputLR_Nikon_050.png}\label{fig_lq_nk50}}
+    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/realsr-canon-lq.png}\label{fig_lq_canon}}
     \hfil
-    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/Baseline_Nikon_050_500000.png}\label{fig_baseline_nk50}}
+    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/realsr-canon-baseline.png}\label{fig_baseline_canon}}
     \hfil
-    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/PD_MAE_Nikon_050_500000.png}\label{fig_ours_nk50}}
+    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/realsr-canon-ours.png}\label{fig_ours_canon}}
     \hfil
-    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/Nikon_050.png}\label{fig_gt_nk50}}
-    \caption{Qualitative comparison on the RealSR (Nikon\_050) dataset. Our method consistently produces sharper textures and cleaner backgrounds compared to the baseline under challenging real-world Nikon camera noise.}
-    \label{fig:qualitative_nikon050}
+    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/realsr-canon-gt.png}\label{fig_gt_canon}}
+    \caption{Qualitative comparison on the RealSR Canon (Canon\_004.png) dataset. Our model suppresses complex sensor noise and recovers realistic edge structures with higher fidelity compared to the baseline.}
+    \label{fig:qualitative_realsr_canon}
 \end{figure*}
 
 \begin{figure*}[!t]
     \centering
-    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/InputLR_baby.png}\label{fig_lq_baby}}
+    \subfloat[Low Quality (LQ)]{\includegraphics[width=0.24\textwidth]{pd_mae/realsr-nikon-lq.png}\label{fig_lq_nikon}}
     \hfil
-    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/Baseline_baby_500000.png}\label{fig_baseline_baby}}
+    \subfloat[DRCT Baseline]{\includegraphics[width=0.24\textwidth]{pd_mae/realsr-nikon-baseline.png}\label{fig_baseline_nikon}}
     \hfil
-    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/PD_MAE_baby_500000.png}\label{fig_ours_baby}}
+    \subfloat[PD-MAE-DRCT (Ours)]{\includegraphics[width=0.24\textwidth]{pd_mae/realsr-nikon-ours.png}\label{fig_ours_nikon}}
     \hfil
-    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/baby.png}\label{fig_gt_baby}}
-    \caption{Qualitative comparison on the Set5 (baby) dataset. Despite the modest PSNR tradeoff on synthetic benchmarks, our model preserves facial skin texture and hair detail more naturally than the baseline.}
-    \label{fig:qualitative_baby}
+    \subfloat[Ground Truth (GT)]{\includegraphics[width=0.24\textwidth]{pd_mae/realsr-nikon-gt.png}\label{fig_gt_nikon}}
+    \caption{Qualitative comparison on the RealSR Nikon (Nikon\_050.png) dataset. The PD-MAE prior effectively filters camera noise patterns and reconstructs clean textures, closely matching the GT reference.}
+    \label{fig:qualitative_realsr_nikon}
 \end{figure*}
 
-As shown in Figs. \ref{fig:qualitative_canon}--\ref{fig:qualitative_baby}, the baseline DRCT often suffers from residual blur or noise artifacts, especially on real-world camera data. By incorporating the restoration-oriented structural prior via SFT modulation, our model consistently reconstructs finer details, sharper edges, and cleaner textures that more closely align with the Ground Truth reference.
+As shown in Figs. \ref{fig:qualitative_set5}--\ref{fig:qualitative_realsr_nikon}, the baseline DRCT often suffers from residual blur or noise artifacts, especially on real-world camera data. By incorporating the restoration-oriented structural prior via SFT modulation, our model consistently reconstructs finer details, sharper edges, and cleaner textures that more closely align with the Ground Truth reference.
 
 
 \subsection{Analysis and Discussion}
@@ -212,7 +225,13 @@ The experimental data reveals several critical behaviors of the proposed framewo
     \item \textbf{Minimal Distortion Tradeoff:} On synthetic datasets (Set5, BSDS100, Urban100), the slight drop in PSNR (ranging from -0.05 dB to -0.10 dB) is extremely small and represents a highly favorable tradeoff given the massive improvements in visual naturalness (NIQE).
 \end{enumerate}
 
+\section{Limitations}
+Although PD-MAE-DRCT improves perceptual quality on most benchmarks, the current evaluation remains limited to $4\times$ SR and a single DRCT-style backbone configuration. The frozen MAE branch also introduces extra feature-extraction computation during inference, even though its parameters are not updated during Stage 3. Finally, the slight PSNR drop on synthetic datasets suggests that the strength and placement of SFT guidance should be further tuned, especially for distortion-sensitive settings.
+
 \section{Conclusion}
 This report presented the PD-MAE-SR framework, which utilizes region-wise partial degradation pretraining and HR calibration to extract restoration-oriented structural priors. By integrating these priors into the SOTA DRCT backbone via SFT modulation, we achieved substantial perceptual gains. The model demonstrates simultaneous improvements in PSNR and NIQE on real-world datasets, establishing a highly robust solution for blind image super-resolution without adding inference-time trainable parameters.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
 
 \end{document}

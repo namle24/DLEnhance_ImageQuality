@@ -1,9 +1,0 @@
-# Fdb version 4
-["pdflatex"] 0 "./results/pd_mae_drct_report.tex" "pd_mae_drct_report.pdf" "pd_mae_drct_report" 0 -1
-  "./results/pd_mae_drct_report.tex" 0 -1 0 ""
-  "pd_mae_drct_report.aux" 0 -1 0 "pdflatex"
-  (generated)
-  "pd_mae_drct_report.aux"
-  "pd_mae_drct_report.log"
-  "pd_mae_drct_report.pdf"
-  (rewritten before read)
