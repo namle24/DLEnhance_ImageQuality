@@ -47,12 +47,11 @@ Our experimental results at 500,000 iterations validate this approach, showing s
 The training of the PD-MAE-SR framework is structured into three progressive stages, transitioning from self-supervised restoration pretraining to downstream backbone integration.
 
 \subsection{Architecture Overview}
-Fig. \ref{fig:architecture} summarizes the full PD-MAE-DRCT pipeline. The first two stages train and calibrate a ViT-style MAE encoder on restoration-oriented objectives. Stage 3 freezes the calibrated encoder, extracts a spatial prior $f_{\text{mae}}$, and injects it into DRCT residual dense groups via SFT modulation. The architecture illustration is left as a placeholder and can be replaced by a manually redrawn paper-style diagram.
+Fig. \ref{fig:architecture} summarizes the full PD-MAE-DRCT pipeline. The first two stages train and calibrate a ViT-style MAE encoder on restoration-oriented objectives. Stage 3 freezes the calibrated encoder, extracts a spatial prior $f_{\text{mae}}$, and injects it into DRCT residual dense groups via SFT modulation.
 
 \begin{figure*}[!t]
     \centering
-    \fbox{\parbox[c][0.28\textheight][c]{0.92\textwidth}{\centering
-    Architecture diagram placeholder. Replace this box with the final paper-style PD-MAE-DRCT architecture figure.}}
+    \includegraphics[width=0.98\textwidth,height=0.72\textheight,keepaspectratio]{pd_mae/pd-mae-drct-architecture-final.png}
     \caption{Overall architecture of PD-MAE-DRCT. Stage 1 learns restoration-oriented priors through region-wise partial degradation; Stage 2 recalibrates the encoder on clean HR structure; Stage 3 freezes the PD-MAE encoder and injects its spatial prior into DRCT residual dense groups through SFT layers.}
     \label{fig:architecture}
 \end{figure*}
@@ -87,7 +86,7 @@ L_{\text{OptionX}} = \frac{1}{\sum_k \text{Mask}(k)} \sum_{k} \text{Mask}(k) \cd
 where $\hat{I}_{\text{HR}}^{(k)}$ and $I_{\text{HR}}^{(k)}$ denote the reconstructed and ground-truth pixel values of the $k$-th patch, respectively.
 
 \subsection{Stage 2: HR Structure Calibration}
-Pretraining on heavily degraded synthetic inputs can cause the encoder to drift away from the clean HR texture domain. To calibrate the encoder, Stage 2 trains the network strictly on clean HR patches. We apply a 50\% random grid mask, setting the masked pixels to zero (black). The target remains the intact HR patch. The learning rate is reduced by a factor of 10 ($1 \times 10^{-5}$) to fine-tune the encoder weights gently, ensuring they remain representative of clean textures while retaining the restoration priors learned in Stage 1.
+Pretraining on heavily degraded synthetic inputs can cause the encoder to drift away from the clean HR texture domain. To calibrate the encoder, Stage 2 trains the network strictly on clean HR patches. We apply a 75\% random grid mask, setting the masked pixels to zero (black). The target remains the intact HR patch. The learning rate is reduced by a factor of 10 ($1 \times 10^{-5}$) to fine-tune the encoder weights gently, ensuring they remain representative of clean textures while retaining the restoration priors learned in Stage 1.
 
 \subsection{Stage 3: Downstream SFT Injection into DRCT}
 In the final stage, the pretrained and calibrated PD-MAE encoder is frozen and used as a structural guidance branch for the SR backbone (DRCT). 
