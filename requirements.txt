@@ -1,18 +1,32 @@
+# PyTorch
+torch>=1.7
+torchvision
+
+# Core Deep Learning & Architectures
 basicsr>=1.4.2
-facexlib>=0.2.5
-gfpgan>=1.3.5
 timm
 einops
-addict
-future
+
+# Image & Data Processing
 numpy>=1.17
 opencv-python
 Pillow
-pyyaml
-requests
 scikit-image
 scipy
-torch>=1.7
-torchvision
+addict
+future
+lmdb
+cython
+
+# Face Restoration / Alignment (needed for GFPGAN / Real-ESRGAN components)
+facexlib>=0.2.5
+gfpgan>=1.3.5
+
+# Training, Logging & Utilities
+pyyaml
+requests
 tqdm
 yapf
+tensorboard
+tensorboardX
+wandb
