@@ -1,0 +1,116 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{hsu2024drct}
+\citation{he2022masked}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {II}Proposed Method}{1}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Architecture Overview}{1}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Stage 1: Partial Degradation MAE Pretraining}{1}{subsection.2.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Overall architecture of PD-MAE-DRCT. Stage 1 learns restoration-oriented priors through region-wise partial degradation; Stage 2 recalibrates the encoder on clean HR structure; Stage 3 freezes the PD-MAE encoder and injects its spatial prior into DRCT residual dense groups through SFT layers.}}{2}{figure.1}\protected@file@percent }
+\newlabel{fig:architecture}{{1}{2}{Overall architecture of PD-MAE-DRCT. Stage 1 learns restoration-oriented priors through region-wise partial degradation; Stage 2 recalibrates the encoder on clean HR structure; Stage 3 freezes the PD-MAE encoder and injects its spatial prior into DRCT residual dense groups through SFT layers}{figure.1}{}}
+\citation{mittal2012making}
+\citation{cai2019toward}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Stage 2: HR Structure Calibration}{3}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}Stage 3: Downstream SFT Injection into DRCT}{3}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Experimental Results}{3}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Quantitative Performance}{3}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Qualitative Results}{3}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Analysis and Discussion}{3}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Limitations}{3}{section.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Quantitative Comparison at 500k Iterations (PSNR $\uparrow $ / NIQE $\downarrow $)}}{4}{table.1}\protected@file@percent }
+\newlabel{tab:results}{{I}{4}{Quantitative Comparison at 500k Iterations (PSNR $\uparrow $ / NIQE $\downarrow $)}{table.1}{}}
+\newlabel{fig_lq_set5}{{2a}{4}{Subfigure 2a}{subfigure.2.1}{}}
+\newlabel{sub@fig_lq_set5}{{(a)}{a}{Subfigure 2a\relax }{subfigure.2.1}{}}
+\newlabel{fig_baseline_set5}{{2b}{4}{Subfigure 2b}{subfigure.2.2}{}}
+\newlabel{sub@fig_baseline_set5}{{(b)}{b}{Subfigure 2b\relax }{subfigure.2.2}{}}
+\newlabel{fig_ours_set5}{{2c}{4}{Subfigure 2c}{subfigure.2.3}{}}
+\newlabel{sub@fig_ours_set5}{{(c)}{c}{Subfigure 2c\relax }{subfigure.2.3}{}}
+\newlabel{fig_gt_set5}{{2d}{4}{Subfigure 2d}{subfigure.2.4}{}}
+\newlabel{sub@fig_gt_set5}{{(d)}{d}{Subfigure 2d\relax }{subfigure.2.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Qualitative comparison on the Set5 (butterfly.png) dataset. Our model restores sharper edges and clearer wing patterns, indicating that the restoration-oriented prior helps guide the SFT layers even under standard synthetic degradation scenarios.}}{4}{figure.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Low Quality (LQ)}}}{4}{subfigure.2.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {DRCT Baseline}}}{4}{subfigure.2.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {PD-MAE-DRCT (Ours)}}}{4}{subfigure.2.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {Ground Truth (GT)}}}{4}{subfigure.2.4}\protected@file@percent }
+\newlabel{fig:qualitative_set5}{{2}{4}{Qualitative comparison on the Set5 (butterfly.png) dataset. Our model restores sharper edges and clearer wing patterns, indicating that the restoration-oriented prior helps guide the SFT layers even under standard synthetic degradation scenarios}{figure.2}{}}
+\newlabel{fig_lq_set14}{{3a}{4}{Subfigure 3a}{subfigure.3.1}{}}
+\newlabel{sub@fig_lq_set14}{{(a)}{a}{Subfigure 3a\relax }{subfigure.3.1}{}}
+\newlabel{fig_baseline_set14}{{3b}{4}{Subfigure 3b}{subfigure.3.2}{}}
+\newlabel{sub@fig_baseline_set14}{{(b)}{b}{Subfigure 3b\relax }{subfigure.3.2}{}}
+\newlabel{fig_ours_set14}{{3c}{4}{Subfigure 3c}{subfigure.3.3}{}}
+\newlabel{sub@fig_ours_set14}{{(c)}{c}{Subfigure 3c\relax }{subfigure.3.3}{}}
+\newlabel{fig_gt_set14}{{3d}{4}{Subfigure 3d}{subfigure.3.4}{}}
+\newlabel{sub@fig_gt_set14}{{(d)}{d}{Subfigure 3d\relax }{subfigure.3.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Qualitative comparison on the Set14 (zebra.png) dataset. Our model restores sharper black-and-white stripes with significantly fewer ringing artifacts than the baseline.}}{4}{figure.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Low Quality (LQ)}}}{4}{subfigure.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {DRCT Baseline}}}{4}{subfigure.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {PD-MAE-DRCT (Ours)}}}{4}{subfigure.3.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {Ground Truth (GT)}}}{4}{subfigure.3.4}\protected@file@percent }
+\newlabel{fig:qualitative_set14}{{3}{4}{Qualitative comparison on the Set14 (zebra.png) dataset. Our model restores sharper black-and-white stripes with significantly fewer ringing artifacts than the baseline}{figure.3}{}}
+\newlabel{fig_lq_urban100}{{4a}{4}{Subfigure 4a}{subfigure.4.1}{}}
+\newlabel{sub@fig_lq_urban100}{{(a)}{a}{Subfigure 4a\relax }{subfigure.4.1}{}}
+\newlabel{fig_baseline_urban100}{{4b}{4}{Subfigure 4b}{subfigure.4.2}{}}
+\newlabel{sub@fig_baseline_urban100}{{(b)}{b}{Subfigure 4b\relax }{subfigure.4.2}{}}
+\newlabel{fig_ours_urban100}{{4c}{4}{Subfigure 4c}{subfigure.4.3}{}}
+\newlabel{sub@fig_ours_urban100}{{(c)}{c}{Subfigure 4c\relax }{subfigure.4.3}{}}
+\newlabel{fig_gt_urban100}{{4d}{4}{Subfigure 4d}{subfigure.4.4}{}}
+\newlabel{sub@fig_gt_urban100}{{(d)}{d}{Subfigure 4d\relax }{subfigure.4.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Qualitative comparison on the Urban100 (img\_002.png) dataset. The PD-MAE prior successfully guides the reconstruction of regular structures (e.g. window glass lattices) without generating geometric distortions.}}{4}{figure.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Low Quality (LQ)}}}{4}{subfigure.4.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {DRCT Baseline}}}{4}{subfigure.4.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {PD-MAE-DRCT (Ours)}}}{4}{subfigure.4.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {Ground Truth (GT)}}}{4}{subfigure.4.4}\protected@file@percent }
+\newlabel{fig:qualitative_urban100}{{4}{4}{Qualitative comparison on the Urban100 (img\_002.png) dataset. The PD-MAE prior successfully guides the reconstruction of regular structures (e.g. window glass lattices) without generating geometric distortions}{figure.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Conclusion}{4}{section.5}\protected@file@percent }
+\bibstyle{IEEEtran}
+\bibdata{references}
+\bibcite{hsu2024drct}{1}
+\bibcite{he2022masked}{2}
+\bibcite{mittal2012making}{3}
+\bibcite{cai2019toward}{4}
+\newlabel{fig_lq_bsds100}{{5a}{5}{Subfigure 5a}{subfigure.5.1}{}}
+\newlabel{sub@fig_lq_bsds100}{{(a)}{a}{Subfigure 5a\relax }{subfigure.5.1}{}}
+\newlabel{fig_baseline_bsds100}{{5b}{5}{Subfigure 5b}{subfigure.5.2}{}}
+\newlabel{sub@fig_baseline_bsds100}{{(b)}{b}{Subfigure 5b\relax }{subfigure.5.2}{}}
+\newlabel{fig_ours_bsds100}{{5c}{5}{Subfigure 5c}{subfigure.5.3}{}}
+\newlabel{sub@fig_ours_bsds100}{{(c)}{c}{Subfigure 5c\relax }{subfigure.5.3}{}}
+\newlabel{fig_gt_bsds100}{{5d}{5}{Subfigure 5d}{subfigure.5.4}{}}
+\newlabel{sub@fig_gt_bsds100}{{(d)}{d}{Subfigure 5d\relax }{subfigure.5.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Qualitative comparison on the BSDS100 (108070.png) dataset. Our method effectively reconstructs fine natural textures like tiger fur while maintaining high perceptual fidelity.}}{5}{figure.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Low Quality (LQ)}}}{5}{subfigure.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {DRCT Baseline}}}{5}{subfigure.5.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {PD-MAE-DRCT (Ours)}}}{5}{subfigure.5.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {Ground Truth (GT)}}}{5}{subfigure.5.4}\protected@file@percent }
+\newlabel{fig:qualitative_bsds100}{{5}{5}{Qualitative comparison on the BSDS100 (108070.png) dataset. Our method effectively reconstructs fine natural textures like tiger fur while maintaining high perceptual fidelity}{figure.5}{}}
+\newlabel{fig_lq_canon}{{6a}{5}{Subfigure 6a}{subfigure.6.1}{}}
+\newlabel{sub@fig_lq_canon}{{(a)}{a}{Subfigure 6a\relax }{subfigure.6.1}{}}
+\newlabel{fig_baseline_canon}{{6b}{5}{Subfigure 6b}{subfigure.6.2}{}}
+\newlabel{sub@fig_baseline_canon}{{(b)}{b}{Subfigure 6b\relax }{subfigure.6.2}{}}
+\newlabel{fig_ours_canon}{{6c}{5}{Subfigure 6c}{subfigure.6.3}{}}
+\newlabel{sub@fig_ours_canon}{{(c)}{c}{Subfigure 6c\relax }{subfigure.6.3}{}}
+\newlabel{fig_gt_canon}{{6d}{5}{Subfigure 6d}{subfigure.6.4}{}}
+\newlabel{sub@fig_gt_canon}{{(d)}{d}{Subfigure 6d\relax }{subfigure.6.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Qualitative comparison on the RealSR Canon (Canon\_004.png) dataset. Our model suppresses complex sensor noise and recovers realistic edge structures with higher fidelity compared to the baseline.}}{5}{figure.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Low Quality (LQ)}}}{5}{subfigure.6.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {DRCT Baseline}}}{5}{subfigure.6.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {PD-MAE-DRCT (Ours)}}}{5}{subfigure.6.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {Ground Truth (GT)}}}{5}{subfigure.6.4}\protected@file@percent }
+\newlabel{fig:qualitative_realsr_canon}{{6}{5}{Qualitative comparison on the RealSR Canon (Canon\_004.png) dataset. Our model suppresses complex sensor noise and recovers realistic edge structures with higher fidelity compared to the baseline}{figure.6}{}}
+\newlabel{fig_lq_nikon}{{7a}{5}{Subfigure 7a}{subfigure.7.1}{}}
+\newlabel{sub@fig_lq_nikon}{{(a)}{a}{Subfigure 7a\relax }{subfigure.7.1}{}}
+\newlabel{fig_baseline_nikon}{{7b}{5}{Subfigure 7b}{subfigure.7.2}{}}
+\newlabel{sub@fig_baseline_nikon}{{(b)}{b}{Subfigure 7b\relax }{subfigure.7.2}{}}
+\newlabel{fig_ours_nikon}{{7c}{5}{Subfigure 7c}{subfigure.7.3}{}}
+\newlabel{sub@fig_ours_nikon}{{(c)}{c}{Subfigure 7c\relax }{subfigure.7.3}{}}
+\newlabel{fig_gt_nikon}{{7d}{5}{Subfigure 7d}{subfigure.7.4}{}}
+\newlabel{sub@fig_gt_nikon}{{(d)}{d}{Subfigure 7d\relax }{subfigure.7.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Qualitative comparison on the RealSR Nikon (Nikon\_050.png) dataset. The PD-MAE prior effectively filters camera noise patterns and reconstructs clean textures, closely matching the GT reference.}}{5}{figure.7}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Low Quality (LQ)}}}{5}{subfigure.7.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {DRCT Baseline}}}{5}{subfigure.7.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {PD-MAE-DRCT (Ours)}}}{5}{subfigure.7.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {Ground Truth (GT)}}}{5}{subfigure.7.4}\protected@file@percent }
+\newlabel{fig:qualitative_realsr_nikon}{{7}{5}{Qualitative comparison on the RealSR Nikon (Nikon\_050.png) dataset. The PD-MAE prior effectively filters camera noise patterns and reconstructs clean textures, closely matching the GT reference}{figure.7}{}}
+\@writefile{toc}{\contentsline {section}{References}{5}{section*.1}\protected@file@percent }
+\gdef \@abspage@last{5}
