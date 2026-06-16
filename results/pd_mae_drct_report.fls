@@ -159,6 +159,9 @@ INPUT c:/texlive/2026/texmf-dist/tex/latex/caption/caption3.sty
 INPUT c:/texlive/2026/texmf-dist/tex/latex/caption/caption3.sty
 INPUT c:/texlive/2026/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 INPUT c:/texlive/2026/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
+INPUT ./pd_mae_drct_report.aux
+INPUT ./pd_mae_drct_report.aux
+INPUT pd_mae_drct_report.aux
 OUTPUT pd_mae_drct_report.aux
 INPUT c:/texlive/2026/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 INPUT c:/texlive/2026/texmf-dist/tex/context/base/mkii/supp-pdf.mkii

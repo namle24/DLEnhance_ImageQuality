@@ -11,8 +11,8 @@ datasets:
   train:
     name: DF2K
     type: PairedImageDataset
-    dataroot_gt: /storage/student12/namlh/data/DF2K/HR
-    dataroot_lq: /storage/student12/namlh/data/DF2K/HR_flat
+    dataroot_gt: /storage/student12/namlh/data/DF2K/HR_flat
+    dataroot_lq: /storage/student12/namlh/data/DF2K/LR_bicubic_X4
     io_backend:
       type: disk
 

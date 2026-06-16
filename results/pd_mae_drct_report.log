@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.8)  16 JUN 2026 16:34
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.8)  16 JUN 2026 17:00
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -405,7 +405,7 @@ File: l3backend-pdftex.def 2026-02-18 L3 backend support: PDF output (pdfTeX)
 LaTeX Warning: Unused global option(s):
     [doublecolumn].
 
-No file pd_mae_drct_report.aux.
+(./pd_mae_drct_report.aux)
 \openout1 = `pd_mae_drct_report.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 15.
@@ -426,6 +426,7 @@ LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 15.
 LaTeX Font Info:    ... okay on input line 15.
 LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 15.
 LaTeX Font Info:    ... okay on input line 15.
+
 -- Lines per column: 58 (exact).
 (c:/texlive/2026/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -918,10 +919,10 @@ Package rerunfilecheck Info: Checksums for `pd_mae_drct_report.out':
 (rerunfilecheck)             After:  F59A6336282CFDD821AEC56B9A302F14;2153.
  ) 
 Here is how much of TeX's memory you used:
- 13553 strings out of 467167
- 228157 string characters out of 5413692
- 652273 words of memory out of 5000000
- 42584 multiletter control sequences out of 15000+600000
+ 13556 strings out of 467167
+ 228238 string characters out of 5413692
+ 652264 words of memory out of 5000000
+ 42585 multiletter control sequences out of 15000+600000
  670102 words of font info for 121 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  74i,10n,79p,1621b,455s stack positions out of 10000i,1000n,20000p,200000b,200000s
