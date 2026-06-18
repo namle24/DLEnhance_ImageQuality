@@ -10,8 +10,8 @@ datasets:
   train:
     name: DF2K
     type: PairedImageDataset
-    dataroot_gt: /storage/student12/namlh/data/DF2K/HR_flat
-    dataroot_lq: /storage/student12/namlh/data/DF2K/LR_bicubic_X4
+    dataroot_gt: /data/home/namlh/data/dataset/train/DF2K/HR
+    dataroot_lq: /data/home/namlh/data/dataset/train/DF2K/LR_bicubic_X4
     io_backend:
       type: disk
 
@@ -29,16 +29,16 @@ datasets:
   val_1:
     name: Set5
     type: PairedImageDataset
-    dataroot_gt: /storage/student12/namlh/data/benchmark_datasets/Set5/Set5/GTmod12
-    dataroot_lq: /storage/student12/namlh/data/benchmark_datasets/Set5/Set5/LRbicx4
+    dataroot_gt: /data/home/namlh/data/benchmark_datasets/Set5/Set5/GTmod12
+    dataroot_lq: /data/home/namlh/data/benchmark_datasets/Set5/Set5/LRbicx4
     io_backend:
       type: disk
 
   val_2:
     name: Set14
     type: PairedImageDataset
-    dataroot_gt: /storage/student12/namlh/data/benchmark_datasets/Set14/Set14/GTmod12
-    dataroot_lq: /storage/student12/namlh/data/benchmark_datasets/Set14/Set14/LRbicx4
+    dataroot_gt: /data/home/namlh/data/benchmark_datasets/Set14/Set14/GTmod12
+    dataroot_lq: /data/home/namlh/data/benchmark_datasets/Set14/Set14/LRbicx4
     io_backend:
       type: disk
 
@@ -136,3 +136,4 @@ logger:
 dist_params:
   backend: nccl
   port: 29500
+  
