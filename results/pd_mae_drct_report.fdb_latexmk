@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex pd_mae_drct_report"] 1781602458.27919 "pd_mae_drct_report.aux" "pd_mae_drct_report.bbl" "pd_mae_drct_report" 1781602466.56974 0
+["bibtex pd_mae_drct_report"] 0 "pd_mae_drct_report.aux" "pd_mae_drct_report.bbl" "pd_mae_drct_report" 0 -1
   "./references.bib" 1781077348 9094 8c0d1bd72400436d75dc56461bf873c1 ""
   "c:/texlive/2026/texmf-dist/bibtex/bst/ieeetran/IEEEtran.bst" 1780928217 57748 7c8250ecf02814ce6ddc0cdbb63df1dd ""
-  "pd_mae_drct_report.aux" 1781602465 13347 9d9a51a0be4290b593e495d8268734ee "pdflatex"
+  "pd_mae_drct_report.aux" 1781604029 13347 9d9a51a0be4290b593e495d8268734ee "pdflatex"
   (generated)
   "pd_mae_drct_report.bbl"
   "pd_mae_drct_report.blg"
   (rewritten before read)
-["pdflatex"] 1781602464.13667 "d:/Projects/DLEnhance_ImageQuality/results/pd_mae_drct_report.tex" "pd_mae_drct_report.pdf" "pd_mae_drct_report" 1781602466.57024 2
+["pdflatex"] 1781604028.49855 "d:/Projects/DLEnhance_ImageQuality/results/pd_mae_drct_report.tex" "pd_mae_drct_report.pdf" "pd_mae_drct_report" 1781604030.81445 2
   "c:/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc" 1780926778 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "c:/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1780927478 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "c:/texlive/2026/texmf-dist/fonts/tfm/adobe/courier/pcrr7t.tfm" 1780926277 960 379cc0019370a9e0208a0a3f949f847a ""
@@ -125,7 +125,7 @@
   "c:/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1780933500 5619402 ad1310ccf7f36101ef3e8f014a173c46 ""
   "c:/texlive/2026/texmf-var/web2c/pdftex/pdflatex.fmt" 1780933863 3656620 b1567a343228dafebff56bc45e01d5c7 ""
   "c:/texlive/2026/texmf.cnf" 1780933472 713 e69b156964470283e0530f5060668171 ""
-  "d:/Projects/DLEnhance_ImageQuality/results/pd_mae_drct_report.tex" 1781602456 19611 2ca8e80bb469032cfe7d851892b88a23 ""
+  "d:/Projects/DLEnhance_ImageQuality/results/pd_mae_drct_report.tex" 1781604027 19611 2ca8e80bb469032cfe7d851892b88a23 ""
   "pd_mae/bsds100-baseline.png" 0 -1 0 ""
   "pd_mae/bsds100-gt.png" 0 -1 0 ""
   "pd_mae/bsds100-lq.png" 0 -1 0 ""
@@ -151,10 +151,10 @@
   "pd_mae/urban100-gt.png" 0 -1 0 ""
   "pd_mae/urban100-lq.png" 0 -1 0 ""
   "pd_mae/urban100-ours.png" 0 -1 0 ""
-  "pd_mae_drct_report.aux" 1781602465 13347 9d9a51a0be4290b593e495d8268734ee "pdflatex"
+  "pd_mae_drct_report.aux" 1781604029 13347 9d9a51a0be4290b593e495d8268734ee "pdflatex"
   "pd_mae_drct_report.bbl" 1781602458 1871 fd8ee93d081c052ccb6a1c8bbc71a067 "bibtex pd_mae_drct_report"
-  "pd_mae_drct_report.out" 1781602465 2153 f59a6336282cfdd821aec56b9a302f14 "pdflatex"
-  "pd_mae_drct_report.tex" 1781602456 19611 2ca8e80bb469032cfe7d851892b88a23 ""
+  "pd_mae_drct_report.out" 1781604029 2153 f59a6336282cfdd821aec56b9a302f14 "pdflatex"
+  "pd_mae_drct_report.tex" 1781604027 19611 2ca8e80bb469032cfe7d851892b88a23 ""
   (generated)
   "pd_mae_drct_report.aux"
   "pd_mae_drct_report.log"

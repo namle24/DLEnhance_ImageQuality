@@ -9,6 +9,7 @@ from basicsr.utils import imwrite, tensor2img
 
 import math
 from tqdm import tqdm
+import os
 from os import path as osp
 
 @MODEL_REGISTRY.register()
@@ -206,6 +207,7 @@ class DRCTModel(SRModel):
                     else:
                         save_img_path = osp.join(self.opt['path']['visualization'], dataset_name,
                                                  f'{img_name}_{self.opt["name"]}.png')
+                os.makedirs(osp.dirname(save_img_path), exist_ok=True)
                 imwrite(sr_img, save_img_path)
 
             if with_metrics:
