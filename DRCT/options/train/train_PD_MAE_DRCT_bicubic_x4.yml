@@ -63,7 +63,7 @@ network_g:
   resi_connection: 1conv
   # ---- SFT + MAE Prior Enabled ----
   use_sft: true
-  mae_checkpoint: /data/home/namlh/DLEnhance_ImageQuality/DRCT/experiments/pretrained_models/pd_mae_s2_iter100000.pth
+  mae_checkpoint: /data/home/namlh/data/dataset/train/PD_MAE_Checkpoints_Stage2/pd_mae_s2_iter100000.pth
 
 # path
 path:
@@ -138,5 +138,3 @@ logger:
 dist_params:
   backend: nccl
   port: 29500
-
-  
