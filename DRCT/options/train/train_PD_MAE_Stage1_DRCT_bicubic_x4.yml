@@ -63,7 +63,7 @@ network_g:
   resi_connection: 1conv
   # ---- SFT + MAE Prior Enabled ----
   use_sft: true
-  mae_checkpoint: /home/namlh/data/dataset/train/PD_MAE_Checkpoints_Stage1/pd_mae_s1_iter200000.pth
+  mae_checkpoint: /home/namlh/data/dataset/train/PD_MAE_Checkpoints_Hybrid/pd_mae_s1_iter200000.pth
 
 # path
 path:
