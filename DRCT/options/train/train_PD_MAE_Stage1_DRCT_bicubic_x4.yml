@@ -11,8 +11,8 @@ datasets:
   train:
     name: DF2K
     type: PairedImageDataset
-    dataroot_gt: /data/home/namlh/data/dataset/train/DF2K/HR
-    dataroot_lq: /data/home/namlh/data/dataset/train/DF2K/LR_bicubic_X4
+    dataroot_gt: /home/namlh/data/dataset/train/DF2K/HR
+    dataroot_lq: /home/namlh/data/dataset/train/DF2K/LR_bicubic_X4
     io_backend:
       type: disk
 
@@ -30,16 +30,16 @@ datasets:
   val_1:
     name: Set5
     type: PairedImageDataset
-    dataroot_gt: /data/home/namlh/data/benchmark_datasets/Set5/Set5/GTmod12
-    dataroot_lq: /data/home/namlh/data/benchmark_datasets/Set5/Set5/LRbicx4
+    dataroot_gt: /home/namlh/data/benchmark_datasets/Set5/Set5/GTmod12
+    dataroot_lq: /home/namlh/data/benchmark_datasets/Set5/Set5/LRbicx4
     io_backend:
       type: disk
 
   val_2:
     name: Set14
     type: PairedImageDataset
-    dataroot_gt: /data/home/namlh/data/benchmark_datasets/Set14/Set14/GTmod12
-    dataroot_lq: /data/home/namlh/data/benchmark_datasets/Set14/Set14/LRbicx4
+    dataroot_gt: /home/namlh/data/benchmark_datasets/Set14/Set14/GTmod12
+    dataroot_lq: /home/namlh/data/benchmark_datasets/Set14/Set14/LRbicx4
     io_backend:
       type: disk
 
@@ -63,7 +63,7 @@ network_g:
   resi_connection: 1conv
   # ---- SFT + MAE Prior Enabled ----
   use_sft: true
-  mae_checkpoint: /data/home/namlh/data/dataset/train/PD_MAE_Checkpoints_Stage1/pd_mae_s1_iter200000.pth
+  mae_checkpoint: /home/namlh/data/dataset/train/PD_MAE_Checkpoints_Stage1/pd_mae_s1_iter200000.pth
 
 # path
 path:
