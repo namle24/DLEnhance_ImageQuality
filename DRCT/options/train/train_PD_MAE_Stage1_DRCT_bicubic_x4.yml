@@ -69,7 +69,7 @@ network_g:
 path:
   pretrain_network_g: ~
   strict_load_g: false
-  resume_state: ~
+  resume_state: /home/namlh/DLEnhance_ImageQuality/DRCT/experiments/train_PD_MAE_Stage1_DRCT_bicubic_x4/training_states/405000.state
 
 # training settings
 train:
