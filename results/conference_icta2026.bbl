@@ -1,0 +1,84 @@
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\doi}[1]{https://doi.org/#1}
+
+\bibitem{bengio2009curriculum}
+Bengio, Y., Louradour, J., Collobert, R., Weston, J.: Curriculum learning. In: Proceedings of the 26th annual international conference on machine learning. pp. 41--48 (2009)
+
+\bibitem{blau2018perception}
+Blau, Y., Michaeli, T.: The perception-distortion tradeoff. In: Proceedings of the IEEE conference on computer vision and pattern recognition. pp. 6228--6237 (2018)
+
+\bibitem{bromley1993signature}
+Bromley, J., Guyon, I., LeCun, Y., S{\"a}ckinger, E., Shah, R.: Signature verification using a" siamese" time delay neural network. In: Advances in neural information processing systems. pp. 737--744 (1993)
+
+\bibitem{dong2014learning}
+Dong, C., Loy, C.C., He, K., Tang, X.: Learning a deep convolutional network for image super-resolution. European conference on computer vision pp. 184--199 (2014)
+
+\bibitem{gao2022featuredistillationinteractionweighting}
+Gao, G., Li, W., Li, J., Wu, F., Lu, H., Yu, Y.: Feature distillation interaction weighting network for lightweight image super-resolution. In: Proceedings of the AAAI Conference on Artificial Intelligence. vol.~36, pp. 661--669 (2022). \doi{10.1609/aaai.v36i1.19946}
+
+\bibitem{gu2019blind}
+Gu, J., Lu, H., Zuo, W., Dong, C.: Blind super-resolution with iterative kernel correction. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp. 1604--1613 (2019)
+
+\bibitem{hinton2015distilling}
+Hinton, G., Vinyals, O., Dean, J.: Distilling the knowledge in a neural network. arXiv preprint arXiv:1503.02531  (2015)
+
+\bibitem{Hui_2019}
+Hui, Z., Gao, X., Yang, Y., Wang, X.: Lightweight image super-resolution with information multi-distillation network. In: Proceedings of the 27th ACM International Conference on Multimedia (ACM MM). pp. 2024--2032 (2019)
+
+\bibitem{ji2020realworld}
+Ji, X., Zuo, Y., Liang, X., Liu, J.: Real-world super-resolution via kernel estimation and noise injection. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (2020)
+
+\bibitem{johnson2016perceptual}
+Johnson, J., Alahi, A., Fei-Fei, L.: Perceptual losses for real-time style transfer and super-resolution. In: European conference on computer vision. pp. 694--711. Springer (2016)
+
+\bibitem{koch2015siamese}
+Koch, G., Zemel, R., Salakhutdinov, R.: Siamese neural networks for one-shot image recognition. In: ICML deep learning workshop. vol.~2 (2015)
+
+\bibitem{11309534}
+Le, H.N., Doan, N.Q., Nguyen, H.H.: Knowledge distillation for real-esrgan with high-order degradation. Proceedings of the 12th International Conference on Knowledge and Systems Engineering (KSE)  (2025)
+
+\bibitem{liang2021swinir}
+Liang, J., Cao, J., Sun, G., Zhang, K., Van~Gool, L., Timofte, R.: Swinir: Image restoration using swin transformer. In: Proceedings of the IEEE/CVF international conference on computer vision. pp. 1833--1844 (2021)
+
+\bibitem{lim2017enhanced}
+Lim, B., Son, S., Kim, H., Nah, S., Mu~Lee, K.: Enhanced deep residual networks for single image super-resolution. In: Proceedings of the IEEE conference on computer vision and pattern recognition workshops. pp. 136--144 (2017)
+
+\bibitem{lin2023diffbir}
+Lin, X., He, J., Chen, Z., Lyu, Z., Fei, B., Dai, B., Ouyang, W., Qiao, Y., Dong, C.: Diffbir: Towards blind image restoration with generative diffusion prior. arXiv preprint arXiv:2308.15070  (2023)
+
+\bibitem{luo2020unfolding}
+Luo, Z., Huang, Y., Li, L., Wang, L., Tan, T.: Unfolding the alternating optimization for blind super-resolution. In: Advances in Neural Information Processing Systems. vol.~33, pp. 5632--5643 (2020)
+
+\bibitem{mittal2012making}
+Mittal, A., Soundararajan, R., Bovik, A.C.: Making a “completely blind” image quality analyzer. IEEE Signal processing letters  \textbf{20}(3),  209--212 (2012)
+
+\bibitem{simonyan2014very}
+Simonyan, K., Zisserman, A.: Very deep convolutional networks for large-scale image recognition. arXiv preprint arXiv:1409.1556  (2014)
+
+\bibitem{soviany2022curriculum}
+Soviany, P., Ionescu, R.T., Rota, P., Sebe, N.: Curriculum learning: A survey. International Journal of Computer Vision  (2022)
+
+\bibitem{wang2024exploiting}
+Wang, J., Yue, Z., Zhou, S., Chan, K.C., Loy, C.C.: Exploiting diffusion prior for real-world image super-resolution. International Journal of Computer Vision  \textbf{132}(5),  1558--1574 (2024)
+
+\bibitem{wang2021realesrgan}
+Wang, X., Xie, L., Dong, C., Shan, Y.: Real-esrgan: Training real-world blind super-resolution with pure synthetic data. In: Proceedings of the IEEE/CVF international conference on computer vision. pp. 1905--1914 (2021)
+
+\bibitem{wang2018esrgan}
+Wang, X., Yu, K., Wu, S., Gu, J., Liu, Y., Dong, C., Qiao, Y., Change~Loy, C.: Esrgan: Enhanced super-resolution generative adversarial networks. In: Proceedings of the European conference on computer vision (ECCV) workshops. pp.~0--0 (2018)
+
+\bibitem{yang2023pixel}
+Yang, T., Jiang, P., Yan, Y., Chen, Z., Huang, H., Chen, S.: Pixel-aware stable diffusion for realistic image super-resolution and personalized generation. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (2023)
+
+\bibitem{zhang2021designing}
+Zhang, K., Liang, J., Van~Gool, L., Timofte, R.: Designing a practical degradation model for deep blind image super-resolution. In: Proceedings of the IEEE/CVF international conference on computer vision. pp. 4791--4800 (2021)
+
+\bibitem{zhang2018learning}
+Zhang, K., Zuo, W., Zhang, L.: Learning a single convolutional super-resolution network for multiple degradations. In: Proceedings of the IEEE conference on computer vision and pattern recognition. pp. 3262--3271 (2018)
+
+\bibitem{zhang2018residual}
+Zhang, Y., Tian, Y., Kong, Y., Zhong, B., Fu, Y.: Residual dense network for image super-resolution. In: Proceedings of the IEEE conference on computer vision and pattern recognition. pp. 2472--2481 (2018)
+
+\end{thebibliography}

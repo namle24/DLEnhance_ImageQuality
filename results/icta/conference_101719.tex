@@ -1,49 +1,43 @@
-\documentclass[conference]{IEEEtran}
-\IEEEoverridecommandlockouts
-% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\documentclass[runningheads]{llncs}
+%
 \usepackage{tikz}
 \usetikzlibrary{positioning, arrows.meta}
-\usepackage{cite}
+% cite package removed: llncs handles citations natively with splncs04.bst
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{makecell}
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
-\usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
 \usepackage{enumitem}
-\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
-    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\setlist{noitemsep,topsep=2pt}
+
 \begin{document}
 
-\title{
-Siamese-based Real-ESRGAN with High-Order Degradation for Realistic Image Restoration.
-}
+\title{Siamese-based Real-ESRGAN with High-Order Degradation for Realistic Image Restoration}
+\titlerunning{Siamese-based Real-ESRGAN for Realistic Image Restoration}
 
-\author{
-LE Hoai Nam$^{1}$, DOAN Nhat Quang$^{1}$, GIANG Anh Tuan$^{1}$,\\
-TRAN Hoang Tung$^{1}$, LE Huu Ton$^{2}$, and NGUYEN Hoang Ha$^{*1}$\\[0.5em]
-\small
-$^{1}$ University of Science and Technology of Hanoi, Vietnam Academy of Science and Technology, Hanoi, Vietnam\\
-$^{2}$ CMC University, Hanoi, Vietnam\\
-$^{*}$ Corresponding author: nguyen-hoang.ha@usth.edu.vn
-}
+\author{Le Hoai Nam\inst{1} \and Doan Nhat Quang\inst{1} \and Giang Anh Tuan\inst{1} \and\\
+Tran Hoang Tung\inst{1} \and Le Huu Ton\inst{2} \and Nguyen Hoang Ha\inst{1}}
+
+\authorrunning{L. H. Nam et al.}
+
+\institute{University of Science and Technology of Hanoi, Vietnam Academy of Science and Technology, Hanoi, Vietnam\\
+\email{nguyen-hoang.ha@usth.edu.vn} \and
+CMC University, Hanoi, Vietnam}
 
 \maketitle
 
 \begin{abstract}
-The application of deep learning to enhance image quality is a rapidly emerging research area. However, restoring realistic images with complex degradations such as noise, blur, and JPEG compression remains a major challenge. To address this, we propose a novel Siamese-based framework that enhances the Real-ESRGAN architecture through a combination of realistic degradation modeling and dual-branch knowledge distillation. First, we implement a High-order Realistic Degradation pipeline in the data synthesis stage, utilizing randomized operations and explicit camera noise simulation to bridge the sim-to-real gap. Furthermore, we introduce a Siamese training strategy consisting of a Teacher network and a Student network with same layers. In this framework, the two branches process different degradation levels of the same ground-truth image: the Teacher learns from "lightly" degraded samples to provide high-quality structural guidance, while the Student is trained on "severely" degraded inputs. By distilling knowledge from the Teacher branch to the Student, our model effectively restores fine details while maintaining low computational costs. Experimental results show that our Siamese approach achieves superior perceptual quality, specifically a NIQE score of 3.82, outperforming the baseline in stability and visual realism. Our framework offers a promising solution for real-world tasks such as enhancing old photographs and surveillance imagery.
-\end{abstract}
+The application of deep learning to enhance image quality is a rapidly emerging research area. However, restoring realistic images with complex degradations such as noise, blur, and JPEG compression remains a major challenge. To address this, we propose a novel Siamese-based framework that enhances the Real-ESRGAN architecture through a combination of realistic degradation modeling and dual-branch knowledge distillation. First, we implement a High-order Realistic Degradation pipeline in the data synthesis stage, utilizing randomized operations and explicit camera noise simulation to bridge the sim-to-real gap. Furthermore, we introduce a Siamese training strategy consisting of a Teacher network and a Student network with same layers. In this framework, the two branches process different degradation levels of the same ground-truth image: the Teacher learns from ``lightly'' degraded samples to provide high-quality structural guidance, while the Student is trained on ``severely'' degraded inputs. By distilling knowledge from the Teacher branch to the Student, our model effectively restores fine details while maintaining low computational costs. Experimental results show that our Siamese approach achieves superior perceptual quality, specifically a NIQE score of 3.82, outperforming the baseline in stability and visual realism. Our framework offers a promising solution for real-world tasks such as enhancing old photographs and surveillance imagery.
 
-\begin{IEEEkeywords}
-Image Super-Resolution, Siamese Network, Knowledge Distillation, Realistic Degradation, Real-ESRGAN.
-\end{IEEEkeywords}
+\keywords{Image Super-Resolution \and Siamese Network \and Knowledge Distillation \and Realistic Degradation \and Real-ESRGAN.}
+\end{abstract}
 
 
 \section{Introduction}
-
 
 Image restoration aims to reconstruct high-quality images from complex real-world degradations. While diffusion models and Transformers achieve strong performance, their high computational costs limit real-time deployment. GAN-based methods like ESRGAN~\cite{wang2018esrgan} and BSRGAN~\cite{zhang2021designing} offer efficient alternatives. Real-ESRGAN~\cite{wang2021realesrgan} further improved blind super-resolution via high-order degradation modeling. However, most existing methods rely on a single degradation path, limiting robustness.
 
@@ -58,20 +52,18 @@ Our main contributions are summarized as follows:
 
 \section{Related Work}
 
-Early work in image super-resolution (SR) began with SRCNN~\cite{dong2014learning}, which established the foundation of deep learning-based image restoration. To improve perceptual quality, GAN-based methods such as ESRGAN~\cite{wang2018esrgan} were later introduced, while residual-based architectures like EDSR~\cite{lim2017enhanced} and RDN~\cite{zhang2018residualdensenetworkimage} demonstrate the effectiveness of deep residual learning. However, most early methods rely on bicubic downsampling to generate low-quality (LQ) images, which cannot accurately represent real-world degradations.
+Early work in image super-resolution (SR) began with SRCNN~\cite{dong2014learning}, which established the foundation of deep learning-based image restoration. To improve perceptual quality, GAN-based methods such as ESRGAN~\cite{wang2018esrgan} were later introduced, while residual-based architectures like EDSR~\cite{lim2017enhanced} and RDN~\cite{zhang2018residual} demonstrate the effectiveness of deep residual learning. However, most early methods rely on bicubic downsampling to generate low-quality (LQ) images, which cannot accurately represent real-world degradations.
 
 Research then shifted toward Blind Super-Resolution (Blind SR)~\cite{zhang2018learning,luo2020unfolding,gu2019blind}, which aims to handle unknown degradation patterns such as blur, compression, and sensor noise. Real-ESRGAN~\cite{wang2021realesrgan} addressed this problem by introducing a high-order degradation model that generates more realistic synthetic training pairs, significantly improving robustness on real-world images. In our previous work~\cite{11309534}, we further improved this degradation process using randomized operation order, refined parameter ranges, and explicit camera-noise simulation.
 
 To improve deployment efficiency, Knowledge Distillation (KD)~\cite{hinton2015distilling,Hui_2019} has been widely adopted to compress large restoration models into lightweight networks. Recent methods such as FAKD~\cite{gao2022featuredistillationinteractionweighting} utilize feature-aware distillation to preserve structural details. Conventional KD mainly relies on output-level supervision from a fixed Teacher. In contrast, our work introduces a Siamese Knowledge Distillation framework, where Teacher and Student (sharing the same weights) jointly learn from different degradation levels, enabling stronger feature consistency.
 
-\subsection{Siamese Networks}
-Originally proposed for signature verification~\cite{bromley1993signature}, Siamese networks or twin networks have been successfully applied to various tasks requiring similarity learning, such as one-shot recognition~\cite{koch2015siamese}. In this work, we adapt the Siamese concept to image restoration by processing pairs of images with different degradation severities through a single shared-weight generator.
 
-\subsection{Curriculum Learning}
-Curriculum learning~\cite{bengio2009curriculum} is a training strategy that mimics human learning by starting with easy examples and gradually increasing task difficulty. It has been shown to improve generalization and convergence in complex optimization landscapes~\cite{soviany2022curriculum}. We integrate this strategy by progressively increasing the degradation strength in the training dataset across three distinct phases.
+\noindent\textbf{Siamese Networks.} Originally proposed for signature verification~\cite{bromley1993signature}, Siamese networks have been widely applied to similarity learning tasks~\cite{koch2015siamese}. We adapt this concept to image restoration by processing pairs of images with different degradation severities through a single shared-weight generator.
 
-\subsection{Diffusion-based Super-Resolution}
-Recently, diffusion-based models such as StableSR~\cite{wang2024exploiting}, DiffBIR~\cite{lin2023diffbir}, and PASD~\cite{yang2023pixel} have achieved state-of-the-art performance in real-world image restoration by leveraging generative priors. However, these models often suffer from high computational costs and slow inference. Our Siamese GAN-based approach aims to achieve comparable perceptual realism while maintaining significantly lower computational overhead.
+\noindent\textbf{Curriculum Learning.} Curriculum learning~\cite{bengio2009curriculum} mimics human learning by starting with easy examples and progressively increasing difficulty, improving generalization and convergence~\cite{soviany2022curriculum}. We integrate this strategy by progressively increasing degradation strength across three training phases.
+
+\noindent\textbf{Diffusion-based Super-Resolution.} Recent models such as StableSR~\cite{wang2024exploiting}, DiffBIR~\cite{lin2023diffbir}, and PASD~\cite{yang2023pixel} achieve state-of-the-art perceptual quality by leveraging generative priors, but suffer from high computational costs and slow inference. Our GAN-based Siamese approach targets comparable realism at significantly lower overhead.
 
 
 \section{Methodology}
@@ -79,8 +71,8 @@ Recently, diffusion-based models such as StableSR~\cite{wang2024exploiting}, Dif
 This study proposes an image restoration framework that combines an improved Realistic High-Order Degradation process with a Siamese joint training architecture and curriculum learning strategy. Instead of conventional Teacher--Student distillation, our method jointly trains dual branches using different degradation levels of the same image. The objective is to improve robustness under complex real-world degradations while maintaining restoration quality and computational efficiency. An overview of the proposed pipeline is shown in Fig.~\ref{fig:workflow}.
 \begin{figure*}[!t]
     \centering
-    \includegraphics[width=\textwidth]{images/pipeline.png}
-    \caption{Overview of the proposed Siamese-based Real-ESRGAN framework\cite{11309534}.}
+    \includegraphics[width=\textwidth,height=3.2cm]{images/pipeline.png}
+    \caption{Overview of the proposed Siamese-based Real-ESRGAN framework~\cite{11309534}.}
     \label{fig:workflow}
 \end{figure*}
 
@@ -90,24 +82,19 @@ Most existing image restoration methods, including Real-ESRGAN~\cite{wang2021rea
 
 Our method in Fig.~\ref{fig:degradation} keeps the general two-stage process (resizing, blurring, noise addition, JPEG compression, and camera-specific noise) while introducing several improvements:
 
-
 \begin{figure*}[!t]
     \centering
-    \includegraphics[width=\textwidth]{images/Realdegradationstructure.png}
-    \caption{Overview of the proposed two-stage realistic degradation pipeline}
+    \includegraphics[width=\textwidth,height=2.6cm]{images/Realdegradationstructure.png}
+    \caption{Overview of the proposed two-stage realistic degradation pipeline.}
     \label{fig:degradation}
 \end{figure*}
 
 \begin{itemize}
-    \item \textbf{Randomized Degradation Order:} We use a flexible degradation sequence instead of a fixed order, while keeping resizing first.
-    
-    \item \textbf{Refined Parameter Ranges:} JPEG compression is limited to narrower ranges to avoid unrealistic artifacts.
-    
-    \item \textbf{Explicit Camera Noise:} Chromatic aberration and sensor-specific pattern noise are added to simulate smartphone and low-quality camera artifacts.
-    
-    \item \textbf{Pre-Generated Degradation:} LQ--HQ pairs are generated offline instead of on-the-fly, improving reproducibility and training efficiency.
-    
-    \item \textbf{Multi-Level Degradation Generation:} We generate four degradation levels (90\%, 80\%, 70\%, and 60\%) from each GT image, enabling curriculum learning for the Siamese framework.
+    \item \textbf{Randomized Degradation Order:} Flexible degradation sequence instead of a fixed order, while keeping resizing first.
+    \item \textbf{Refined Parameter Ranges:} JPEG compression limited to narrower ranges to avoid unrealistic artifacts.
+    \item \textbf{Explicit Camera Noise:} Chromatic aberration and sensor-specific pattern noise simulate smartphone and low-quality camera artifacts.
+    \item \textbf{Pre-Generated Degradation:} LQ--HQ pairs generated offline, improving reproducibility and training efficiency.
+    \item \textbf{Multi-Level Degradation:} Four quality levels (90\%, 80\%, 70\%, 60\%) are generated per GT image to support the curriculum Siamese framework.
 \end{itemize}
 
 For $\times4$ super-resolution training, LQ images are generated at one-quarter the resolution of their GT counterparts. GT images are cropped into $480 \times 480$ patches with a stride of 240 (50\% overlap), while LQ images are cropped into $120 \times 120$ patches with a stride of 60, maintaining the $\times4$ scale ratio.
@@ -126,7 +113,7 @@ The overall Siamese training framework is illustrated in Fig.~\ref{fig:siamese_a
 
 \begin{figure*}[!t]
     \centering
-    \includegraphics[width=\textwidth]{images/student_teacher_siamese.drawio.png}
+    \includegraphics[width=\textwidth,height=3.2cm]{images/student_teacher_siamese.drawio.png}
     \caption{Overview of the proposed weight-sharing Siamese training framework with curriculum learning.}
     \label{fig:siamese_architecture}
 \end{figure*}
@@ -149,7 +136,7 @@ where $L_{pixel}$ denotes the pixel-wise reconstruction loss between the Student
 Only the Student branch receives gradient updates, while the Teacher outputs are detached and used as dynamic supervision. Since both branches share parameters, optimizing difficult restoration cases also implicitly improves performance on milder degradations. This enables better convergence and stronger perceptual quality compared to static distillation frameworks.
 
 
-\section{EXPERIMENTS}
+\section{Experiments}
 \subsection{Data}
 We use the same data sources as our previous work~\cite{11309534}, including DF2K, Unsplash, and RealSR. DF2K consists of DIV2K, Flickr2K, and OutdoorScene, providing diverse high-quality (HQ) images with rich textures and large resolution variations. We further include additional images from Unsplash and RealSR to improve scene diversity and real-world degradation coverage.
 
@@ -157,15 +144,27 @@ Unlike conventional super-resolution training that relies on bicubic downsamplin
 
 Model evaluation is conducted on Set5, Set14, and RealSR benchmarks using PSNR, SSIM, and NIQE for quantitative comparison.
 
-\subsection{Training Details}
-Our implementation is based on the training strategy of Real-ESRGAN~\cite{wang2021realesrgan} with several modifications for Siamese curriculum learning. The network is optimized using Adam with $\beta_1 = 0.9$ and $\beta_2 = 0.999$. Both the generator and discriminator use an initial learning rate of $1 \times 10^{-4}$, while learning rate decay is controlled by a MultiStepLR scheduler at 200k, 400k, 500k, and 700k iterations with $\gamma = 0.5$. The total training process runs for 800,000 iterations with an initial warmup stage of 10,000 iterations. All experiments are conducted on an NVIDIA RTX 3090 GPU. The optimization objective combines pixel reconstruction, perceptual, adversarial, and Siamese distillation losses. Pixel supervision uses L1 loss with weight 2.0, while perceptual loss is computed using a pre-trained VGG19 network~\cite{simonyan2014very} following the formulation in~\cite{johnson2016perceptual}. Adversarial learning follows the vanilla GAN formulation with loss weight 0.5.
+\subsection{Implementation Details}
+Our implementation follows Real-ESRGAN~\cite{wang2021realesrgan} with Siamese modifications. We use Adam ($\beta_1=0.9$, $\beta_2=0.999$) with initial learning rate $1\times10^{-4}$, decayed by MultiStepLR ($\gamma=0.5$) at 200k, 400k, 500k, and 700k iterations over 800k total steps with 10k warmup. Losses: pixel L1 ($w_{pixel}=2.0$), perceptual via VGG19~\cite{simonyan2014very,johnson2016perceptual} ($w_{perceptual}=1.0$), adversarial ($w_{GAN}=0.5$), distillation ($\lambda_{kd}^{out}=\lambda_{kd}^{feat}=0.15$) and consistency (0.075), activated after warmup. All experiments run on an NVIDIA RTX 3090. Since both branches share the same RRDBNet backbone ($\approx$16.7M parameters), inference cost matches the Real-ESRGAN baseline ($\approx$0.08\,s for a $720{\times}480$ image), far below diffusion-based alternatives.
 
-Unlike conventional single-stage training, our framework adopts a curriculum-based multi-phase strategy. Training is progressively divided into several phases with increasing degradation difficulty. The degradation levels (90\%, 80\%, 70\%, 60\%) represent a composite quality index where 100\% is the original GT and lower values indicate increased ranges of blur, noise variance, and JPEG compression strength. In Phase 1, the Teacher and Student branches receive relatively mild degradation pairs (90\%/80\%). The degradation severity is then gradually increased to 80\%/70\% and 70\%/60\% in later phases. Each phase runs for approximately 250,000 iterations to ensure convergence before the next curriculum stage. This progressive schedule stabilizes optimization and enables the network to adapt more effectively to severe real-world degradations.
+\subsection{Three-Phase Curriculum Training Schedule}
+A central novelty of our framework is the \textbf{progressive multi-level degradation curriculum}. Rather than training on a single fixed degradation strength, the Siamese pair is exposed to pairs of increasing difficulty across three phases (Table~\ref{tab:curriculum}). The quality index (\%) denotes composite degradation intensity, where 100\% is the original GT and lower values indicate stronger blur, noise, and compression. In each phase, the Teacher receives the milder input and provides dynamic pseudo-supervision, while the Student is challenged with the harder degradation. This progressive schedule prevents the training instability observed when directly optimizing on the most severe pairs.
 
-To further improve feature consistency between both branches, we apply output-level and feature-level distillation losses with weights $\lambda_{kd}^{out}=0.15$ and $\lambda_{kd}^{feat}=0.15$. An additional consistency regularization term is weighted by 0.075. Distillation supervision is activated progressively after the warmup stage to improve convergence stability and perceptual reconstruction quality.
-
-\subsection{Complexity Analysis}
-One of the key advantages of our weight-sharing Siamese architecture is its high parameter efficiency. Since the Teacher and Student branches share the same RRDBNet backbone, the total number of parameters remains approximately 16.7M, identical to the baseline Real-ESRGAN. During inference, only the Student branch is utilized, resulting in an inference time of approximately 0.08s for a $720 \times 480$ image on an NVIDIA RTX 3090. The computational cost is significantly lower than diffusion-based models, which typically require several seconds for a single image restoration.
+\begin{table}[h]
+\centering
+\caption{Three-phase curriculum training schedule (Deg.\ quality: 100\% = GT; lower = harder).}
+\label{tab:curriculum}
+\small
+\begin{tabular}{@{}ccc p{3.6cm}@{}}
+\toprule
+\textbf{Phase} & \textbf{Teacher} & \textbf{Student} & \textbf{Training Focus} \\
+\midrule
+1 & 90\% & 80\% & Warm-up; stable GAN convergence \\
+2 & 80\% & 70\% & Moderate difficulty; best perceptual quality \\
+3 & 70\% & 60\% & Severe degradation robustness \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 
 \subsection{Experimental Setup and Metrics}
@@ -175,12 +174,6 @@ We evaluate the proposed framework using three standard metrics: Peak Signal-to-
 \subsection{Quantitative Results}
 
 Table~\ref{tab:quantitative_results} summarizes the performance across multiple benchmarks. The results show that our Siamese framework, particularly Phase 2, significantly improves perceptual quality compared to the baseline Real-ESRGAN and our previous lightweight Student model.
-
-% Required packages in preamble:
-% \usepackage{booktabs}
-% \usepackage{multirow}
-% \usepackage{makecell}
-% \usepackage{graphicx}
 
 \begin{table*}[t]
 \centering
@@ -251,8 +244,8 @@ Real-ESRGAN~\cite{wang2021realesrgan}
   & Our Data
   & 25.19/0.767                              & \textbf{6.54}
   & 23.89/0.694                              & 5.82
-  & \textbf{26.77}/\textbf{0.805}                     & 6.78
-  & \textbf{25.93}/\textbf{0.763}                              & 6.25
+  & \textbf{26.77}/\textbf{0.805}            & 6.78
+  & \textbf{25.93}/\textbf{0.763}            & 6.25
   & 22.31/0.572                              & 4.82
   & 20.00/0.598                              & 4.05
   & 1.45 \\
@@ -282,14 +275,13 @@ Real-ESRGAN~\cite{wang2021realesrgan}
 }
 \end{table*}
 
-
 For instance, on the \textbf{RealSR\_V3 (Canon)} dataset, Siamese Phase 2 achieves a NIQE score of \textbf{5.71}, improving over the baseline Real-ESRGAN score of \textbf{6.88}. Similar improvements are observed on \textbf{Urban100} and \textbf{BSDS100}, where our method consistently produces lower NIQE values while maintaining competitive PSNR and SSIM. Although Phase 3 is trained on more severe degradations, Phase 2 provides the best balance between perceptual realism and structural preservation.
 
 We observe that while the Siamese model improves perceptual quality (NIQE), it sometimes yields lower PSNR/SSIM on synthetic benchmarks compared to the original Real-ESRGAN. This reflects the well-known perception-distortion trade-off~\cite{blau2018perception}, where optimizing for visual realism can lead to deviations in pixel-level fidelity. However, in real-world applications, the gain in visual clarity and structural sharpness significantly outweighs the loss in PSNR.
 
 \subsection{Ablation Study}
 To verify the effectiveness of our proposed Siamese curriculum learning strategy, we conduct an ablation study comparing different training configurations.
-\begin{itemize}[nosep,leftmargin=*]
+\begin{itemize}
     \item \textbf{Effect of Siamese Framework:} Comparing the Siamese model with our previous student-only model shows that joint training with feature distillation results in more stable texture restoration and fewer artifacts.
     \item \textbf{Effect of Curriculum Learning:} Models trained without the multi-phase curriculum (directly on 60\% quality) often suffer from training instability and generate spurious noise patterns. The progressive schedule (90\% $\to$ 80\% $\to$ 70\% $\to$ 60\%) enables the network to learn robust features gradually.
     \item \textbf{Loss Weight Selection:} The loss weights ($w_{pixel}=2.0, w_{GAN}=0.5$) were chosen to prioritize structural consistency while maintaining adversarial sharpness. Higher GAN weights led to excessive noise, while lower weights resulted in blurry outputs.
@@ -302,13 +294,10 @@ The visual results in Fig.~\ref{fig:qualitative_results} further validate the ef
 
 \begin{figure*}[!t]
     \centering
-    
-    \includegraphics[width=0.98\textwidth]{images/visual.png}
-    \includegraphics[width=0.98\textwidth]{images/visual2.png}
-    \includegraphics[width=0.98\textwidth]{images/visual3.png}
-    
+    \includegraphics[width=0.98\textwidth,height=2.2cm]{images/visual.png}
+    \includegraphics[width=0.98\textwidth,height=2.2cm]{images/visual2.png}
+    \includegraphics[width=0.98\textwidth,height=2.2cm]{images/visual3.png}
     \caption{Qualitative comparison of different restoration methods on three benchmark datasets: Urban100, BSD100, and RealSR V3. The proposed Siamese Real-ESRGAN framework, particularly Phase 2, produces sharper structures, clearer textures, and more natural visual quality compared to ESRGAN, EDSR, SwinIR, BSRGAN, and the original Real-ESRGAN.}
-    
     \label{fig:qualitative_results}
 \end{figure*}
 
@@ -321,14 +310,7 @@ Compared to our previous lightweight Student framework, the current weight-shari
 
 We proposed an enhanced Real-ESRGAN framework combining high-order degradation with a weight-sharing Siamese training architecture. Using a three-phase curriculum strategy, our model achieves superior perceptual quality and robustness. Experimental results, including a 17.0\% NIQE improvement on RealSR\_V3, confirm that our joint optimization outperforms baseline Real-ESRGAN while maintaining high efficiency. Despite advances, severe degradation remains challenging. Future work will explore automated tuning and generative priors for more extreme scenarios and mobile optimization.
 
-
-
-{\footnotesize
-\bibliographystyle{IEEEtran}
+\bibliographystyle{splncs04}
 \bibliography{references}
-}
-\vspace{12pt}
-\color{red}
-
 
 \end{document}
