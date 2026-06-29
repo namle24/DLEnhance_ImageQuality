@@ -4,7 +4,7 @@ import os
 from collections import OrderedDict
 from basicsr.metrics import calculate_psnr, calculate_ssim
 from basicsr.utils.registry import MODEL_REGISTRY
-from realesrgan.models.realesrgan_model import RealESRGANModel
+from basicsr.models.realesrgan_model import RealESRGANModel
 import os.path as osp
 from basicsr.utils import imwrite, tensor2img
 
