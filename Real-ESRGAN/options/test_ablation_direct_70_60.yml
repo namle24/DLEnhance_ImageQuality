@@ -1,0 +1,60 @@
+name: test_ablation_direct_70_60
+model_type: RealESRGANModel
+scale: 4
+num_gpu: 1
+manual_seed: 0
+
+datasets:
+  test_1:
+    name: RealSR_Canon
+    type: PairedImageDataset
+    dataroot_gt: /data/home/namlh/data/benchmark_datasets/RealSR(V3)/Canon/HR
+    dataroot_lq: /data/home/namlh/data/benchmark_datasets/RealSR(V3)/Canon/LR
+    io_backend:
+      type: disk
+
+  test_2:
+    name: RealSR_Nikon
+    type: PairedImageDataset
+    dataroot_gt: /data/home/namlh/data/benchmark_datasets/RealSR(V3)/Nikon/HR
+    dataroot_lq: /data/home/namlh/data/benchmark_datasets/RealSR(V3)/Nikon/LR
+    io_backend:
+      type: disk
+
+  test_3:
+    name: Urban100
+    type: PairedImageDataset
+    dataroot_gt: /data/home/namlh/data/benchmark_datasets/urban100/urban100
+    dataroot_lq: /data/home/namlh/data/benchmark_datasets/urban100/urban100_LQ
+    io_backend:
+      type: disk
+
+network_g:
+  type: RRDBNet
+  num_in_ch: 3
+  num_out_ch: 3
+  num_feat: 64
+  num_block: 23
+  num_grow_ch: 32
+  scale: 4
+
+path:
+  pretrain_network_g: /data/home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/ablation_siamese_direct_70_60_120k/models/net_g_latest.pth
+  strict_load_g: true
+  param_key_g: params_ema
+
+val:
+  save_img: true
+  suffix: ~
+  metrics:
+    psnr:
+      type: calculate_psnr
+      crop_border: 4
+      test_y_channel: true
+    ssim:
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: true
+    niqe:
+      type: calculate_niqe
+      crop_border: 4

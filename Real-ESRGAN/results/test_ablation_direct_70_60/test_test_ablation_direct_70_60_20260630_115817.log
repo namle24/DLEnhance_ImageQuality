@@ -1,0 +1,165 @@
+2026-06-30 11:58:17,477 INFO: 
+                ____                _       _____  ____
+               / __ ) ____ _ _____ (_)_____/ ___/ / __ \
+              / __  |/ __ `// ___// // ___/\__ \ / /_/ /
+             / /_/ // /_/ /(__  )/ // /__ ___/ // _, _/
+            /_____/ \__,_//____//_/ \___//____//_/ |_|
+     ______                   __   __                 __      __
+    / ____/____   ____   ____/ /  / /   __  __ _____ / /__   / /
+   / / __ / __ \ / __ \ / __  /  / /   / / / // ___// //_/  / /
+  / /_/ // /_/ // /_/ // /_/ /  / /___/ /_/ // /__ / /<    /_/
+  \____/ \____/ \____/ \____/  /_____/\____/ \___//_/|_|  (_)
+    
+Version Information: 
+	BasicSR: 0.1.0
+	PyTorch: 2.13.0.dev20260513+cu132
+	TorchVision: 0.28.0.dev20260514+cu132
+2026-06-30 11:58:17,478 INFO: 
+  name: test_ablation_direct_70_60
+  model_type: RealESRGANModel
+  scale: 4
+  num_gpu: 1
+  manual_seed: 0
+  datasets:[
+    test_1:[
+      name: RealSR_Canon
+      type: PairedImageDataset
+      dataroot_gt: /data/home/namlh/data/benchmark_datasets/RealSR(V3)/Canon/HR
+      dataroot_lq: /data/home/namlh/data/benchmark_datasets/RealSR(V3)/Canon/LR
+      io_backend:[
+        type: disk
+      ]
+      phase: test
+      scale: 4
+    ]
+    test_2:[
+      name: RealSR_Nikon
+      type: PairedImageDataset
+      dataroot_gt: /data/home/namlh/data/benchmark_datasets/RealSR(V3)/Nikon/HR
+      dataroot_lq: /data/home/namlh/data/benchmark_datasets/RealSR(V3)/Nikon/LR
+      io_backend:[
+        type: disk
+      ]
+      phase: test
+      scale: 4
+    ]
+    test_3:[
+      name: Urban100
+      type: PairedImageDataset
+      dataroot_gt: /data/home/namlh/data/benchmark_datasets/urban100/urban100
+      dataroot_lq: /data/home/namlh/data/benchmark_datasets/urban100/urban100_LQ
+      io_backend:[
+        type: disk
+      ]
+      phase: test
+      scale: 4
+    ]
+  ]
+  network_g:[
+    type: RRDBNet
+    num_in_ch: 3
+    num_out_ch: 3
+    num_feat: 64
+    num_block: 23
+    num_grow_ch: 32
+    scale: 4
+  ]
+  path:[
+    pretrain_network_g: /data/home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/ablation_siamese_direct_70_60_120k/models/net_g_latest.pth
+    strict_load_g: True
+    param_key_g: params_ema
+    results_root: /data/home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/results/test_ablation_direct_70_60
+    log: /data/home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/results/test_ablation_direct_70_60
+    visualization: /data/home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/results/test_ablation_direct_70_60/visualization
+  ]
+  val:[
+    save_img: True
+    suffix: None
+    metrics:[
+      psnr:[
+        type: calculate_psnr
+        crop_border: 4
+        test_y_channel: True
+      ]
+      ssim:[
+        type: calculate_ssim
+        crop_border: 4
+        test_y_channel: True
+      ]
+      niqe:[
+        type: calculate_niqe
+        crop_border: 4
+      ]
+    ]
+  ]
+  dist: False
+  rank: 0
+  world_size: 1
+  auto_resume: False
+  is_train: False
+
+2026-06-30 11:58:17,481 INFO: Dataset [PairedImageDataset] - RealSR_Canon is built.
+2026-06-30 11:58:17,481 INFO: Number of test images in RealSR_Canon: 50
+2026-06-30 11:58:17,484 INFO: Dataset [PairedImageDataset] - RealSR_Nikon is built.
+2026-06-30 11:58:17,484 INFO: Number of test images in RealSR_Nikon: 50
+2026-06-30 11:58:17,489 INFO: Dataset [PairedImageDataset] - Urban100 is built.
+2026-06-30 11:58:17,490 INFO: Number of test images in Urban100: 100
+2026-06-30 11:58:17,852 INFO: Network [RRDBNet] is created.
+2026-06-30 11:58:18,391 INFO: Network: RRDBNet, with parameters: 16,697,987
+2026-06-30 11:58:18,391 INFO: RRDBNet(
+  (conv_first): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (body): ModuleList(
+    (0-22): 23 x RRDB(
+      (rdb1): ResidualDenseBlock(
+        (conv1): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (conv2): Conv2d(96, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (conv3): Conv2d(128, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (conv4): Conv2d(160, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (conv5): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (lrelu): LeakyReLU(negative_slope=0.2, inplace=True)
+      )
+      (rdb2): ResidualDenseBlock(
+        (conv1): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (conv2): Conv2d(96, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (conv3): Conv2d(128, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (conv4): Conv2d(160, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (conv5): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (lrelu): LeakyReLU(negative_slope=0.2, inplace=True)
+      )
+      (rdb3): ResidualDenseBlock(
+        (conv1): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (conv2): Conv2d(96, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (conv3): Conv2d(128, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (conv4): Conv2d(160, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (conv5): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (lrelu): LeakyReLU(negative_slope=0.2, inplace=True)
+      )
+    )
+  )
+  (conv_body): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv_up1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv_up2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv_hr): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv_last): Conv2d(64, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (lrelu): LeakyReLU(negative_slope=0.2, inplace=True)
+)
+2026-06-30 11:58:18,643 INFO: Loading RRDBNet model from /data/home/namlh/DLEnhance_ImageQuality/Real-ESRGAN/experiments/ablation_siamese_direct_70_60_120k/models/net_g_latest.pth, with param key: [params_ema].
+2026-06-30 11:58:18,721 INFO: Model [RealESRGANModel] is created.
+2026-06-30 11:58:18,721 INFO: Testing RealSR_Canon...
+2026-06-30 12:02:11,089 INFO: Validation RealSR_Canon
+	 # psnr: 25.3179	Best: 25.3179 @ test_ablation_direct_70_60 iter
+	 # ssim: 0.7928	Best: 0.7928 @ test_ablation_direct_70_60 iter
+	 # niqe: 6.2605	Best: 6.2605 @ test_ablation_direct_70_60 iter
+
+2026-06-30 12:02:11,093 INFO: Testing RealSR_Nikon...
+2026-06-30 12:10:50,581 INFO: Validation RealSR_Nikon
+	 # psnr: 24.4653	Best: 24.4653 @ test_ablation_direct_70_60 iter
+	 # ssim: 0.7505	Best: 0.7505 @ test_ablation_direct_70_60 iter
+	 # niqe: 6.2164	Best: 6.2164 @ test_ablation_direct_70_60 iter
+
+2026-06-30 12:10:50,596 INFO: Testing Urban100...
+2026-06-30 12:14:10,522 INFO: Validation Urban100
+	 # psnr: 19.7445	Best: 19.7445 @ test_ablation_direct_70_60 iter
+	 # ssim: 0.6140	Best: 0.6140 @ test_ablation_direct_70_60 iter
+	 # niqe: 4.1377	Best: 4.1377 @ test_ablation_direct_70_60 iter
+

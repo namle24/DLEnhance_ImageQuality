@@ -1,0 +1,797 @@
+2026-06-04 11:07:22,033 INFO: 
+                ____                _       _____  ____
+               / __ ) ____ _ _____ (_)_____/ ___/ / __ \
+              / __  |/ __ `// ___// // ___/\__ \ / /_/ /
+             / /_/ // /_/ /(__  )/ // /__ ___/ // _, _/
+            /_____/ \__,_//____//_/ \___//____//_/ |_|
+     ______                   __   __                 __      __
+    / ____/____   ____   ____/ /  / /   __  __ _____ / /__   / /
+   / / __ / __ \ / __ \ / __  /  / /   / / / // ___// //_/  / /
+  / /_/ // /_/ // /_/ // /_/ /  / /___/ /_/ // /__ / /<    /_/
+  \____/ \____/ \____/ \____/  /_____/\____/ \___//_/|_|  (_)
+    
+Version Information: 
+	BasicSR: 1.4.2
+	PyTorch: 2.13.0.dev20260513+cu132
+	TorchVision: 0.28.0.dev20260514+cu132
+2026-06-04 11:07:22,033 INFO: 
+  name: train_PD_MAE_DRCT_x4
+  model_type: DRCTModel
+  scale: 4
+  num_gpu: 1
+  manual_seed: 0
+  mae_weight: 0.01
+  datasets:[
+    train:[
+      name: DF2K
+      type: PairedImageDataset
+      dataroot_gt: /data/home/namlh/data/dataset/train/HR_sub
+      dataroot_lq: /data/home/namlh/data/dataset/train/LR_all_sub
+      io_backend:[
+        type: disk
+      ]
+      gt_size: 256
+      use_hflip: True
+      use_rot: True
+      use_shuffle: True
+      num_worker_per_gpu: 6
+      batch_size_per_gpu: 4
+      dataset_enlarge_ratio: 1
+      prefetch_mode: None
+      phase: train
+      scale: 4
+    ]
+    val_1:[
+      name: RealSR_Canon
+      type: PairedImageDataset
+      dataroot_gt: /data/home/namlh/data/benchmark_datasets/RealSR(V3)/Canon/HR
+      dataroot_lq: /data/home/namlh/data/benchmark_datasets/RealSR(V3)/Canon/LR
+      io_backend:[
+        type: disk
+      ]
+      phase: val
+      scale: 4
+    ]
+    val_2:[
+      name: RealSR_Nikon
+      type: PairedImageDataset
+      dataroot_gt: /data/home/namlh/data/benchmark_datasets/RealSR(V3)/Nikon/HR
+      dataroot_lq: /data/home/namlh/data/benchmark_datasets/RealSR(V3)/Nikon/LR
+      io_backend:[
+        type: disk
+      ]
+      phase: val
+      scale: 4
+    ]
+    val_3:[
+      name: Set5
+      type: PairedImageDataset
+      dataroot_gt: /data/home/namlh/data/benchmark_datasets/Set5/Set5/GTmod12
+      dataroot_lq: /data/home/namlh/data/benchmark_datasets/Set5/Set5/LRbicx4
+      io_backend:[
+        type: disk
+      ]
+      phase: val
+      scale: 4
+    ]
+  ]
+  network_g:[
+    type: DRCT
+    upscale: 4
+    in_chans: 3
+    img_size: 64
+    window_size: 16
+    compress_ratio: 3
+    squeeze_factor: 30
+    conv_scale: 0.01
+    overlap_ratio: 0.5
+    img_range: 1.0
+    depths: [6, 6, 6, 6, 6, 6]
+    embed_dim: 180
+    num_heads: [6, 6, 6, 6, 6, 6]
+    mlp_ratio: 2
+    upsampler: pixelshuffle
+    resi_connection: 1conv
+    use_sft: True
+    mae_checkpoint: /data/home/namlh/data/dataset/train/PD_MAE_Checkpoints_Stage2/pd_mae_s2_iter100000.pth
+  ]
+  path:[
+    pretrain_network_g: /data/home/namlh/DLEnhance_ImageQuality/DRCT/experiments/train_PD_MAE_DRCT_x4/models/net_g_500000.pth
+    strict_load_g: False
+    resume_state: experiments/train_PD_MAE_DRCT_x4/training_states/500000.state
+    experiments_root: /data/home/namlh/DLEnhance_ImageQuality/DRCT/experiments/train_PD_MAE_DRCT_x4
+    models: /data/home/namlh/DLEnhance_ImageQuality/DRCT/experiments/train_PD_MAE_DRCT_x4/models
+    training_states: /data/home/namlh/DLEnhance_ImageQuality/DRCT/experiments/train_PD_MAE_DRCT_x4/training_states
+    log: /data/home/namlh/DLEnhance_ImageQuality/DRCT/experiments/train_PD_MAE_DRCT_x4
+    visualization: /data/home/namlh/DLEnhance_ImageQuality/DRCT/experiments/train_PD_MAE_DRCT_x4/visualization
+  ]
+  train:[
+    ema_decay: 0.999
+    optim_g:[
+      type: Adam
+      lr: 0.0002
+      weight_decay: 0
+      betas: [0.9, 0.99]
+    ]
+    scheduler:[
+      type: MultiStepLR
+      milestones: [250000, 400000, 450000, 475000]
+      gamma: 0.5
+    ]
+    total_iter: 500000
+    warmup_iter: -1
+    pixel_opt:[
+      type: L1Loss
+      loss_weight: 1.0
+      reduction: mean
+    ]
+    perceptual_opt:[
+      type: PerceptualLoss
+      layer_weights:[
+        conv3_4: 1.0
+        conv4_4: 1.0
+        conv5_4: 1.0
+      ]
+      vgg_type: vgg19
+      use_input_norm: True
+      perceptual_weight: 0.01
+      style_weight: 0
+      range_norm: False
+      criterion: l1
+    ]
+  ]
+  val:[
+    val_freq: 5000.0
+    save_img: True
+    pbar: False
+    metrics:[
+      psnr:[
+        type: calculate_psnr
+        crop_border: 3
+        test_y_channel: True
+        better: higher
+      ]
+      ssim:[
+        type: calculate_ssim
+        crop_border: 3
+        test_y_channel: True
+        better: higher
+      ]
+    ]
+  ]
+  logger:[
+    print_freq: 100
+    save_checkpoint_freq: 5000.0
+    use_tb_logger: True
+    wandb:[
+      project: None
+      resume_id: None
+    ]
+  ]
+  dist_params:[
+    backend: nccl
+    port: 29500
+  ]
+  dist: False
+  rank: 0
+  world_size: 1
+  auto_resume: True
+  is_train: True
+  root_path: /data/home/namlh/DLEnhance_ImageQuality/DRCT
+
+2026-06-04 11:11:00,915 INFO: Dataset [PairedImageDataset] - DF2K is built.
+2026-06-04 11:11:00,916 INFO: Training statistics:
+	Number of train images: 150877
+	Dataset enlarge ratio: 1
+	Batch size per gpu: 4
+	World size (gpu number): 1
+	Require iter number per epoch: 37720
+	Total epochs: 14; iters: 500000.
+2026-06-04 11:11:00,942 INFO: Dataset [PairedImageDataset] - RealSR_Canon is built.
+2026-06-04 11:11:00,942 INFO: Number of val images/folders in RealSR_Canon: 50
+2026-06-04 11:11:00,945 INFO: Dataset [PairedImageDataset] - RealSR_Nikon is built.
+2026-06-04 11:11:00,946 INFO: Number of val images/folders in RealSR_Nikon: 50
+2026-06-04 11:11:00,946 INFO: Dataset [PairedImageDataset] - Set5 is built.
+2026-06-04 11:11:00,947 INFO: Number of val images/folders in Set5: 5
+2026-06-04 11:11:02,064 INFO: Network [DRCT] is created.
+2026-06-04 11:11:02,155 INFO: Network: DRCT, with parameters: 40,184,883
+2026-06-04 11:11:02,155 INFO: DRCT(
+  (conv_first): Conv2d(3, 180, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (patch_embed): PatchEmbed(
+    (norm): LayerNorm((180,), eps=1e-05, elementwise_affine=True, bias=True)
+  )
+  (patch_unembed): PatchUnEmbed()
+  (pos_drop): Dropout(p=0.0, inplace=False)
+  (layers): ModuleList(
+    (0): RDG(
+      (swin1): SwinTransformerBlock(
+        dim=180, input_resolution=(64, 64), num_heads=6, window_size=16, shift_size=0, mlp_ratio=2
+        (norm1): LayerNorm((180,), eps=1e-05, elementwise_affine=True, bias=True)
+        (attn): WindowAttention(
+          dim=180, window_size=(16, 16), num_heads=6
+          (qkv): Linear(in_features=180, out_features=540, bias=True)
+          (attn_drop): Dropout(p=0.0, inplace=False)
+          (proj): Linear(in_features=180, out_features=180, bias=True)
+          (proj_drop): Dropout(p=0.0, inplace=False)
+          (softmax): Softmax(dim=-1)
+        )
+        (drop_path): Identity()
+        (norm2): LayerNorm((180,), eps=1e-05, elementwise_affine=True, bias=True)
+        (mlp): Mlp(
+          (fc1): Linear(in_features=180, out_features=360, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=360, out_features=180, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+      (adjust1): Conv2d(180, 32, kernel_size=(1, 1), stride=(1, 1))
+      (swin2): SwinTransformerBlock(
+        dim=212, input_resolution=(64, 64), num_heads=4, window_size=16, shift_size=8, mlp_ratio=2
+        (norm1): LayerNorm((212,), eps=1e-05, elementwise_affine=True, bias=True)
+        (attn): WindowAttention(
+          dim=212, window_size=(16, 16), num_heads=4
+          (qkv): Linear(in_features=212, out_features=636, bias=True)
+          (attn_drop): Dropout(p=0.0, inplace=False)
+          (proj): Linear(in_features=212, out_features=212, bias=True)
+          (proj_drop): Dropout(p=0.0, inplace=False)
+          (softmax): Softmax(dim=-1)
+        )
+        (drop_path): Identity()
+        (norm2): LayerNorm((212,), eps=1e-05, elementwise_affine=True, bias=True)
+        (mlp): Mlp(
+          (fc1): Linear(in_features=212, out_features=424, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=424, out_features=212, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+      (adjust2): Conv2d(212, 32, kernel_size=(1, 1), stride=(1, 1))
+      (swin3): SwinTransformerBlock(
+        dim=244, input_resolution=(64, 64), num_heads=2, window_size=16, shift_size=0, mlp_ratio=2
+        (norm1): LayerNorm((244,), eps=1e-05, elementwise_affine=True, bias=True)
+        (attn): WindowAttention(
+          dim=244, window_size=(16, 16), num_heads=2
+          (qkv): Linear(in_features=244, out_features=732, bias=True)
+          (attn_drop): Dropout(p=0.0, inplace=False)
+          (proj): Linear(in_features=244, out_features=244, bias=True)
+          (proj_drop): Dropout(p=0.0, inplace=False)
+          (softmax): Softmax(dim=-1)
+        )
+        (drop_path): Identity()
+        (norm2): LayerNorm((244,), eps=1e-05, elementwise_affine=True, bias=True)
+        (mlp): Mlp(
+          (fc1): Linear(in_features=244, out_features=488, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=488, out_features=244, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+      (adjust3): Conv2d(244, 32, kernel_size=(1, 1), stride=(1, 1))
+      (swin4): SwinTransformerBlock(
+        dim=276, input_resolution=(64, 64), num_heads=6, window_size=16, shift_size=8, mlp_ratio=1
+        (norm1): LayerNorm((276,), eps=1e-05, elementwise_affine=True, bias=True)
+        (attn): WindowAttention(
+          dim=276, window_size=(16, 16), num_heads=6
+          (qkv): Linear(in_features=276, out_features=828, bias=True)
+          (attn_drop): Dropout(p=0.0, inplace=False)
+          (proj): Linear(in_features=276, out_features=276, bias=True)
+          (proj_drop): Dropout(p=0.0, inplace=False)
+          (softmax): Softmax(dim=-1)
+        )
+        (drop_path): Identity()
+        (norm2): LayerNorm((276,), eps=1e-05, elementwise_affine=True, bias=True)
+        (mlp): Mlp(
+          (fc1): Linear(in_features=276, out_features=276, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=276, out_features=276, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+      (adjust4): Conv2d(276, 32, kernel_size=(1, 1), stride=(1, 1))
+      (swin5): SwinTransformerBlock(
+        dim=308, input_resolution=(64, 64), num_heads=4, window_size=16, shift_size=0, mlp_ratio=1
+        (norm1): LayerNorm((308,), eps=1e-05, elementwise_affine=True, bias=True)
+        (attn): WindowAttention(
+          dim=308, window_size=(16, 16), num_heads=4
+          (qkv): Linear(in_features=308, out_features=924, bias=True)
+          (attn_drop): Dropout(p=0.0, inplace=False)
+          (proj): Linear(in_features=308, out_features=308, bias=True)
+          (proj_drop): Dropout(p=0.0, inplace=False)
+          (softmax): Softmax(dim=-1)
+        )
+        (drop_path): Identity()
+        (norm2): LayerNorm((308,), eps=1e-05, elementwise_affine=True, bias=True)
+        (mlp): Mlp(
+          (fc1): Linear(in_features=308, out_features=308, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=308, out_features=308, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+      (adjust5): Conv2d(308, 180, kernel_size=(1, 1), stride=(1, 1))
+      (lrelu): LeakyReLU(negative_slope=0.2, inplace=True)
+      (pe): PatchEmbed()
+      (pue): PatchUnEmbed()
+    )
+    (1-5): 5 x RDG(
+      (swin1): SwinTransformerBlock(
+        dim=180, input_resolution=(64, 64), num_heads=6, window_size=16, shift_size=0, mlp_ratio=2
+        (norm1): LayerNorm((180,), eps=1e-05, elementwise_affine=True, bias=True)
+        (attn): WindowAttention(
+          dim=180, window_size=(16, 16), num_heads=6
+          (qkv): Linear(in_features=180, out_features=540, bias=True)
+          (attn_drop): Dropout(p=0.0, inplace=False)
+          (proj): Linear(in_features=180, out_features=180, bias=True)
+          (proj_drop): Dropout(p=0.0, inplace=False)
+          (softmax): Softmax(dim=-1)
+        )
+        (drop_path): DropPath()
+        (norm2): LayerNorm((180,), eps=1e-05, elementwise_affine=True, bias=True)
+        (mlp): Mlp(
+          (fc1): Linear(in_features=180, out_features=360, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=360, out_features=180, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+      (adjust1): Conv2d(180, 32, kernel_size=(1, 1), stride=(1, 1))
+      (swin2): SwinTransformerBlock(
+        dim=212, input_resolution=(64, 64), num_heads=4, window_size=16, shift_size=8, mlp_ratio=2
+        (norm1): LayerNorm((212,), eps=1e-05, elementwise_affine=True, bias=True)
+        (attn): WindowAttention(
+          dim=212, window_size=(16, 16), num_heads=4
+          (qkv): Linear(in_features=212, out_features=636, bias=True)
+          (attn_drop): Dropout(p=0.0, inplace=False)
+          (proj): Linear(in_features=212, out_features=212, bias=True)
+          (proj_drop): Dropout(p=0.0, inplace=False)
+          (softmax): Softmax(dim=-1)
+        )
+        (drop_path): DropPath()
+        (norm2): LayerNorm((212,), eps=1e-05, elementwise_affine=True, bias=True)
+        (mlp): Mlp(
+          (fc1): Linear(in_features=212, out_features=424, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=424, out_features=212, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+      (adjust2): Conv2d(212, 32, kernel_size=(1, 1), stride=(1, 1))
+      (swin3): SwinTransformerBlock(
+        dim=244, input_resolution=(64, 64), num_heads=2, window_size=16, shift_size=0, mlp_ratio=2
+        (norm1): LayerNorm((244,), eps=1e-05, elementwise_affine=True, bias=True)
+        (attn): WindowAttention(
+          dim=244, window_size=(16, 16), num_heads=2
+          (qkv): Linear(in_features=244, out_features=732, bias=True)
+          (attn_drop): Dropout(p=0.0, inplace=False)
+          (proj): Linear(in_features=244, out_features=244, bias=True)
+          (proj_drop): Dropout(p=0.0, inplace=False)
+          (softmax): Softmax(dim=-1)
+        )
+        (drop_path): DropPath()
+        (norm2): LayerNorm((244,), eps=1e-05, elementwise_affine=True, bias=True)
+        (mlp): Mlp(
+          (fc1): Linear(in_features=244, out_features=488, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=488, out_features=244, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+      (adjust3): Conv2d(244, 32, kernel_size=(1, 1), stride=(1, 1))
+      (swin4): SwinTransformerBlock(
+        dim=276, input_resolution=(64, 64), num_heads=6, window_size=16, shift_size=8, mlp_ratio=1
+        (norm1): LayerNorm((276,), eps=1e-05, elementwise_affine=True, bias=True)
+        (attn): WindowAttention(
+          dim=276, window_size=(16, 16), num_heads=6
+          (qkv): Linear(in_features=276, out_features=828, bias=True)
+          (attn_drop): Dropout(p=0.0, inplace=False)
+          (proj): Linear(in_features=276, out_features=276, bias=True)
+          (proj_drop): Dropout(p=0.0, inplace=False)
+          (softmax): Softmax(dim=-1)
+        )
+        (drop_path): DropPath()
+        (norm2): LayerNorm((276,), eps=1e-05, elementwise_affine=True, bias=True)
+        (mlp): Mlp(
+          (fc1): Linear(in_features=276, out_features=276, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=276, out_features=276, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+      (adjust4): Conv2d(276, 32, kernel_size=(1, 1), stride=(1, 1))
+      (swin5): SwinTransformerBlock(
+        dim=308, input_resolution=(64, 64), num_heads=4, window_size=16, shift_size=0, mlp_ratio=1
+        (norm1): LayerNorm((308,), eps=1e-05, elementwise_affine=True, bias=True)
+        (attn): WindowAttention(
+          dim=308, window_size=(16, 16), num_heads=4
+          (qkv): Linear(in_features=308, out_features=924, bias=True)
+          (attn_drop): Dropout(p=0.0, inplace=False)
+          (proj): Linear(in_features=308, out_features=308, bias=True)
+          (proj_drop): Dropout(p=0.0, inplace=False)
+          (softmax): Softmax(dim=-1)
+        )
+        (drop_path): DropPath()
+        (norm2): LayerNorm((308,), eps=1e-05, elementwise_affine=True, bias=True)
+        (mlp): Mlp(
+          (fc1): Linear(in_features=308, out_features=308, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=308, out_features=308, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+      (adjust5): Conv2d(308, 180, kernel_size=(1, 1), stride=(1, 1))
+      (lrelu): LeakyReLU(negative_slope=0.2, inplace=True)
+      (pe): PatchEmbed()
+      (pue): PatchUnEmbed()
+    )
+  )
+  (norm): LayerNorm((180,), eps=1e-05, elementwise_affine=True, bias=True)
+  (mae_wrapper): PD_MAE_Encoder_Wrapper(
+    (mae): PDMAE(
+      (encoder): MAEEncoder(
+        (patch_embed): Conv2d(3, 384, kernel_size=(8, 8), stride=(8, 8))
+        (blocks): ModuleList(
+          (0-11): 12 x Block(
+            (norm1): LayerNorm((384,), eps=1e-05, elementwise_affine=True, bias=True)
+            (attn): Attention(
+              (qkv): Linear(in_features=384, out_features=1152, bias=True)
+              (q_norm): Identity()
+              (k_norm): Identity()
+              (attn_drop): Dropout(p=0.0, inplace=False)
+              (norm): Identity()
+              (proj): Linear(in_features=384, out_features=384, bias=True)
+              (proj_drop): Dropout(p=0.0, inplace=False)
+            )
+            (ls1): Identity()
+            (drop_path1): Identity()
+            (norm2): LayerNorm((384,), eps=1e-05, elementwise_affine=True, bias=True)
+            (mlp): Mlp(
+              (fc1): Linear(in_features=384, out_features=1536, bias=True)
+              (act): GELU(approximate='none')
+              (drop1): Dropout(p=0.0, inplace=False)
+              (norm): Identity()
+              (fc2): Linear(in_features=1536, out_features=384, bias=True)
+              (drop2): Dropout(p=0.0, inplace=False)
+            )
+            (ls2): Identity()
+            (drop_path2): Identity()
+          )
+        )
+        (norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True, bias=True)
+      )
+      (decoder): MAEDecoder(
+        (decoder_embed): Linear(in_features=384, out_features=192, bias=True)
+        (blocks): ModuleList(
+          (0-7): 8 x Block(
+            (norm1): LayerNorm((192,), eps=1e-05, elementwise_affine=True, bias=True)
+            (attn): Attention(
+              (qkv): Linear(in_features=192, out_features=576, bias=True)
+              (q_norm): Identity()
+              (k_norm): Identity()
+              (attn_drop): Dropout(p=0.0, inplace=False)
+              (norm): Identity()
+              (proj): Linear(in_features=192, out_features=192, bias=True)
+              (proj_drop): Dropout(p=0.0, inplace=False)
+            )
+            (ls1): Identity()
+            (drop_path1): Identity()
+            (norm2): LayerNorm((192,), eps=1e-05, elementwise_affine=True, bias=True)
+            (mlp): Mlp(
+              (fc1): Linear(in_features=192, out_features=768, bias=True)
+              (act): GELU(approximate='none')
+              (drop1): Dropout(p=0.0, inplace=False)
+              (norm): Identity()
+              (fc2): Linear(in_features=768, out_features=192, bias=True)
+              (drop2): Dropout(p=0.0, inplace=False)
+            )
+            (ls2): Identity()
+            (drop_path2): Identity()
+          )
+        )
+        (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True, bias=True)
+        (decoder_pred): Linear(in_features=192, out_features=192, bias=True)
+      )
+    )
+  )
+  (sft_layers): ModuleDict(
+    (1): SFT_Layer(
+      (scale_conv): Conv2d(384, 180, kernel_size=(1, 1), stride=(1, 1))
+      (shift_conv): Conv2d(384, 180, kernel_size=(1, 1), stride=(1, 1))
+    )
+    (3): SFT_Layer(
+      (scale_conv): Conv2d(384, 180, kernel_size=(1, 1), stride=(1, 1))
+      (shift_conv): Conv2d(384, 180, kernel_size=(1, 1), stride=(1, 1))
+    )
+    (5): SFT_Layer(
+      (scale_conv): Conv2d(384, 180, kernel_size=(1, 1), stride=(1, 1))
+      (shift_conv): Conv2d(384, 180, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (conv_after_body): Conv2d(180, 180, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv_before_upsample): Sequential(
+    (0): Conv2d(180, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): LeakyReLU(negative_slope=0.01, inplace=True)
+  )
+  (upsample): Upsample(
+    (0): Conv2d(64, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): PixelShuffle(upscale_factor=2)
+    (2): Conv2d(64, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (3): PixelShuffle(upscale_factor=2)
+  )
+  (conv_last): Conv2d(64, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+)
+2026-06-04 11:11:05,831 INFO: Loading DRCT model from /data/home/namlh/DLEnhance_ImageQuality/DRCT/experiments/train_PD_MAE_DRCT_x4/models/net_g_500000.pth, with param key: [params].
+2026-06-04 11:11:05,946 INFO: Use Exponential Moving Average with decay: 0.999
+2026-06-04 11:11:07,520 INFO: Network [DRCT] is created.
+2026-06-04 11:11:07,850 INFO: Loading DRCT model from /data/home/namlh/DLEnhance_ImageQuality/DRCT/experiments/train_PD_MAE_DRCT_x4/models/net_g_500000.pth, with param key: [params_ema].
+2026-06-04 11:11:07,959 INFO: Loss [L1Loss] is created.
+2026-06-04 11:11:11,803 INFO: Loss [PerceptualLoss] is created.
+2026-06-04 11:11:11,819 WARNING: Params mae_wrapper.mae.encoder.pos_embed will not be optimized.
+2026-06-04 11:11:11,819 WARNING: Params mae_wrapper.mae.encoder.cls_token will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.patch_embed.weight will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.patch_embed.bias will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.0.norm1.weight will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.0.norm1.bias will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.0.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.0.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.0.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.0.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.0.norm2.weight will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.0.norm2.bias will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.0.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.0.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.0.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.0.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.1.norm1.weight will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.1.norm1.bias will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.1.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,820 WARNING: Params mae_wrapper.mae.encoder.blocks.1.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.1.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.1.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.1.norm2.weight will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.1.norm2.bias will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.1.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.1.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.1.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.1.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.2.norm1.weight will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.2.norm1.bias will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.2.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.2.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.2.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.2.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.2.norm2.weight will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.2.norm2.bias will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.2.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.2.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,821 WARNING: Params mae_wrapper.mae.encoder.blocks.2.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.2.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.3.norm1.weight will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.3.norm1.bias will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.3.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.3.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.3.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.3.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.3.norm2.weight will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.3.norm2.bias will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.3.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.3.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.3.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.3.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.4.norm1.weight will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.4.norm1.bias will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.4.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.4.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,822 WARNING: Params mae_wrapper.mae.encoder.blocks.4.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.4.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.4.norm2.weight will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.4.norm2.bias will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.4.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.4.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.4.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.4.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.5.norm1.weight will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.5.norm1.bias will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.5.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.5.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.5.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.5.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.5.norm2.weight will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.5.norm2.bias will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.5.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.5.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.5.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.5.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,823 WARNING: Params mae_wrapper.mae.encoder.blocks.6.norm1.weight will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.6.norm1.bias will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.6.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.6.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.6.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.6.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.6.norm2.weight will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.6.norm2.bias will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.6.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.6.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.6.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.6.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.7.norm1.weight will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.7.norm1.bias will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.7.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.7.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.7.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.7.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.7.norm2.weight will not be optimized.
+2026-06-04 11:11:11,824 WARNING: Params mae_wrapper.mae.encoder.blocks.7.norm2.bias will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.7.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.7.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.7.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.7.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.8.norm1.weight will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.8.norm1.bias will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.8.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.8.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.8.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.8.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.8.norm2.weight will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.8.norm2.bias will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.8.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.8.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.8.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.8.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.9.norm1.weight will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.9.norm1.bias will not be optimized.
+2026-06-04 11:11:11,825 WARNING: Params mae_wrapper.mae.encoder.blocks.9.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.9.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.9.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.9.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.9.norm2.weight will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.9.norm2.bias will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.9.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.9.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.9.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.9.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.10.norm1.weight will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.10.norm1.bias will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.10.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.10.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.10.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.10.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.10.norm2.weight will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.10.norm2.bias will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.10.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,826 WARNING: Params mae_wrapper.mae.encoder.blocks.10.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.blocks.10.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.blocks.10.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.blocks.11.norm1.weight will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.blocks.11.norm1.bias will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.blocks.11.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.blocks.11.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.blocks.11.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.blocks.11.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.blocks.11.norm2.weight will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.blocks.11.norm2.bias will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.blocks.11.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.blocks.11.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.blocks.11.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.blocks.11.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.norm.weight will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.encoder.norm.bias will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.decoder.decoder_pos_embed will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.decoder.decoder_embed.weight will not be optimized.
+2026-06-04 11:11:11,827 WARNING: Params mae_wrapper.mae.decoder.decoder_embed.bias will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.0.norm1.weight will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.0.norm1.bias will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.0.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.0.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.0.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.0.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.0.norm2.weight will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.0.norm2.bias will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.0.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.0.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.0.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.0.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.1.norm1.weight will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.1.norm1.bias will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.1.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.1.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.1.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.1.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,828 WARNING: Params mae_wrapper.mae.decoder.blocks.1.norm2.weight will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.1.norm2.bias will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.1.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.1.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.1.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.1.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.2.norm1.weight will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.2.norm1.bias will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.2.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.2.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.2.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.2.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.2.norm2.weight will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.2.norm2.bias will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.2.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.2.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.2.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.2.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.3.norm1.weight will not be optimized.
+2026-06-04 11:11:11,829 WARNING: Params mae_wrapper.mae.decoder.blocks.3.norm1.bias will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.3.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.3.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.3.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.3.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.3.norm2.weight will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.3.norm2.bias will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.3.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.3.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.3.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.3.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.4.norm1.weight will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.4.norm1.bias will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.4.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.4.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.4.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.4.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.4.norm2.weight will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.4.norm2.bias will not be optimized.
+2026-06-04 11:11:11,830 WARNING: Params mae_wrapper.mae.decoder.blocks.4.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.4.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.4.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.4.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.5.norm1.weight will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.5.norm1.bias will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.5.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.5.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.5.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.5.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.5.norm2.weight will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.5.norm2.bias will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.5.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.5.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.5.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.5.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.6.norm1.weight will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.6.norm1.bias will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.6.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,831 WARNING: Params mae_wrapper.mae.decoder.blocks.6.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.6.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.6.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.6.norm2.weight will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.6.norm2.bias will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.6.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.6.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.6.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.6.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.7.norm1.weight will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.7.norm1.bias will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.7.attn.qkv.weight will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.7.attn.qkv.bias will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.7.attn.proj.weight will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.7.attn.proj.bias will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.7.norm2.weight will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.7.norm2.bias will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.7.mlp.fc1.weight will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.7.mlp.fc1.bias will not be optimized.
+2026-06-04 11:11:11,832 WARNING: Params mae_wrapper.mae.decoder.blocks.7.mlp.fc2.weight will not be optimized.
+2026-06-04 11:11:11,833 WARNING: Params mae_wrapper.mae.decoder.blocks.7.mlp.fc2.bias will not be optimized.
+2026-06-04 11:11:11,833 WARNING: Params mae_wrapper.mae.decoder.norm.weight will not be optimized.
+2026-06-04 11:11:11,833 WARNING: Params mae_wrapper.mae.decoder.norm.bias will not be optimized.
+2026-06-04 11:11:11,833 WARNING: Params mae_wrapper.mae.decoder.decoder_pred.weight will not be optimized.
+2026-06-04 11:11:11,833 WARNING: Params mae_wrapper.mae.decoder.decoder_pred.bias will not be optimized.
+2026-06-04 11:11:11,834 INFO: Model [DRCTModel] is created.
+2026-06-04 11:11:11,841 INFO: Resuming training from epoch: 11, iter: 500000.
+2026-06-04 11:11:12,120 INFO: Start training from epoch: 11, iter: 500000
+2026-06-04 11:11:15,594 INFO: End of training. Time consumed: 0:00:03
+2026-06-04 11:11:15,596 INFO: Save the latest model.
+2026-06-04 11:13:57,905 INFO: Validation RealSR_Canon
+	 # psnr: 27.2191	Best: 27.2191 @ 500004 iter
+	 # ssim: 0.7815	Best: 0.7815 @ 500004 iter
+
+2026-06-04 11:19:00,878 INFO: Validation RealSR_Nikon
+	 # psnr: 26.6357	Best: 26.6357 @ 500004 iter
+	 # ssim: 0.7435	Best: 0.7435 @ 500004 iter
+
+2026-06-04 11:19:04,282 INFO: Validation Set5
+	 # psnr: 27.4946	Best: 27.4946 @ 500004 iter
+	 # ssim: 0.7803	Best: 0.7803 @ 500004 iter
+
