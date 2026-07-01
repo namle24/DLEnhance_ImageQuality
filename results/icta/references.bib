@@ -61,6 +61,8 @@
       url={https://arxiv.org/abs/2107.10833}, 
 }
 
+
+
 @misc{wang2024exploiting,
       title={Exploiting Diffusion Prior for Real-World Image Super-Resolution}, 
       author={Jianyi Wang and Zongsheng Yue and Shangchen Zhou and Kelvin C. K. Chan and Chen Change Loy},
@@ -71,6 +73,21 @@
       url={https://arxiv.org/abs/2305.07015}, 
 }
 
+@inproceedings{Bengio09,
+author = {Bengio, Yoshua and Louradour, J\'{e}r\^{o}me and Collobert, Ronan and Weston, Jason},
+title = {Curriculum learning},
+year = {2009},
+isbn = {9781605585161},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1553374.1553380},
+doi = {10.1145/1553374.1553380},
+booktitle = {Proceedings of the 26th Annual International Conference on Machine Learning},
+pages = {41–48},
+numpages = {8},
+location = {Montreal, Quebec, Canada},
+series = {ICML '09}
+}
 @misc{lin2023diffbir,
       title={DiffBIR: Towards Blind Image Restoration with Generative Diffusion Prior}, 
       author={Xinqi Lin and Jingwen He and Ziyan Chen and Zhaoyang Lyu and Bo Dai and Fanghua Yu and Wanli Ouyang and Yu Qiao and Chao Dong},
@@ -84,7 +101,7 @@
 @ARTICLE{mittal2012making,
   author={Mittal, Anish and Soundararajan, Rajiv and Bovik, Alan C.},
   journal={IEEE Signal Processing Letters}, 
-  title={Making a "Completely Blind" Image Quality Analyzer}, 
+  title={Making a “Completely Blind” Image Quality Analyzer}, 
   year={2013},
   volume={20},
   number={3},
@@ -102,32 +119,17 @@
       url={https://arxiv.org/abs/1409.1556}, 
 }
 
-@inproceedings{bengio2009curriculum,
-  title={Curriculum learning},
-  author={Yoshua Bengio and J{\'e}r{\^o}me Louradour and Ronan Collobert and Jason Weston},
-  booktitle={International Conference on Machine Learning},
-  year={2009},
-  url={https://api.semanticscholar.org/CorpusID:873046}
-}
-
-@misc{johnson2016perceptual,
-      title={Perceptual Losses for Real-Time Style Transfer and Super-Resolution}, 
-      author={Justin Johnson and Alexandre Alahi and Li Fei-Fei},
-      year={2016},
-      eprint={1603.08155},
+@misc{hinton2015distilling,
+      title={Distilling the Knowledge in a Neural Network}, 
+      author={Geoffrey Hinton and Oriol Vinyals and Jeff Dean},
+      year={2015},
+      eprint={1503.02531},
       archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/1603.08155}, 
+      primaryClass={stat.ML},
+      url={https://arxiv.org/abs/1503.02531}, 
 }
 
-@article{hinton2015distilling,
-  title={Distilling the knowledge in a neural network},
-  author={Hinton, Geoffrey and Vinyals, Oriol and Dean, Jeff},
-  journal={arXiv preprint arXiv:1503.02531},
-  year={2015}
-}
-
-@inproceedings{Hui_2019, series={MM '19},
+@inproceedings{Hui_2019, series={MM ’19},
    title={Lightweight Image Super-Resolution with Information Multi-distillation Network},
    url={http://dx.doi.org/10.1145/3343031.3351084},
    DOI={10.1145/3343031.3351084},
@@ -135,8 +137,8 @@
    publisher={ACM},
    author={Hui, Zheng and Gao, Xinbo and Yang, Yunchu and Wang, Xiumei},
    year={2019},
-   month=Oct, pages={2024--2032},
-   collection={MM '19} }
+   month=Oct, pages={2024–2032},
+   collection={MM ’19} }
 
 
 @article{bromley1993signature,
@@ -187,16 +189,17 @@ doi = {10.1142/S0218001493000339}
       primaryClass={cs.LG},
       url={https://arxiv.org/abs/2101.10382}, 
 }
-
-@inproceedings{blau2018perception,
-   title={The Perception-Distortion Tradeoff},
-   url={http://dx.doi.org/10.1109/CVPR.2018.00652},
-   DOI={10.1109/cvpr.2018.00652},
-   booktitle={2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition},
-   publisher={IEEE},
-   author={Blau, Yochai and Michaeli, Tomer},
-   year={2018},
-   month={June}, pages={6228--6237} }
+    
+@INPROCEEDINGS{blau2018perception,
+  author={Blau, Yochai and Michaeli, Tomer},
+  booktitle={2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition}, 
+  title={The Perception-Distortion Tradeoff}, 
+  year={2018},
+  volume={},
+  number={},
+  pages={6228-6237},
+  keywords={Distortion;Distortion measurement;Image restoration;Gallium nitride;Image resolution;Visualization;Indexes},
+  doi={10.1109/CVPR.2018.00652}}
 
 
 @INPROCEEDINGS{ji2020realworld,
@@ -260,3 +263,74 @@ doi = {10.1142/S0218001493000339}
   doi={10.1109/KSE68178.2025.11309534}}
 
 
+@misc{johnson2016perceptual,
+      title={Perceptual Losses for Real-Time Style Transfer and Super-Resolution}, 
+      author={Justin Johnson and Alexandre Alahi and Li Fei-Fei},
+      year={2016},
+      eprint={1603.08155},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/1603.08155}, 
+}
+
+@inproceedings{Timofte2017NTIRE2C,
+author = {Timofte, Radu and Agustsson, Eirikur and Van Gool, Luc and Yang, Ming-Hsuan and Zhang, Lei and Lim, Bee and Son, Sanghyun and Kim, Heewon and Nah, Seungjun and Lee, Kyoung Mu and Wang, Xintao and Tian, Yapeng and Yu, Ke and Zhang, Yulun and Wu, Shixiang and Dong, Chao and Lin, Liang and Qiao, Yu and Loy, Chen Change and Guo, Qi},
+year = {2017},
+month = {07},
+pages = {1110-1121},
+title = {NTIRE 2017 Challenge on Single Image Super-Resolution: Methods and Results},
+doi = {10.1109/CVPRW.2017.149}
+}
+
+@article{set5,
+author = {Bevilacqua, Marco and Roumy, A. and Guillemot, Christine and Alberi-Morel, Marie-Line},
+year = {2012},
+month = {09},
+pages = {},
+title = {Low-Complexity Single Image Super-Resolution Based on Nonnegative Neighbor Embedding},
+doi = {10.5244/C.26.135}
+}
+
+@misc{realsr,
+      title={Toward Real-World Single Image Super-Resolution: A New Benchmark and A New Model}, 
+      author={Jianrui Cai and Hui Zeng and Hongwei Yong and Zisheng Cao and Lei Zhang},
+      year={2019},
+      eprint={1904.00523},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/1904.00523}, 
+}
+
+@inproceedings{set14,
+  title={On Single Image Scale-Up Using Sparse-Representations},
+  author={Roman Zeyde and Michael Elad and Matan Protter},
+  booktitle={Curves and Surfaces},
+  year={2010},
+  url={https://api.semanticscholar.org/CorpusID:2356330}
+}
+
+@article{bsd100,
+  title={A database of human segmented natural images and its application to evaluating segmentation algorithms and measuring ecological statistics},
+  author={David R. Martin and Charless C. Fowlkes and Doron Tal and Jitendra Malik},
+  journal={Proceedings Eighth IEEE International Conference on Computer Vision. ICCV 2001},
+  year={2001},
+  volume={2},
+  pages={416-423 vol.2},
+  url={https://api.semanticscholar.org/CorpusID:64193}
+}
+
+@inproceedings{urban100,
+author = {Huang, Jia-Bin and Singh, Abhishek and Ahuja, Narendra},
+year = {2015},
+month = {06},
+pages = {},
+title = {Single Image Super-resolution from Transformed Self-Exemplars},
+doi = {10.1109/CVPR.2015.7299156}
+}
+
+@misc{unsplash_dataset,
+  title = {Unsplash Dataset},
+  author = {{Unsplash}},
+  howpublished = {\url{https://unsplash.com/data}},
+  year = {2026}
+}

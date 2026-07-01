@@ -1,0 +1,111 @@
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\doi}[1]{https://doi.org/#1}
+
+\bibitem{Bengio09}
+Bengio, Y., Louradour, J., Collobert, R., Weston, J.: Curriculum learning. In:
+  Proceedings of the 26th Annual International Conference on Machine Learning.
+  p. 41–48. ICML '09, Association for Computing Machinery, New York, NY, USA
+  (2009). \doi{10.1145/1553374.1553380},
+  \url{https://doi.org/10.1145/1553374.1553380}
+
+\bibitem{set5}
+Bevilacqua, M., Roumy, A., Guillemot, C., Alberi-Morel, M.L.: Low-complexity
+  single image super-resolution based on nonnegative neighbor embedding  (09
+  2012). \doi{10.5244/C.26.135}
+
+\bibitem{blau2018perception}
+Blau, Y., Michaeli, T.: The perception-distortion tradeoff. In: 2018 IEEE/CVF
+  Conference on Computer Vision and Pattern Recognition. pp. 6228--6237 (2018).
+  \doi{10.1109/CVPR.2018.00652}
+
+\bibitem{realsr}
+Cai, J., Zeng, H., Yong, H., Cao, Z., Zhang, L.: Toward real-world single image
+  super-resolution: A new benchmark and a new model (2019),
+  \url{https://arxiv.org/abs/1904.00523}
+
+\bibitem{dong2014learning}
+Dong, C., Loy, C.C., He, K., Tang, X.: Image super-resolution using deep
+  convolutional networks (2015), \url{https://arxiv.org/abs/1501.00092}
+
+\bibitem{hinton2015distilling}
+Hinton, G., Vinyals, O., Dean, J.: Distilling the knowledge in a neural network
+  (2015), \url{https://arxiv.org/abs/1503.02531}
+
+\bibitem{urban100}
+Huang, J.B., Singh, A., Ahuja, N.: Single image super-resolution from
+  transformed self-exemplars (06 2015). \doi{10.1109/CVPR.2015.7299156}
+
+\bibitem{johnson2016perceptual}
+Johnson, J., Alahi, A., Fei-Fei, L.: Perceptual losses for real-time style
+  transfer and super-resolution (2016), \url{https://arxiv.org/abs/1603.08155}
+
+\bibitem{liang2021swinir}
+Liang, J., Cao, J., Sun, G., Zhang, K., Gool, L.V., Timofte, R.: Swinir: Image
+  restoration using swin transformer (2021),
+  \url{https://arxiv.org/abs/2108.10257}
+
+\bibitem{lim2017enhanced}
+Lim, B., Son, S., Kim, H., Nah, S., Lee, K.M.: Enhanced deep residual networks
+  for single image super-resolution (2017),
+  \url{https://arxiv.org/abs/1707.02921}
+
+\bibitem{bsd100}
+Martin, D.R., Fowlkes, C.C., Tal, D., Malik, J.: A database of human segmented
+  natural images and its application to evaluating segmentation algorithms and
+  measuring ecological statistics. Proceedings Eighth IEEE International
+  Conference on Computer Vision. ICCV 2001  \textbf{2},  416--423 vol.2 (2001),
+  \url{https://api.semanticscholar.org/CorpusID:64193}
+
+\bibitem{mittal2012making}
+Mittal, A., Soundararajan, R., Bovik, A.C.: Making a “completely blind”
+  image quality analyzer. IEEE Signal Processing Letters  \textbf{20}(3),
+  209--212 (2013). \doi{10.1109/LSP.2012.2227726}
+
+\bibitem{11309534}
+Nam, L.H., Quang, D.N., Tuan, G.A., Tung, T.H., Ton, L.H., Ha, N.H.: Towards
+  real-esrgan refinement for realistic image restoration via advanced
+  degradation and knowledge distillation. In: 2025 17th International
+  Conference on Knowledge and System Engineering (KSE). pp. 01--06 (2025).
+  \doi{10.1109/KSE68178.2025.11309534}
+
+\bibitem{simonyan2014very}
+Simonyan, K., Zisserman, A.: Very deep convolutional networks for large-scale
+  image recognition (2015), \url{https://arxiv.org/abs/1409.1556}
+
+\bibitem{Timofte2017NTIRE2C}
+Timofte, R., Agustsson, E., Van~Gool, L., Yang, M.H., Zhang, L., Lim, B., Son,
+  S., Kim, H., Nah, S., Lee, K.M., Wang, X., Tian, Y., Yu, K., Zhang, Y., Wu,
+  S., Dong, C., Lin, L., Qiao, Y., Loy, C.C., Guo, Q.: Ntire 2017 challenge on
+  single image super-resolution: Methods and results. pp. 1110--1121 (07 2017).
+  \doi{10.1109/CVPRW.2017.149}
+
+\bibitem{unsplash_dataset}
+{Unsplash}: Unsplash dataset. \url{https://unsplash.com/data} (2026)
+
+\bibitem{wang2021realesrgan}
+Wang, X., Xie, L., Dong, C., Shan, Y.: Real-esrgan: Training real-world blind
+  super-resolution with pure synthetic data (2021),
+  \url{https://arxiv.org/abs/2107.10833}
+
+\bibitem{wang2018esrgan}
+Wang, X., Yu, K., Wu, S., Gu, J., Liu, Y., Dong, C., Loy, C.C., Qiao, Y., Tang,
+  X.: Esrgan: Enhanced super-resolution generative adversarial networks (2018),
+  \url{https://arxiv.org/abs/1809.00219}
+
+\bibitem{set14}
+Zeyde, R., Elad, M., Protter, M.: On single image scale-up using
+  sparse-representations. In: Curves and Surfaces (2010),
+  \url{https://api.semanticscholar.org/CorpusID:2356330}
+
+\bibitem{zhang2021designing}
+Zhang, K., Liang, J., Gool, L.V., Timofte, R.: Designing a practical
+  degradation model for deep blind image super-resolution (2021),
+  \url{https://arxiv.org/abs/2103.14006}
+
+\bibitem{zhang2018residualdensenetworkimage}
+Zhang, Y., Tian, Y., Kong, Y., Zhong, B., Fu, Y.: Residual dense network for
+  image super-resolution (2018), \url{https://arxiv.org/abs/1802.08797}
+
+\end{thebibliography}

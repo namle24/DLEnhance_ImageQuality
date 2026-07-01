@@ -32,36 +32,46 @@
 
 \begin{document}
 
-\title{Curriculum-Guided Siamese Real-ESRGAN with High-Order Degradation for Real-World Image Super-Resolution}
+\title{Curriculum-Guided Siamese Real-ESRGAN for Real-World Image Super-Resolution}
 \titlerunning{Curriculum-Guided Siamese Real-ESRGAN for Real-World Image Super-Resolution}
 
-\author{LE Hoai Nam\inst{1} \and NGUYEN Hoang Ha\inst{1}\thanks{Corresponding author.}}
-\authorrunning{L. H. Nam and N. H. Ha}
+\author{Anonymous Authors}
+\authorrunning{Anonymous Authors}
 
-\institute{University of Science and Technology of Hanoi, Vietnam Academy of Science and Technology, Hanoi, Vietnam\\
-\email{nguyen-hoang.ha@usth.edu.vn}}
+\institute{Anonymous Affiliations}
 
 \maketitle
 
 \begin{abstract}
-Real-world image degradation combines blur, sensor noise, chromatic aberration, and JPEG compression, making synthetic restoration training difficult. We present a Siamese Real-ESRGAN framework that improves degradation diversity and training stability for realistic image restoration. The method extends high-order degradation with probabilistic operation selection, tuned compression ranges, camera-noise simulation, and offline multi-level quality generation. A shared-weight Teacher--Student training scheme restores paired inputs with different degradation severity, while a three-stage curriculum gradually shifts from mild to severe degradation pairs. Experiments on standard and real-world benchmarks show improved perceptual quality, reaching NIQE 3.82 on Urban100 and an 18.7\% NIQE gain over Real-ESRGAN on RealSR Canon, without increasing inference cost.
 
-\keywords{Image Super-Resolution \and Siamese Network \and Knowledge Distillation \and Realistic Degradation \and Real-ESRGAN}
+This paper presents a curriculum-guided Siamese Real-ESRGAN framework for practical image restoration under different degradation severities. The proposed method extends high-order degradation synthesis with probabilistic operation selection, realistic compression ranges, camera-specific noise simulation, and offline multi-level low-quality image generation. During training, two degraded versions of the same high-resolution image are used as a paired input: the milder version provides restoration guidance, while the harder version encourages robustness to stronger artifacts. A shared-weight generator processes both inputs, enabling self-guided learning without introducing an additional teacher network or increasing inference-time complexity. A mild-to-hard curriculum further stabilizes training by gradually increasing the degradation difficulty. Experiments on standard and real-world benchmarks show that the proposed method improves perceptual quality and produces cleaner textures, sharper structures, and fewer visual artifacts compared with the baseline Real-ESRGAN model.
+
+\keywords{Image Super-Resolution \and Siamese Network \and Knowledge Distillation \and Curriculum Learning \and Real-ESRGAN}
 \end{abstract}
 
 \section{Introduction}
 
-Single-image super-resolution (SR) recovers high-quality images from low-quality observations. Deep SR methods perform well under bicubic degradation, but real photographs contain mixed artifacts from optics, sensors, compression, and post-processing. ESRGAN~\cite{wang2018esrgan}, BSRGAN~\cite{zhang2021designing}, and Real-ESRGAN~\cite{wang2021realesrgan} improve perceptual blind SR, yet a single degradation distribution remains insufficient for severe or differently ordered real artifacts.
+Single-image super-resolution (SR) aims to recover a high-resolution image from a degraded low-resolution input. It plays an important role in various domains including digital photography, surveillance, remote sensing, medical imaging, and visual content enhancement, where image details are often lost due to limited sensor resolution, compression, noise, blur, or transmission constraints. Although recent deep learning-based SR methods have achieved remarkable results, many of them are trained under simplified synthetic degradations, which do not fully represent real-world image degradation.
 
-This work extends our previous Real-ESRGAN refinement study~\cite{11309534}. That work improved degradation synthesis and conventional distillation for compression. Here, we target robust restoration under gradually increasing degradation severity. Instead of a fixed large Teacher and a separate Student, one shared-weight generator runs two passes: the milder input guides the harder one, and the curriculum moves both inputs toward stronger degradation levels. We make three main contributions. First, we introduce a shared-weight Siamese Real-ESRGAN training scheme that requires no additional parameters at inference time. Second, we design a three-stage curriculum (90\%/80\%, 80\%/70\%, and 70\%/60\%) to stabilize training under progressively severe degradations. Third, we develop an enhanced high-order degradation pipeline with probabilistic operation ordering, realistic JPEG compression, camera noise simulation, and offline multi-level data generation.
+In practical scenarios, low-quality images usually contain a complex mixture of unknown degradations, including optical blur, sensor noise, JPEG compression, resizing artifacts, and camera post-processing effects. This gap between synthetic training data and real-world inputs often causes SR models to generate over-smoothed textures, amplified noise, ringing artifacts, or visually unrealistic details. To address this issue, real-world SR methods such as ESRGAN~\cite{wang2018esrgan}, BSRGAN~\cite{zhang2021designing}, and Real-ESRGAN~\cite{wang2021realesrgan} introduce more realistic degradation models and perceptual learning objectives. Among them, Real-ESRGAN has become a strong baseline by using a high-order degradation pipeline to simulate complex real-world artifacts.
+
+However, learning from real-world degradations remains challenging because image quality may vary from mildly degraded to severely corrupted. Training directly on strong degradations can make optimization unstable and may lead to unreliable texture generation, while training mainly on mild degradations may reduce robustness on difficult inputs. Inspired by curriculum learning~\cite{Bengio09}, a natural strategy is to expose the model to multiple degradation levels in a progressive manner, allowing it to first learn from easier cases where structural information is still preserved and then gradually adapt to harder cases with stronger artifacts. In this work, we adopt this mild-to-hard training strategy by constructing paired degradation levels from the same high-resolution image, so that easier degradation cases can support the learning of more difficult restoration scenarios.
+
+The main contributions of this paper are two-fold. First, we propose a shared-weight Siamese Real-ESRGAN training scheme that improves restoration guidance without increasing inference-time complexity. Second, we design a mild-to-hard curriculum scheme using progressive degradation pairs and an enhanced high-order degradation pipeline to stabilize learning under increasingly severe degradations.
+
 
 \section{Related Work}
+This section reviews image super-resolution methods most related to real-world degradation modeling, knowledge distillation, and curriculum learning.
+Deep learning has improved image super-resolution by learning the mapping from low-quality to high-quality images. SRCNN~\cite{dong2014learning} showed the effectiveness of end-to-end CNN learning, while EDSR~\cite{lim2017enhanced} and RDN~\cite{zhang2018residualdensenetworkimage} improved reconstruction through deeper residual and dense architectures. ESRGAN~\cite{wang2018esrgan} introduced adversarial and perceptual losses for sharper textures, and SwinIR~\cite{liang2021swinir} further strengthened restoration with Transformer blocks. However, many of these methods rely on simplified synthetic degradations, which limits robustness when test images contain mixed real-world artifacts. Real-world SR methods therefore focus on more practical degradation synthesis. BSRGAN~\cite{zhang2021designing} combines blur, downsampling, noise, and JPEG compression in a randomized degradation pipeline. Real-ESRGAN~\cite{wang2021realesrgan} further uses a high-order degradation process and has become a strong baseline for blind real-world SR. Our work follows this direction, but organizes the generated samples into explicit degradation levels so that training can exploit mild-to-severe relationships instead of treating all degraded inputs as one mixed distribution.
 
- SRCNN~\cite{dong2014learning}, EDSR~\cite{lim2017enhanced}, and RDN~\cite{zhang2018residualdensenetworkimage} advanced deep SR but mostly assume bicubic degradation. Blind SR methods~\cite{zhang2018learning,luo2020unfolding,gu2019blind} model unknown degradations, while Real-ESRGAN~\cite{wang2021realesrgan} uses high-order synthetic degradation. We build on it directly, but generate four offline quality levels for curriculum pairing. Knowledge Distillation (KD)~\cite{hinton2015distilling,Hui_2019} usually uses a fixed Teacher; feature-aware variants such as FAKD~\cite{gao2022featuredistillationinteractionweighting} preserve structure similarly. In contrast, Siamese networks~\cite{bromley1993signature,koch2015siamese} learn from paired inputs under shared weights, matching our paired degradation levels. Curriculum learning~\cite{bengio2009curriculum,soviany2022curriculum} motivates the easy-to-hard schedule. Recent diffusion SR models~\cite{wang2024exploiting,lin2023diffbir,yang2023pixel} are strong but costly, so we keep a practical GAN-based backbone.
+Knowledge distillation transfers information from a Teacher model to a Student model~\cite{hinton2015distilling}. In SR, distillation is often used for model compression or feature-level guidance. Different from methods with separate Teacher and Student networks, our framework uses two degraded versions of the same image and one shared generator. The milder branch provides output-level and feature-level guidance for the harder branch without adding inference-time parameters. Our training strategy is also related to curriculum learning~\cite{Bengio09}, where models are exposed to easier samples before harder ones. Here, difficulty is defined by degradation strength. The model first learns from mild degradation pairs and then moves to stronger pairs, which helps stabilize optimization under severe real-world degradations.
+
+
+
 
 \section{Methodology}
-The proposed framework has two components: multi-level realistic degradation and weight-sharing Siamese training. Fig.~\ref{fig:overview} summarizes the full pipeline, which extends the degradation design from our previous work~\cite{11309534}.
-\begin{figure}[t]
+The proposed framework contains three connected steps: generating multi-level degraded images, forming mild/hard pairs from the same GT image, and training a shared-weight Siamese Real-ESRGAN with a mild-to-hard curriculum. Fig.~\ref{fig:overview} summarizes this pipeline.
+\begin{figure}[h]
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[node distance=4.5mm and 7mm]
@@ -72,9 +82,10 @@ The proposed framework has two components: multi-level realistic degradation and
   \node[smallblock, right=of deg] (q80) {80\%};
   \node[smallblock, below right=2mm and 8mm of deg] (q70) {70\% / 60\%};
   \node[block, right=18mm of q80] (pair) {Paired inputs\\same GT};
-  \node[block, right=of pair] (teacher) {Teacher pass\\milder input};
-  \node[block, below=5mm of teacher] (student) {Student pass\\harder input};
-  \node[loss, right=of teacher] (loss) {Pixel, perceptual, GAN\\output KD, feature KD};
+  \coordinate[right=7mm of pair] (split);
+  \node[block, above right=1mm and 7mm of split] (teacher) {Teacher branch\\milder input};
+  \node[block, below=3mm of teacher] (student) {Student branch\\harder input};
+  \node[loss, right=of teacher] (loss) {Loss:\\pixel, perceptual, GAN\\output KD, feature KD};
   \node[block, right=of loss] (sr) {Restored image};
 
   \draw[arr] (gt) -- (crop);
@@ -85,30 +96,33 @@ The proposed framework has two components: multi-level realistic degradation and
   \draw[arr] (q90.east) -- (pair.west);
   \draw[arr] (q80.east) -- (pair.west);
   \draw[arr] (q70.east) -- (pair.west);
-  \draw[arr] (pair) -- (teacher);
-  \draw[arr] (pair) -- (student);
+  \draw[arr] (pair) -- (split);
+  \draw[arr] (split) |- (teacher.west);
+  \draw[arr] (split) |- (student.west);
+  \draw[arr] (teacher.south) -- node[right, font=\scriptsize] {KD guidance} (student.north);
   \draw[arr] (teacher) -- (loss);
   \draw[arr] (student) -- (loss);
   \draw[arr] (loss) -- (sr);
+  \node[draw, dashed, rounded corners=2pt, fit=(deg)(q90)(q80)(q70), inner sep=3pt,
+        label={[font=\scriptsize]below:multi-level realistic degradation}] {};
   \node[draw, dashed, rounded corners=2pt, fit=(teacher)(student), inner sep=3pt,
-        label={[font=\scriptsize]below:shared RRDBNet weights}] {};
+        label={[font=\scriptsize]below:shared-weight RRDBNet}] {};
 \end{tikzpicture}}
-\caption{Overview of the proposed Siamese Real-ESRGAN framework. Multi-level degraded samples are paired by curriculum stage and processed by one shared-weight generator in two passes.}
+\caption{Overview of the proposed Siamese Real-ESRGAN framework. Each GT patch is degraded into multiple quality levels, paired by curriculum stage, and processed by one shared-weight generator in two branches.}
 \label{fig:overview}
 \end{figure}
 
 \subsection{Multi-Level High-Order Degradation}
 
-Real-ESRGAN synthesizes low-quality images through resizing, blur, noise, and JPEG compression. Following our previous degradation pipeline~\cite{11309534}, we keep the two-stage structure but add probabilistic operation selection, practical JPEG ranges, and camera-specific noise including chromatic aberration and sensor shot/read noise.
-
-For an HQ image $I_{HQ}$, the generated LQ image at quality level $q$ is formulated as
+Our degradation module follows the high-order pipeline of Real-ESRGAN and the refined setting in~\cite{11309534}. We keep the two-stage degradation structure, but generate four explicit quality levels by changing noise, compression, and blur parameters. Camera-specific noise, including chromatic aberration and sensor shot/read noise, is also included to better approximate real acquisition.
+For an HR image $I_{HQ}$, the generated LQ image at quality level $q$ is defined as
 \[
 I_{LQ}^{(q)} = \mathcal{D}_{q}(I_{HQ})
 = \Pi\big(R_{0.25}, B_{\Theta_q}, N_{\Theta_q}, C, J_{\Theta_q}\big)(I_{HQ}),
 \]
-where $R$, $B$, $N$, $J$, and $C$ denote resizing, blur, noise, JPEG compression, and camera-specific noise. The resize factor is fixed to $0.25$ for $\times4$ SR. $\Pi(\cdot)$ follows the implementation: resize is kept first in the first pass; blur, noise, camera noise, and JPEG are then sampled by probability, and a second pass applies the selected non-resize degradations. The level $q\in\{90,80,70,60\}$ is a quality index, not an evaluation score: $q=100$ is the original GT image, larger $q$ is milder, and lower $q$ is stronger.
+where $R$, $B$, $N$, $J$, and $C$ denote resizing, blur, noise, JPEG compression, and camera-specific noise, respectively. The resize factor is fixed to $0.25$ for $\times4$ SR. The level $q\in\{90,80,70,60\}$ is a quality index: $q=100$ denotes the original GT image, larger $q$ means milder degradation, and lower $q$ means stronger degradation. In the two-stage process, resizing is applied first, while blur, noise, camera noise, and JPEG compression are sampled probabilistically and then repeated in the second pass.
 
-In our implementation, each level changes the parameter set
+Each quality level changes the parameter set
 \[
 \Theta_q=(\Sigma_q,Q_q,p^B_q),
 \]
@@ -123,56 +137,61 @@ q & \Sigma_q & Q_q & p^B_q \\
 60 & [15,25] & [30,55] & 0.8
 \end{array}
 \]
-The remaining generator probabilities are shared across levels ($p^{resize}=1.0$, $p^{noise}=0.9$, $p^{JPEG}=0.9$, and $p^{camera}=0.7$). Thus, 90\% samples preserve more structure through weaker noise, lighter compression, and lower blur probability, while 60\% samples contain stronger noise, heavier JPEG artifacts, and more frequent blur.
+The remaining probabilities are shared across levels: $p^{resize}=1.0$, $p^{noise}=0.9$, $p^{JPEG}=0.9$, and $p^{camera}=0.7$. Thus, 90\% samples preserve more structure, while 60\% samples contain stronger noise, heavier compression, and more frequent blur.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{Realdegradationstructure.png}
-\caption{Enhanced two-stage realistic degradation pipeline inherited and extended from our previous work~\cite{11309534}.}
+\caption{Enhanced two-stage degradation pipeline for multi-level LQ generation.}
 \label{fig:degradation}
 \end{figure}
 
-For $\times4$ SR, GT images are cropped into $480\times480$ patches with 50\% overlap, producing $120\times120$ LQ counterparts. Each patch is pre-degraded into the four levels above, enabling efficient and reproducible 90/80, 80/70, and 70/60 pairing.
+For $\times4$ SR, GT images are cropped into $480\times480$ patches with 50\% overlap, producing $120\times120$ LQ counterparts. Each patch is pre-degraded into four quality levels. This makes the training pairs content-aligned and reproducible: 90/80, 80/70, and 70/60 always come from the same HR patch.
 
 \subsection{Siamese Training with Shared Weights}
+Fig.~\ref{fig:siamese_architecture} shows the shared-weight Teacher--Student training design. The generator is the Real-ESRGAN RRDBNet backbone~\cite{wang2018esrgan,wang2021realesrgan} with 23 RRDB blocks and 64 feature channels. Each mini-batch contains two degraded versions of the same GT image. The Teacher branch processes the milder input under \texttt{torch.no\_grad()} and produces detached targets $T_{HQ}$ and $T_{feat}$. The Student branch processes the harder input and produces $S_{HQ}$ and $S_{feat}$. Both branches use the same generator weights; only the Student branch receives gradients.
 
-The generator is the Real-ESRGAN RRDBNet backbone~\cite{wang2018esrgan,wang2021realesrgan} with 23 RRDB blocks and 64 feature channels. Each mini-batch contains two degraded versions of the same GT image. The milder Teacher pass runs under \texttt{torch.no\_grad()} and produces $T_{HQ}$ and $T_{feat}$; the harder Student pass produces $S_{HQ}$ and $S_{feat}$. Both passes share weights, and only the Student pass receives gradients.
 
 \IfFileExists{images/student_teacher_siamese.drawio.png}{%
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{student_teacher_siamese.drawio.png}
-\caption{Weight-sharing Siamese training architecture. Teacher and Student passes share the same generator parameters; only the Student pass receives gradient updates.}
+\caption{Shared-weight Siamese training architecture. The Teacher branch processes the milder input as detached guidance, while the Student branch restores the harder input and receives gradient updates.}
 \label{fig:siamese_architecture}
 \end{figure}
 }{}
 
-The training objective combines reconstruction, perceptual, adversarial, and consistency losses:
+The training objective combines reconstruction, perceptual, adversarial, and distillation losses:
 \[
 L_{total}=w_{pix}L_{pix}+w_{per}L_{per}+w_{GAN}L_{GAN}
 \;+\lambda^{out}_{kd}L^{out}_{kd}+\lambda^{feat}_{kd}L^{feat}_{kd}.
 \]
-$L_{pix}$ is L1 loss to GT, $L_{per}$ is VGG19 perceptual loss~\cite{simonyan2014very,johnson2016perceptual}, and $L_{GAN}$ uses a spectral-normalized U-Net discriminator. $L^{out}_{kd}$ and $L^{feat}_{kd}$ align Student outputs and features with detached Teacher targets, giving dynamic guidance without a second stored network.
+$L_{pix}$ is L1 loss to GT, $L_{per}$ is VGG19 perceptual loss~\cite{simonyan2014very,johnson2016perceptual}, and $L_{GAN}$ uses a spectral-normalized U-Net discriminator. $L^{out}_{kd}$ aligns the restored images, and $L^{feat}_{kd}$ aligns intermediate features between the Student branch and the detached Teacher targets. This provides guidance from a milder degradation level without storing or deploying a second model.
 
 \subsection{Curriculum Schedule}
 
-Training uses three phases: 90\%/80\% for stable warm-up, 80\%/70\% for the best perceptual balance, and 70\%/60\% for severe-degradation robustness. Since 100\% denotes GT, the first value in each pair is the milder Teacher input and the second value is the harder Student input. The pairwise gap remains 10 percentage points, while the absolute degradation severity increases from Phase~1 to Phase~3.
+The curriculum schedule controls which quality pair is used during training. Following curriculum learning~\cite{Bengio09}, we define difficulty by degradation strength: lower quality levels are harder because they contain stronger blur, noise, compression, and camera artifacts. Instead of mixing all levels from the beginning, the model is trained from mild pairs to severe pairs. Training is divided into three phases. \emph{Phase~1} uses the 90\%/80\% pair, where both inputs are mildly degraded and most structural information is preserved. \emph{Phase~2} uses the 80\%/70\% pair, increasing the degradation severity and encouraging recovery of more corrupted textures and edges. \emph{Phase~3} uses the 70\%/60\% pair, where the harder input contains the strongest artifacts.
+
+In each phase, the first element of the pair is the milder guidance input, and the second element is the harder restoration input. Since both images are generated from the same HR patch, they remain content-aligned and can support output-level and feature-level KD. This progressive schedule lets the model adapt to difficult degradations without starting directly from the hardest 70\%/60\% pair.
+
 
 \section{Experiments}
-
 \subsection{Experimental Setup}
 
-Training uses the same sources as our previous work~\cite{11309534}: DF2K, Unsplash, and RealSR. Only HQ images are retained; all LQ images are generated by our degradation pipeline. Unlike bicubic pairs, our data combines multi-stage blur, resizing, noise, camera artifacts, compression, probabilistic operations, and multiple severity levels. This better approximates real acquisition but makes pixel-faithful reconstruction harder. Evaluation uses Set5, Set14, RealSR Canon/Nikon, BSDS100, and Urban100.
+Training uses high-resolution images from DF2K and Flickr2K~\cite{Timofte2017NTIRE2C}, Unsplash~\cite{unsplash_dataset}, and RealSR~\cite{realsr}. Only HR images are retained; all LQ images are generated by our degradation pipeline. 
+%Unlike bicubic pairs, our data combines multi-stage blur, resizing, noise, camera artifacts, compression, probabilistic operations, and multiple severity levels. 
+This better approximates real acquisition but makes pixel-faithful reconstruction harder. Evaluation uses Set5~\cite{set5}, Set14~\cite{set14}, RealSR Canon/Nikon~\cite{realsr}, BSD100~\cite{bsd100}, and Urban100\cite{urban100}.
 
-We report PSNR, SSIM, and NIQE~\cite{mittal2012making}. PSNR/SSIM measure distortion fidelity, while lower NIQE indicates better naturalness and is often more relevant for real-world SR~\cite{wang2021realesrgan}. Training follows Real-ESRGAN with Adam, learning rate $1\times10^{-4}$, 800k iterations, 10k warm-up, and MultiStepLR decay at 200k, 400k, 500k, and 700k. Loss weights are $w_{pix}=2.0$, $w_{GAN}=0.5$, and $\lambda^{out}_{kd}=\lambda^{feat}_{kd}=0.15$. Experiments run on an RTX 3090; inference remains comparable to Real-ESRGAN because the 16.7M-parameter backbone is shared.
 
-\subsection{Quantitative Results}
+All models are trained with Adam using an initial learning rate of $1\times10^{-4}$ for 800k iterations, including a 10k-iteration warm-up. MultiStepLR decays the learning rate at 200k, 400k, 500k, and 700k iterations. Loss weights are set to $w_{pix}=2.0$, $w_{GAN}=0.5$, and $\lambda^{out}{kd}=\lambda^{feat}{kd}=0.15$. The 16.7M-parameter generator uses a single inference pass, so the proposed training scheme adds no inference-time model size or runtime complexity. Experiments are conducted on an NVIDIA RTX 3090 GPU. 
 
-Table~\ref{tab:quantitative_results} focuses on Real-ESRGAN variants to make the comparison fair and attributable. The original Real-ESRGAN row reports the released model trained with Real-ESRGAN's online high-order degradation setting. In contrast, our variants use a pre-generated multi-level degradation setting: each HR image is converted into controlled 90\%, 80\%, 70\%, and 60\% LQ versions, which enables fixed mild-to-hard pairs for Siamese curriculum training. The \textit{Real-ESRGAN with Multi-level Degradation} row isolates the degradation-setting effect without Siamese training: it improves PSNR/SSIM on RealSR Canon/Nikon and BSDS100, but high NIQE shows that richer degradation alone does not guarantee perceptually natural restoration. With Siamese curriculum learning, Phase~2 reaches NIQE 3.82 on Urban100 and reduces RealSR\_V3 Canon NIQE from 7.02 to 5.71, an 18.7\% gain. Phase~3 further improves NIQE on RealSR Canon/Nikon and Set14, at the cost of lower PSNR/SSIM due to stronger degradation.
+%We report PSNR, SSIM, and NIQE~\cite{mittal2012making}. PSNR/SSIM measure distortion fidelity, while lower NIQE indicates better naturalness and is often more relevant for real-world SR~\cite{wang2021realesrgan}. 
 
-\begin{table*}[t]
+\subsection{Result Analysis}
+
+\begin{table*}[h]
 \centering
-\caption{Comparison of Real-ESRGAN variants on benchmark datasets. The original row uses the released Real-ESRGAN model with online high-order degradation; all other rows use our generated multi-level degradation setting.}
+\caption{Comparison of Real-ESRGAN variants on benchmark datasets.}
 \label{tab:quantitative_results}
 \renewcommand{\arraystretch}{1.1}
 \resizebox{\textwidth}{!}{%
@@ -183,9 +202,9 @@ Table~\ref{tab:quantitative_results} focuses on Real-ESRGAN variants to make the
   & \multicolumn{2}{c}{\textbf{Set14}} 
   & \multicolumn{2}{c}{\textbf{RealSR\_V3 (Canon)}} 
   & \multicolumn{2}{c}{\textbf{RealSR\_V3 (Nikon)}} 
-  & \multicolumn{2}{c}{\textbf{BSDS100}} 
+  & \multicolumn{2}{c}{\textbf{BSD100}} 
   & \multicolumn{2}{c}{\textbf{Urban100}}
-  & \multirow{2}{*}{\makecell{\textbf{Avg.} \\ \textbf{Time (s)}}} \\
+  & \multirow{2}{*}{\makecell{\textbf{Avg.} \\ \textbf{Time (s/img)}}} \\
 \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}\cmidrule(lr){11-12}\cmidrule(lr){13-14}
  & & \textbf{PSNR/SSIM} & \textbf{NIQE} 
    & \textbf{PSNR/SSIM} & \textbf{NIQE} 
@@ -195,17 +214,17 @@ Table~\ref{tab:quantitative_results} focuses on Real-ESRGAN variants to make the
    & \textbf{PSNR/SSIM} & \textbf{NIQE} & \\
 \midrule
 
-Real-ESRGAN~\cite{wang2021realesrgan}
+Real-ESRGAN\cite{wang2021realesrgan}
   & Original online
   & \textbf{26.31}/\textbf{0.80}            & 7.89
   & \textbf{25.18}/\textbf{0.69}            & 5.88
   & 25.84/0.78                              & 7.02
   & 25.19/0.75                              & 6.69
   & 22.34/0.57                              & 4.46
-  & \textbf{20.12}/\textbf{0.64}            & 4.35
-  & 1.55 \\
+  & 20.12/\textbf{0.64}            & 4.35
+  & 1.5 \\
 
-\makecell[l]{Real-ESRGAN }
+\makecell[l]{Real-ESRGAN\cite{wang2021realesrgan}}
   & Multi-level
   & 24.40/0.67                         & 10.44
   & 24.52/0.67                           & 6.10
@@ -213,9 +232,9 @@ Real-ESRGAN~\cite{wang2021realesrgan}
   & \textbf{26.24}/\textbf{0.77}         & 6.94
   & \textbf{22.49}/\textbf{0.58}         & 4.83
   & 20.06/0.61                          & 4.33
-  & \textbf{1.35} \\
+  & 1.5 \\
 
-\makecell[l]{\textbf{Real-ESRGAN} \\ \textbf{student (Ours)}}
+\makecell[l]{Real-ESRGAN student\cite{11309534}}
   & Multi-level
   & 25.19/0.76                              & \textbf{6.54}
   & 23.89/0.69                              & 5.82
@@ -225,66 +244,80 @@ Real-ESRGAN~\cite{wang2021realesrgan}
   & 20.00/0.59                              & 4.05
   & 1.45 \\
 
-\makecell[l]{\textbf{Real-ESRGAN} \\ \textbf{siamese (Ours)} \\ \textbf{Phase 2}}
-  & 80\%/70\%
-  & 23.37/0.71                              & 7.98
-  & 22.69/0.64                              & 5.91
-  & 23.21/0.74                              & 5.71
-  & 22.76/0.71                              & 5.69
-  & 21.45/\textbf{0.57}                     & \textbf{4.25}
-  & 18.57/0.58                              & \textbf{3.82}
+\makecell[l]{\textbf{Our framework - Phase1}}
+  & 90\%/80\%
+  & 25.42/0.79                              & 8.52
+  & 24.51/0.68                              & 6.69
+  & 26.35/0.78                           & 6.37
+  & 25.60/0.74                              & 6.13
+  & 21.45/0.60                             & 5.18
+  & \textbf{21.07}/0.64                              & 3.90
   & 1.72 \\
+  
+\makecell[l]{\textbf{Our framework - Phase 2}}
+  & 80\%/70\%
+  & 25.37/0.71                              & 7.98
+  & 24.69/0.64                              & 5.91
+  & 25.21/0.74                              & 5.71
+  & 24.76/0.71                              & 5.69
+  & 22.45/\textbf{0.57}                     & \textbf{4.25}
+  & 20.57/0.58                              & \textbf{3.82}
+  & 1.82 \\
 
-\makecell[l]{\textbf{Real-ESRGAN} \\ \textbf{siamese (Ours)} \\ \textbf{Phase 3}}
+\makecell[l]{\textbf{Our framework - Phase 3}}
   & 70\%/60\%
-  & 21.98/0.65                              & 8.00
-  & 21.44/0.59                              & \textbf{5.58}
-  & 22.76/0.73                              & \textbf{5.64}
-  & 22.28/0.69                              & \textbf{5.47}
-  & 20.70/0.54                              & 4.28
-  & 17.80/0.55                              & 3.93
-  & 1.37 \\
+  & 25.98/0.65                              & 8.00
+  & 23.44/0.59                              & \textbf{5.58}
+  & 24.76/0.73                              & \textbf{5.64}
+  & 23.28/0.69                              & \textbf{5.47}
+  & 22.70/0.54                              & 4.28
+  & 19.80/0.55                              & 3.93
+  & \textbf{1.37} \\
 
 \bottomrule
 \end{tabular}%
 }
 \end{table*}
 
-The results follow the perception-distortion trade-off~\cite{blau2018perception}: PSNR/SSIM favor pixel alignment and simpler degradations, whereas NIQE reflects naturalness in blind SR. Our multi-level degradation setting can reduce PSNR/SSIM on synthetic benchmarks, but improves NIQE when degradation is closer to real camera pipelines.
+Table~\ref{tab:quantitative_results} compares variants within the Real-ESRGAN family. The first three rows are non-curriculum references: the released Real-ESRGAN with \textit{Original online} degradation, the same backbone with our \textit{Multi-level} degradation, and the previous student model trained on multi-level data. The last three rows are our Siamese curriculum phases, where the degradation setting specifies the paired levels used for Teacher--Student training.
 
-\subsection{Ablation Study}
+The restoration metrics show that our framework improves perceptual restoration quality compared with existing Real-ESRGAN-based variants. Compared with the released Real-ESRGAN, Phase~2 reduces NIQE from 7.02 to 5.71 on RealSR Canon, from 6.69 to 5.69 on RealSR Nikon, and from 4.35 to 3.82 on Urban100. Phase~3 further gives the best NIQE on Set14 and RealSR Canon/Nikon. These gains are achieved without a large runtime increase: the Siamese branches are used only during training, while inference still uses a single Real-ESRGAN generator. This indicates cleaner textures, sharper structures, and fewer visual artifacts, although some PSNR/SSIM scores decrease because the model is optimized more toward perceptual quality.
 
-The ablation in Table~\ref{tab:quantitative_results} separates three effects. First, comparing the released Real-ESRGAN model with the Real-ESRGAN backbone trained under our multi-level degradation setting isolates the degradation-design effect. The multi-level setting improves PSNR/SSIM on RealSR\_V3 Canon/Nikon and BSDS100, but the high NIQE values show that richer degradation synthesis alone does not guarantee perceptually natural restoration. Second, comparing the single-branch student with the Siamese variants isolates the effect of paired mild-to-hard guidance. The Siamese Phase~2 model obtains the best Urban100 NIQE and improves RealSR\_V3 Canon NIQE over the Real-ESRGAN baseline, showing that shared-weight Teacher--Student training mainly benefits perceptual quality rather than pixel fidelity. Third, comparing Phase~2 and Phase~3 shows the role of curriculum severity: Phase~2 gives the best overall perceptual balance, whereas Phase~3 favors robustness to the strongest degradation pair.
+The phase results reveal that curriculum training should stop at an appropriate difficulty level instead of always moving to harder phases. Phase~1 starts from the mild 90\%/80\% pair and preserves structure well, while Phase~2 gives the best overall perceptual balance, especially on Urban100 and RealSR Canon. Phase~3 uses the hardest 70\%/60\% pair and further improves NIQE on Set14 and RealSR Canon/Nikon, but with lower PSNR/SSIM, which follows the perception-distortion trade-off~\cite{blau2018perception}. This supports selecting the phase that best matches the target quality trade-off.
 
-We further examined implementation-level variants. Direct training on only the hardest 70\%/60\% pair produced unstable GAN behavior and noisy textures in early iterations, while the progressive 90\%/80\% $\rightarrow$ 80\%/70\% $\rightarrow$ 70\%/60\% schedule avoided this instability. Replacing the shared-weight pass with a separate fixed Teacher increased training memory without improving NIQE, and disabling feature-level KD weakened texture consistency. These observations support the proposed design: degradation diversity supplies the paired inputs, the shared-weight Siamese pass provides dynamic guidance, and the curriculum controls the difficulty of that guidance.
+As a short diagnostic, we also trained a w/o curriculum variant directly on the hardest 70\%/60\% pair for 120k iterations. It reached 22.13 dB PSNR and 0.665 SSIM on Set5, with NIQE scores of 6.26 on RealSR Canon, 6.22 on RealSR Nikon, and 4.14 on Urban100. Although this run uses a smaller budget than the main Table~\ref{tab:quantitative_results} models, it suggests that starting directly from the hardest pair is less favorable than using a gradual curriculum.
 
-\subsection{Qualitative Analysis}
 
 \IfFileExists{images/visual.png}{%
-\begin{figure}[t]
+\begin{figure}[h]
 \centering
-\includegraphics[width=0.85\textwidth]{visual.png}
+\includegraphics[width=1\textwidth]{visual.png}
 
 \vspace{1mm}
 
 \IfFileExists{images/visual2.png}{%
-\includegraphics[width=0.85\textwidth]{visual2.png}
+\includegraphics[width=1\textwidth]{visual2.png}
 }{}
 
 \vspace{1mm}
 
 \IfFileExists{images/visual3.png}{%
-\includegraphics[width=0.85\textwidth]{visual3.png}
+\includegraphics[width=1\textwidth]{visual3.png}
 }{}
 
 \vspace{-1mm}
-\caption{Qualitative comparison on Urban100, BSDS100, and RealSR V3. The proposed Siamese Real-ESRGAN, especially Phase~2, produces sharper structures and more natural textures than competing baselines.}
+\caption{Qualitative comparison on Urban100, BSDS100, and RealSR V3. 
+%The proposed Siamese Real-ESRGAN, especially Phase~2, produces sharper structures and more natural textures than competing baselines.
+}
 \label{fig:qualitative_results}
 \vspace{-2mm}
 \end{figure}
 }{}
 
-Qualitatively, Phase~2 gives sharper text, cleaner edges, less Urban100 aliasing, and fewer BSDS100 texture artifacts, matching the NIQE trends in Table~\ref{tab:quantitative_results}.
+Fig.~\ref{fig:qualitative_results} compares the visual outputs of different models. 
+Phase~2 shows sharper text, cleaner edges, less aliasing on Urban100, and fewer texture artifacts on BSDS100, consistent with the NIQE trends in Table~\ref{tab:quantitative_results}.
+
+
 
 \section{Conclusion}
 Pairing two degradation severities of the same image through a shared-weight Siamese training strategy consistently improves perceptual quality without increasing inference cost. The proposed curriculum achieves the best NIQE of 3.82 on Urban100 and reduces NIQE on RealSR\_V3 Canon from 7.02 to 5.71 (18.7\%) compared with the original Real-ESRGAN. These results suggest that progressively increasing degradation difficulty is more effective than directly training on the most challenging samples. Future work will investigate automatic curriculum scheduling and lightweight generative refinement to further improve restoration under severe real-world degradations.

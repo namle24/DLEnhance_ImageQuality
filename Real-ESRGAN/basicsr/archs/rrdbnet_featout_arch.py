@@ -23,8 +23,17 @@ class RRDBNetFeatOut(RRDBNet):
         else:
             feat = x
         
+        mae_feat = None
+        if getattr(self, 'use_sft', False):
+            mae_feat = self.mae_wrapper(x)
+
         feat = self.conv_first(feat)
-        body_feat = self.conv_body(self.body(feat))
+        body_feat = feat
+        for i, block in enumerate(self.body):
+            body_feat = block(body_feat)
+            if getattr(self, 'use_sft', False) and str(i) in self.sft_layers:
+                body_feat = self.sft_layers[str(i)](body_feat, mae_feat)
+        body_feat = self.conv_body(body_feat)
         feat = feat + body_feat  
         
         if return_intermediate:
